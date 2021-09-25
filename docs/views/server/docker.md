@@ -59,16 +59,19 @@ server {
 ### 9.25
 
 今天我做了自动部署流程。遇到了不少的困难，记录一下。
-- 首先是git actions的使用，可以通过secrets定义密钥变量，然后在`.github\workflows\xx.yml`文件中使用。
+
+- 首先是 git actions 的使用，可以通过 secrets 定义密钥变量，然后在`.github\workflows\xx.yml`文件中使用。
 - Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?报错。这个东西我暂时看不懂，应该是网络方面的错误吧。
-解决方法：
-只需要重启一下daemon即可。
+  解决方法：
+  只需要重启一下 daemon 即可。
+
 ```
 systemctl daemon-reload
 sudo service docker restart
-sudo service docker status 
+sudo service docker status
 ```
-- 然后就是连接阿里云镜像仓库的各种报错信息。这里一定要结合仓库上面的一些例子来编写yml。
-- 然后就是连接私有服务器的各种报错。这里我也不多说了，按照错误提示来debug就好了。
 
-yml文件的编写我打算以后再慢慢的研究，总而言之终于把这个CI给弄好了。
+- 然后就是连接阿里云镜像仓库的各种报错信息。这里一定要结合仓库上面的一些例子来编写 yml。
+- 然后就是连接私有服务器的各种报错。这里我也不多说了，按照错误提示来 debug 就好了。
+
+yml 文件的编写我打算以后再慢慢的研究，总而言之终于把这个 CI 给弄好了。
