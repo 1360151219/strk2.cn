@@ -10,6 +10,21 @@ on:
   pull_request:
     branches: [master]
 
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
 
       
 
@@ -58,7 +73,6 @@ on:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            
             docker stop $(docker ps --filter ancestor=registry.cn-beijing.aliyuncs.com/strk2/strk2-blog -q)
             docker rm -f $(docker ps -a --filter ancestor=registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest -q)
             docker rmi -f $(docker images registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest -q)
