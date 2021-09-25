@@ -56,4 +56,4 @@ jobs:
             docker rmi -f $(docker images registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest -q)
             docker login --username=盐焗乳鸽还要香锅 --password=${{ secrets.PASSWORD }} registry.cn-beijing.aliyuncs.com
             docker pull registry.cn-beijing.aliyuncs.com/strk2/strk2-blog
-            docker run -d -p 8080:8080 registry.cn-beijing.aliyuncs.com/strk2/strk2-blog
+            docker run -d -p 8081:8080 registry.cn-beijing.aliyuncs.com/strk2/strk2-blog
