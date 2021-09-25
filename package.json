@@ -1,0 +1,36 @@
+{
+  "name": "afternoon-grocery-store",
+  "version": "1.0.0",
+  "description": "recoluan's blog",
+  "main": "index.js",
+  "repository": "http://recoluan.gitlab.io",
+  "author": "reco_luan",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs"
+  },
+  "dependencies": {
+    "@vuepress-reco/vuepress-plugin-pagation": "^1.6.0",
+    "@vuepress/plugin-medium-zoom": "1.0.0-alpha.0",
+    "@vuepress/plugin-pwa": "^1.8.2",
+    "hexo-theme-butterfly": "^3.8.0",
+    "vuepress-plugin-flowchart": "1.4.3",
+    "vuepress-theme-reco": "^1.6.6"
+  },
+  "devDependencies": {
+    "@vuepress-reco/vuepress-plugin-bgm-player": "^1.1.3",
+    "@vuepress-reco/vuepress-plugin-bulletin-popover": "^1.5.7",
+    "@vuepress-reco/vuepress-plugin-kan-ban-niang": "^1.0.5",
+    "meting": "^2.0.1",
+    "vuepress": "^1.8.2",
+    "vuepress-plugin-boxx": "0.0.7",
+    "vuepress-plugin-cursor-effects": "^1.0.2",
+    "vuepress-plugin-dynamic-title": "^1.0.0",
+    "vuepress-plugin-go-top": "^1.0.4",
+    "vuepress-plugin-nuggets-style-copy": "^1.0.3",
+    "vuepress-plugin-ribbon": "^1.0.4",
+    "vuepress-plugin-zengarden-pagination": "^1.0.0"
+  }
+}
