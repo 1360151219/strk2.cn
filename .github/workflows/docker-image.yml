@@ -37,6 +37,7 @@ on:
           registry: registry.cn-beijing.aliyuncs.com
           username: 盐焗乳鸽还要香锅
           password: ${{ secrets.PASSWORD }}
+          
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
