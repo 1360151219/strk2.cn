@@ -1,3 +1,6 @@
 FROM nginx:latest
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY public /var/www/blog/
+COPY . /var/www/blog/
+WORKDIR /var/www/blog/
+RUN npm install \ 
+    npm build
