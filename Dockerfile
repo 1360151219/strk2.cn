@@ -22,4 +22,4 @@ RUN npm run build
 
 FROM nginx:alpine as server
 
-COPY --from=builder /var/www/blog/public /usr/share/nginx/html
+COPY --from=builder nginx.conf /etc/nginx/nginx.conf
