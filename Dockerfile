@@ -1,25 +1,15 @@
-FROM node:alpine as builder
 
-# from https://github.com/wencaizhang/best-Dockerfile-for-spa
 
-# 更新 Alpine 的软件源为国内（清华大学）的站点
-# RUN echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.4/main/" > /etc/apk/repositories
+# WORKDIR /var/www/blog/
+# COPY . /var/www/blog/
+# RUN npm config set -g registry https://registry.npm.taobao.org
+# RUN npm install
 
-# 默认没有  bash，如果需要，解开注释安装  bash
-# RUN apk update \
-#   && apk upgrade \
-#   && apk add --no-cache bash \
-#   bash-doc \
-#   bash-completion \
-#   && rm -rf /var/cache/apk/* \
-#   && /bin/bash
+# RUN npm run build
 
-WORKDIR /var/www/blog/
-COPY . /var/www/blog/
-RUN npm install --registry=https://registry.npm.taobao.org
+# FROM nginx:alpine as server
 
-RUN npm run build
-
-FROM nginx:alpine as server
-
-COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+# COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+FROM nginx:latest
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY public /var/www/blog/
