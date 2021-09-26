@@ -20,7 +20,7 @@ RUN npm install --registry=https://registry.npm.taobao.org
 
 COPY . /var/www/blog/
 RUN npm run build
-
+ 
 FROM nginx:alpine as server
 
 COPY --from=builder /var/www/blog/public /usr/share/nginx/html
