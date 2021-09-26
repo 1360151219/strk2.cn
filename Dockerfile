@@ -1,5 +1,5 @@
 
-FROM node:lastest as builder
+FROM node:latest as builder
 WORKDIR /var/www/blog/
 COPY . /var/www/blog/
 RUN npm config set -g registry https://registry.npm.taobao.org
