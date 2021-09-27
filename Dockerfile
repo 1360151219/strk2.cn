@@ -9,7 +9,7 @@ RUN npm run build
 
 FROM nginx:alpine as server
 
-COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /var/www/blog/nginx.conf /etc/nginx/nginx.conf
 # FROM nginx:latest
 # COPY nginx.conf /etc/nginx/nginx.conf
 # COPY public /var/www/blog/
