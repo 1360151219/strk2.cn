@@ -65,7 +65,7 @@ server {
   解决方法：
   只需要重启一下 daemon 即可。
 
-```
+```yml
 systemctl daemon-reload
 sudo service docker restart
 sudo service docker status
@@ -82,3 +82,45 @@ yml 文件的编写我打算以后再慢慢的研究，总而言之终于把这�
 
 - 首先是 yml 文件以及 Dockerfile 中的根目录环境是不一样的
 - 现在我只能在本地先 build，然后再通过 Dockerfile COPY，我尝试在 Dockerfile 中写入 build，然后发现 npm install 就得等 15min？这也太慢了吧，而且还有各种报错信息，都是路径的问题。哎，给我弄吐了，先这样吧以后再完善。总而言之现在我的博客也不需要 finalshell 来连接服务器然后手动上传了。这也算是进步一丢丢吧。
+
+### 9.27
+
+我宣布，本博客的 CI 自动化部署流程终于弄好了。今天又有点不甘心于是继续尝试，我看了一下我们团队 email 微服务以前的 Dockerfile 文件，发现采用了 2 个 FROM，于是我也学着写了一下。
+
+```yml
+FROM node:alpine as builder
+WORKDIR /var/www/blog/
+COPY . /var/www/blog/
+RUN npm install --registry=https://registry.npm.taobao.org
+
+RUN npm run build
+
+FROM nginx:alpine as server
+
+COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+```
+
+然后居然报错：`nginx.conf not found!`
+
+我上百度也搜了一下，但是找不到问题所在。然后继续看学长之前写的 Dockerfile，发现最后一句的 COPY 的源文件目录会不会应该是在 node 环境中的目录呢？于是我改成了:`COPY --from=builder /var/www/blog/nginx.conf /etc/nginx/nginx.conf`
+
+果然 CI 流程成功运行了。我开心的打开博客一看，居然报 Nginx server error 500
+
+于是我打开 docker 想进入容器，发现报错:`OCI runtime exec failed: exec failed: container_linux.go:344: starting container process caused "exec: \"/bin/bash\": stat /bin/bash: no such file or directory": unknown`。 咱也看不懂啊，百度一查，将进入容器的命令改为 sh 即可，进入之后，发现熟悉的 nginx 环境没有了，我突然就想到了是我刚刚构建 nginx 的时候只复制了`nginx.conf`,并没有复制 html 文件。于是灵感大发重新改了配置：
+
+```yml
+FROM node:latest as builder
+COPY . .
+RUN npm config set -g registry https://registry.npm.taobao.org
+RUN npm install
+
+RUN npm run build
+
+FROM nginx:alpine as server
+
+COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder public /var/www/blog/
+WORKDIR /var/www/blog/
+```
+
+终终终终于成功啦....我的博客终于也可以自动化部署了。而且是应用了 docker 技术，而不是手动上传文件。。
