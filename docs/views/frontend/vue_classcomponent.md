@@ -115,3 +115,7 @@ $refs!: {
     input: HTMLInputElement
   }
 ```
+
+## 关于修饰符
+
+`@Prop({default:balabala})`

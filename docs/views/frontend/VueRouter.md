@@ -75,9 +75,9 @@ const routes = [
 
 那么在页面的 HTML 中，我们也有 2 个内置组件可以支持路由操作：
 
-- ?> `<router-view>`: 路由出口,路由匹配到的组件将渲染在这里 (类似于 slot 插槽)
+- `<router-view>`: 路由出口,路由匹配到的组件将渲染在这里 (类似于 slot 插槽)
 
-- ?> `<router-link>`: 路由导航，类似`<a>`标签，通过传入`to`属性来指定跳转路径；它默认被渲染成`<a>`，但是可以通过传入`tag`属性来改变；通过传入`active-class`属性来指定路径跳转后，该组件被加入的类名，可以通过该属性实现跳转高亮功能。
+- `<router-link>`: 路由导航，类似`<a>`标签，通过传入`to`属性来指定跳转路径；它默认被渲染成`<a>`，但是可以通过传入`tag`属性来改变；通过传入`active-class`属性来指定路径跳转后，该组件被加入的类名，可以通过该属性实现跳转高亮功能。
 
 例子：
 
@@ -173,7 +173,7 @@ const router = new VueRouter({
 
 ##### **#`router.push(Path)`方法**
 
-?> **注意：在 Vue 实例内部，你可以通过 `$router` 访问路由实例。因此你可以调用 `this.$router.push`。**
+> **注意：在 Vue 实例内部，你可以通过 `$router` 访问路由实例。因此你可以调用 `this.$router.push`。**
 
 想要导航到不同的 URL，则使用 `router.push` 方法。这个方法会向 history 栈添加一个新的记录，所以，当用户点击浏览器后退按钮时，则回到之前的 URL。
 
@@ -284,11 +284,11 @@ router.beforeEach((to, from, next) => {
 
 每个守卫有 3 个参数：
 
-- ?> `to: Route`: 即将要进入的目标 _路由对象_
+- `to: Route`: 即将要进入的目标 _路由对象_
 
-- ?> `from: Route`: 当前导航正要离开的路由
+- `from: Route`: 当前导航正要离开的路由
 
-- ?> `next: Function`: 一定要调用该方法来 resolve 这个钩子。next 即放行，里面可以传入一个 url 来实现跳转。
+- `next: Function`: 一定要调用该方法来 resolve 这个钩子。next 即放行，里面可以传入一个 url 来实现跳转。
 
 ##### 局部前置守卫
 

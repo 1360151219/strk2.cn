@@ -1,6 +1,6 @@
 ---
 title: hustHole 项目开发日记
-date: 2021-9-17
+date: 2021-9-30
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅
@@ -390,3 +390,66 @@ static 里的文件不会被 webpack 解析，会直接被复制到最终的打�
 # ~9.17
 
 最近学长配置了 pwa，我也学习了一下，记录了下来，详情到[点这里可以进去](../frontend/pwa.md)
+
+# ~9.30
+
+最近做了许多功能，记录一下：
+
+- `pwa-install`插件：可以配合 PWA 配置下载弹窗。还学习到了一些 js 判断用户是否从桌面上打开：
+
+```js
+if (
+  !this.installComponent.getInstalledStatus() ||
+  !navigator["standalone"] ||
+  !window.matchMedia("(display-mode:standalone)").matches
+)
+  this.install();
+```
+
+- `vue-pull-refresh`插件的配置使用
+
+- 加入事件总线用于非父子组件间通信
+
+```js
+import EventBus from "vue-bus-ts";
+
+Vue.use(EventBus);
+const bus = new EventBus.Bus();
+const vm = new Vue({
+  router,
+  vuetify,
+  store,
+  bus,
+  render: (h) => h(App),
+}).$mount("#app");
+/* 使用的时候 */
+this.$bus.$emit(...)
+this.$bus.$on(...)
+```
+
+- 对一些复用代码的组件封装，以及冗余代码的删除。
+
+- 对于树洞帖子，若数据更新了，如果之前已经打开过的话，会由于`keep-alive`的缓存效果而不刷新。于是我利用它的`exclude`属性来使得对于特点组件不缓存。
+
+```js
+<keep-alive exclude="AddProduct">
+  <router-view />
+</keep-alive>;
+
+/*
+ ** 对于这里的名字，是组件的name属性，对于类组件写法如下：
+ */
+//错误写法
+@Component()
+export default class AddProduct extends Vue {
+  //这个时候在dev开发环境或者测试环境都是没问题的，只有线上环境打包时候会把name忽略
+}
+
+//正确写法
+@Component({
+  name: "AddProduct",
+})
+export default class AddProduct extends Vue {}
+```
+
+> 注意，如果传入的是类组件的名字，只会在开发环境下生效，因为生产环境中类组件的名字会清除掉。
