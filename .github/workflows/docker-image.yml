@@ -33,7 +33,6 @@ jobs:
         with:
           push: true
           tags: registry.cn-beijing.aliyuncs.com/strk2/strk2-blog
-
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
       - name: deploy to cluster
