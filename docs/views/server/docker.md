@@ -1,6 +1,6 @@
 ---
-title: docker 学习记录坑
-date: 2021-9-26
+title: docker---Kubernetes 学习记录坑
+date: 2021-10-5
 categories:
   - 运维
 author: 盐焗乳鸽还要砂锅
@@ -124,3 +124,14 @@ WORKDIR /var/www/blog/
 ```
 
 终终终终于成功啦....我的博客终于也可以自动化部署了。而且是应用了 docker 技术，而不是手动上传文件。。
+
+### 10.5
+
+这几天看了一些 k8s 的概念和知识点语法(等有时间写一个小笔记吧)。今晚成功试着将我的一个博客镜像部署在了集群里。通过这个可以访问部署的项目：`kubectl port-forward 你的pod名 ⽬标本地端⼝:微服务端⼝`
+
+![](../imgs/k8s/k8s-1.png)
+
+**高可用**:同时还绑定了一个 HPA 到这个 Deployment 中：
+`kubectl autoscale deployment blog-deploy --min=1 --max=3 --cpu-percent=5`
+
+感觉差不多了，明天继续学习......

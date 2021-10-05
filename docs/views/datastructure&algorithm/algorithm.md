@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-9-23
+date: 2021-10-1
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1606,6 +1606,37 @@ var isPalindromic = function(s) {
     }
   }
   return true;
+};
+```
+
+### 1436. 旅行终点站
+
+给你一份旅游线路图，该线路图中的旅行线路用数组 paths 表示，其中 `paths[i] = [cityAi, cityBi]` 表示该线路将会从 `cityAi` 直接前往 `cityBi` 。请你找出这次旅行的终点站，即没有任何可以通往其他城市的线路的城市。
+
+题目数据保证线路图会形成一条不存在循环的线路，因此恰有一个旅行终点站。
+
+**法一：直接法** `2021.10.1`
+
+> 思路：先用一个哈希表记录下每一对路线，然后从第一对路线开始，即`start=paths[0][0]`，`end=map[start]`，通过循环不断找后一条路线，当`end`为空的时候，`start`即为终点站
+
+```js
+/**
+ * @param {string[][]} paths
+ * @return {string}
+ */
+var destCity = function(paths) {
+  let map = {};
+  for (let i = 0; i < paths.length; i++) {
+    map[paths[i][0]] = paths[i][1];
+  }
+
+  let start = paths[0][0];
+  let end = map[start];
+  while (end) {
+    start = end;
+    end = map[start];
+  }
+  return start;
 };
 ```
 
