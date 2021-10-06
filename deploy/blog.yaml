@@ -13,7 +13,7 @@ spec:
         app: blog-deploy
     spec:
       imagePullSecrets:
-        - name: myregistry
+        - name: blog-registry
       containers:
       - name: blog-deploy
         image: registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest
