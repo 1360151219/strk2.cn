@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-1
+date: 2021-10-6
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -256,6 +256,42 @@ var maxProfit = function(prices) {
     min = Math.min(prices[i], min);
   }
   return max;
+};
+```
+
+### leetcode 414. 第三大的数
+
+给你一个非空数组，返回此数组中 第三大的数 。如果不存在，则返回数组中最大的数。
+
+**法一：一次遍历** `2021.10.6`
+
+> 思路：维护 3 个变量分别是第一大、第二大和第三大，初始化的时候设置为`-Infinity`。在遍历过程中不断更新 3 个变量的值，如果遇到相同的数则直接`contiune`，最后返回的时候则只需要判断这 3 个变量是否都有了值，即不为`-Infinity`，如果都有了值则证明存在第三大的数，若有一个没有值则直接返回第一大的数。
+
+```js
+var thirdMax = function(nums) {
+  let max = -Infinity;
+  let secondmax = -Infinity;
+  let thirdmax = -Infinity;
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] === max || nums[i] === secondmax || nums[i] === thirdMax)
+      continue;
+    if (nums[i] > thirdmax) {
+      thirdmax = nums[i];
+    }
+    if (thirdmax > secondmax) {
+      let temp = secondmax;
+      secondmax = thirdmax;
+      thirdmax = temp;
+    }
+    if (secondmax > max) {
+      let temp = max;
+      max = secondmax;
+      secondmax = temp;
+    }
+  }
+  return thirdmax === -Infinity || secondmax === -Infinity || max === -Infinity
+    ? max
+    : thirdmax;
 };
 ```
 
