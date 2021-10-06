@@ -32,20 +32,20 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: registry.cn-beijing.aliyuncs.com/strk2/strk2-blog
+          tags: registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
       - name: deploy to cluster
         uses: steebchen/kubectl@v2.0.0
         with: # defaults to latest kubectl binary version
           config: ${{ secrets.KUBE_CONFIG_DATA }}
-          command: rollout restart deployment blog-deploy
+          command: rollout restart deployment/blog-deploy
       - name: verify deployment
         uses: steebchen/kubectl@v2.0.0
         with:
           config: ${{ secrets.KUBE_CONFIG_DATA }}
           version: v1.21.0 # specify kubectl binary version explicitly
-          command: rollout status deployment blog-deploy
+          command: rollout status deployment/blog-deploy
   pull-docker:
     needs: [build]
     name: Pull Docker
