@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-deploy
+  namespace: exp
+spec:
+  selector:
+    matchLabels:
+      app: blog-deploy
+  template:
+    metadata:
+      labels:
+        app: blog-deploy
+    spec:
+      containers:
+      - name: blog-deploy
+        image: registry.cn-beijing.aliyuncs.com/strk2/strk2-blog:latest
+        resources:
+          requests:
+            cpu: 40m
+            memory: 40Mi
+          limits:
+            cpu: 40m
+            memory: 40Mi
+        ports:
+        - containerPort: 8379
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blogsvc
+spec:
+  selector:
+    app: blog-deploy
+  type: NodePort
+  ports:
+    - port: 6666
+      targetPort: 8379
+      name: blog-deploy
