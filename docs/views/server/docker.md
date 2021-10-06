@@ -135,3 +135,5 @@ WORKDIR /var/www/blog/
 `kubectl autoscale deployment blog-deploy --min=1 --max=3 --cpu-percent=5`
 
 感觉差不多了，明天继续学习......
+
+记录一下：github actions 对公开后的镜像仓库不生效？ 我也不知道为什么。
