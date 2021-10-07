@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-6
+date: 2021-10-7
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1604,6 +1604,42 @@ var longestPalindrome = function(s) {
     }
   });
   return temp ? res + 1 : res;
+};
+```
+
+### leetcode 434. 字符串中的单词数
+
+统计字符串中的单词个数，这里的单词指的是连续的不是空格的字符。
+
+请注意，你可以假定字符串里不包括任何不可打印的字符。
+**法一：split 法** `2021.10.7`
+
+> 思路：首先用`trim`把首尾的空格都去掉了，然后用`split`方法根据空格分隔成数组，再遍历数组，遍历到字符串则加 1 即可。
+
+```js
+var countSegments = function(s) {
+  if (s.trim().length === 0) return 0;
+  let arr = s.trim().split(" ");
+  let res = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === "") continue;
+    else res++;
+  }
+  return res;
+};
+```
+
+**法二：一次遍历** `2021.10.7`
+
+> 思路：上面的方法感觉太繁琐，直接一次遍历字符串将单词给挑出来即可。
+
+```js
+var countSegments = function(s) {
+  let res = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] !== " " && (i === 0 || s[i - 1] === " ")) res++;
+  }
+  return res;
 };
 ```
 
