@@ -1,6 +1,6 @@
 ---
 title: docker---Kubernetes 学习记录坑
-date: 2021-10-5
+date: 2021-10-8
 categories:
   - 运维
 author: 盐焗乳鸽还要砂锅
@@ -137,3 +137,13 @@ WORKDIR /var/www/blog/
 感觉差不多了，明天继续学习......
 
 记录一下：github actions 对公开后的镜像仓库不生效？ 我也不知道为什么。
+
+### 10.8
+
+今天把这几天学到的内容都自己上手了一遍：
+
+- 创建`secret`资源对象并绑定在我的`deployment`上
+- 将什么`readinessProbe`、`livenessProbe`、`rollingUpdate`策略都写进了我的 deployment 上
+- 注意 svc 的`targetPort`最好填容器内`containerPort`的`name`而不是具体的 port。这样可以将拥有相同 labels 的 pods 都绑定在一个 svc 上。
+
+现在可以做到在 github action CI 的时候自动拉取镜像 连接集群 滚动更新了。总算是有一丢成就感了...
