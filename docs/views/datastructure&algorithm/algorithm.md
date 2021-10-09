@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-7
+date: 2021-10-9
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -504,6 +504,51 @@ for (let j = 0; j < c; j++) {
     for (let i = 1; i < r; i++) {
       matrix[i][j] = 0;
     }
+  }
+}
+```
+
+### leetcode 351.将数据流变为多个不相交区间
+
+给你一个由非负整数  `a1, a2, ..., an` 组成的数据流输入，请你将到目前为止看到的数字总结为不相交的区间列表。
+
+实现 `SummaryRanges` 类：
+
+- `SummaryRanges()` 使用一个空数据流初始化对象。
+- `void addNum(int val)` 向数据流中加入整数 `val` 。
+- `int[][] getIntervals()` 以不相交区间  `[starti, endi]` 的列表形式返回对数据流中整数的总结。
+
+**法一：Set+循环找连续的数** `2021.10.9`
+
+> 思路：首先先去重，然后遍历这个 set，遍历的时候用一个循环，如果存在比目前的数大 1 的，则 i++，直至找不到为止，然后 push 到 res 中。
+
+```js
+class SummaryRanges {
+  constructor() {
+    this.items = new Set();
+  }
+  addNum(val) {
+    this.items.add(val);
+  }
+  getIntervals() {
+    let res = [];
+    let items = [...this.items];
+    items = items.sort((a, b) => a - b);
+    for (let i = 0; i < items.length; i++) {
+      let arr = [];
+      arr.push(items[i]);
+      while (1) {
+        if (items.indexOf(items[i] + 1) > 0) {
+          i++;
+          continue;
+        } else {
+          break;
+        }
+      }
+      arr.push(items[i]);
+      res.push(arr);
+    }
+    return res;
   }
 }
 ```
