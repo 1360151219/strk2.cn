@@ -136,6 +136,48 @@ var twoSum = function(nums, target) {
 };
 ```
 
+### leetcode 56. 合并区间
+
+以数组 `intervals` 表示若干个区间的集合，其中单个区间为 `intervals[i] = [starti, endi]` 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+
+**法一：排序** `2021.10.10`
+
+> 思路：明天再写吧~~(代码很冗余)
+
+```js
+/**
+ * @param {number[][]} intervals
+ * @return {number[][]}
+ */
+var merge = function(intervals) {
+  intervals.sort((a, b) => a[0] - b[0]);
+  let start = intervals[0][0];
+  let end = intervals[0][1];
+  let res = [];
+  for (let i = 0; i < intervals.length; i++) {
+    if (i === intervals.length - 1) {
+      let arr = [];
+      arr.push(start);
+      arr.push(end);
+      res.push(arr);
+      break;
+    }
+    if (intervals[i + 1][0] <= end) {
+      end = Math.max(intervals[i][1], intervals[i + 1][1], end);
+      continue;
+    } else {
+      let arr = [];
+      arr.push(start);
+      arr.push(end);
+      res.push(arr);
+      start = intervals[i + 1][0];
+      end = intervals[i + 1][1];
+    }
+  }
+  return res;
+};
+```
+
 ### leetcode 88.合并 2 个有序数组
 
 **法一：JS 的 API** `2021.7.13`
@@ -2555,6 +2597,38 @@ var lenLongestFibSubseq = function(arr) {
     }
   }
   return max < 3 ? 0 : max;
+};
+```
+
+## 二分
+
+### 441. 排列硬币
+
+你总共有  n  枚硬币，并计划将它们按阶梯状排列。对于一个由 k 行组成的阶梯，其第 i 行必须正好有 i 枚硬币。阶梯的最后一行 可能 是不完整的。
+
+给你一个数字  n ，计算并返回可形成 **完整阶梯行** 的总行数。
+
+**法一：暴力** `2021.10.10`
+
+> 思路：从 0 开始叠加 sum，判断 n 和 sum 的大小即可，返回叠加次数相关的系数
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var arrangeCoins = function(n) {
+  let sum = 0;
+  for (let k = 1; k < n; k++) {
+    sum += k;
+    if (sum < n) continue;
+    else if (sum === n) {
+      return k;
+    } else {
+      return k - 1;
+    }
+  }
+  return 1;
 };
 ```
 
