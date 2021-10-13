@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-10
+date: 2021-10-13
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -13,6 +13,84 @@ tags:
 ---
 
 现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
+
+## 数学
+
+### 29. 两数相除
+
+要求不用乘除法、余数来实现一个向下取整的除法。
+
+**法一：数学逻辑** `2021.10.12`
+
+> 逻辑建议看代码吧。
+
+```js
+function divide(dividend, divisor) {
+  if (dividend == 0) return 0;
+  if (divisor == 1) return dividend;
+  if (divisor == -1) {
+    if (dividend > -2147483648) return -dividend; // 只要不是最小的那个整数，都是直接返回相反数就好啦
+    return 2147483648 - 1; // 是最小的那个，那就返回最大的整数啦
+  }
+  let a = dividend;
+  let b = divisor;
+  let sign = 1;
+  if ((a > 0 && b < 0) || (a < 0 && b > 0)) {
+    sign = -1;
+  }
+  a = a > 0 ? a : -a;
+  b = b > 0 ? b : -b;
+  let res = div(a, b);
+  if (sign > 0) return res > Infinity ? Infinity : res;
+  return -res;
+}
+function div(a, b) {
+  // 似乎精髓和难点就在于下面这几句
+  if (a < b) return 0;
+  let count = 1;
+  let tb = b; // 在后面的代码中不更新b
+  while (tb + tb <= a) {
+    count = count + count; // 最小解翻倍
+    tb = tb + tb; // 当前测试的值也翻倍
+  }
+  return count + div(a - tb, b);
+}
+```
+
+### 412. Fizz Buzz
+
+给你一个整数 n ，找出从 1 到 n 各个整数的 Fizz Buzz 表示，并用字符串数组 answer（下标从 1 开始）返回结果，其中：
+
+- answer[i] == "FizzBuzz" 如果 i 同时是 3 和 5 的倍数。
+- answer[i] == "Fizz" 如果 i 是 3 的倍数。
+- answer[i] == "Buzz" 如果 i 是 5 的倍数。
+- answer[i] == i 如果上述条件全不满足。
+
+**2021.10.13**
+
+> 思路：没什么好说的，一个 for 循环的事情。
+
+```js
+/**
+ * @param {number} n
+ * @return {string[]}
+ */
+var fizzBuzz = function(n) {
+  let res = [];
+  for (let i = 1; i <= n; i++) {
+    if (i % 3 === 0 && i % 5 !== 0) {
+      res.push("Fizz");
+    } else if (i % 3 !== 0 && i % 5 === 0) {
+      res.push("Buzz");
+    } else if (i % 3 === 0 && i % 5 === 0) {
+      res.push("FizzBuzz");
+    } else {
+      res.push(String(i));
+    }
+  }
+  return res;
+};
+```
 
 ## 数组
 
@@ -752,6 +830,92 @@ var findUnsortedSubarray = function(nums) {
     }
   }
   return start > end ? start - end + 1 : 0;
+};
+```
+
+### leetcode 273. 整数转换英文表示
+
+将非负整数 num 转换为其对应的英文表示。
+
+**法一：递归** `2021.10.11`
+
+> 思路：此题没什么意思。首先要知道 num 最多是 10 位数，则可以按照英语的分法，按照 3 个一位的方式分成 4 组，依次递归判断并转成相应的英文。
+
+```js
+/**
+ * @param {number} num
+ * @return {string}
+ */
+var numberToWords = function(num) {
+  // 最大就10位数
+  const singles = [
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+  ];
+  const teens = [
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
+  ];
+  const tens = [
+    "",
+    "Ten",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
+  ];
+  const thousands = ["", "Thousand", "Million", "Billion"];
+  const recursion = function(curArr, num) {
+    if (num === 0) return;
+    else if (num < 10) {
+      curArr.push(singles[num] + " ");
+    } else if (num < 20) {
+      curArr.push(teens[num - 10] + " ");
+    } else if (num < 100) {
+      curArr.push(tens[Math.floor(num / 10)] + " ");
+      recursion(curArr, num % 10);
+    } else {
+      curArr.push(singles[Math.floor(num / 100)] + " Hundred ");
+      recursion(curArr, num % 100);
+    }
+  };
+  let res = [];
+  if (num === 0) return "Zero";
+  for (
+    let i = 3, unit = 1000000000;
+    i >= 0;
+    i--, unit = Math.floor(unit / 1000)
+  ) {
+    const curNum = Math.floor(num / unit);
+    if (curNum !== 0) {
+      num -= curNum * unit;
+      let crrArr = [];
+      recursion(crrArr, curNum);
+      crrArr.push(thousands[i] + " ");
+      res.push(crrArr.join(""));
+    }
+  }
+  return res.join("").trim();
 };
 ```
 
