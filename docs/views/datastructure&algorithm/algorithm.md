@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-13
+date: 2021-10-14
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -55,6 +55,39 @@ function div(a, b) {
   }
   return count + div(a - tb, b);
 }
+```
+
+**法二：位运算** `2021.10.13`
+
+> 思路：首先，`x>>i`等于`x/2^i`，比如 100/3，i 从 31 开始，一直到 i=5 的时候，`100>>5>3`，那么即有`2**5个3`，然后我们再用`100-3*2**5`为 4，`4>>0>3`,即有`2**0个3`. 总的个数为`2**5+2**0=33`
+
+```js
+const divide = (a, b) => {
+  if (dividend == 0) return 0;
+  if (divisor == 1) return dividend;
+  if (divisor == -1) {
+    if (dividend > -2147483648) return -dividend; // 只要不是最小的那个整数，都是直接返回相反数就好啦
+    return 2147483648 - 1; // 是最小的那个，那就返回最大的整数啦
+  }
+
+  // 是否为负数
+  const isNeg = (a ^ b) < 0;
+  // 取绝对值
+  [a, b] = [Math.abs(a), Math.abs(b)];
+
+  let res = 0;
+  for (let i = 31; i >= 0; i--) {
+    // 找出满足条件的最大的倍数
+    if (a >>> i >= b) {
+      // 累加上这个倍数
+      res += 1 << i;
+      // 被除数减去这个倍数*b
+      a -= b << i;
+    }
+  }
+
+  return isNeg ? -res : res;
+};
 ```
 
 ### 412. Fizz Buzz
@@ -3125,5 +3158,37 @@ const maxSlidingWindow = (nums, k) => {
     if (i >= k - 1) result.push(nums[q[0]]);
   }
   return result;
+};
+```
+
+### 剑指 Offer II 069. 山峰数组的顶部
+
+符合下列属性的数组 `arr` 称为 山峰数组（山脉数组） ：
+
+`arr.length >= 3`
+存在 `i（0 < i < arr.length - 1）`使得：
+
+- `arr[0] < arr[1] < ... arr[i-1] < arr[i]`
+- `arr[i] > arr[i+1] > ... > arr[arr.length - 1]`
+  给定由整数组成的山峰数组 `arr` ，返回任何满足 `arr[0] < arr[1] < ... arr[i - 1] < arr[i] > arr[i + 1] > ... > arr[arr.length - 1]` 的下标 `i` ，即山峰顶部。
+
+**法一：二分查找** `2021.10.14`
+
+> 思路：简单二分。
+
+```js
+var peakIndexInMountainArray = function(arr) {
+  let l = 0;
+  let r = arr.length - 1;
+  let mid = Math.floor((l + r) / 2);
+  while (l < r) {
+    if (arr[mid] > arr[mid + 1]) {
+      r = mid;
+    } else {
+      l = mid + 1;
+    }
+    mid = Math.floor((l + r) / 2);
+  }
+  return mid;
 };
 ```

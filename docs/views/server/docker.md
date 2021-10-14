@@ -1,6 +1,6 @@
 ---
 title: docker---Kubernetes 学习记录坑
-date: 2021-10-8
+date: 2021-10-14
 categories:
   - 运维
 author: 盐焗乳鸽还要砂锅
@@ -147,3 +147,183 @@ WORKDIR /var/www/blog/
 - 注意 svc 的`targetPort`最好填容器内`containerPort`的`name`而不是具体的 port。这样可以将拥有相同 labels 的 pods 都绑定在一个 svc 上。
 
 现在可以做到在 github action CI 的时候自动拉取镜像 连接集群 滚动更新了。总算是有一丢成就感了...
+
+### K8S 学习记录
+
+今天上课，于是想回顾一下自己学 k8s 的一些知识吧。
+
+首先 k8s 是一个生产级别的容器编排，整体架构由`master`集群控制节点和若干个`node`集群工作节点构成。
+
+#### k8s 资源对象
+
+所有的 k8s 资源对象都可以使用`yaml`文件来创建。由于我没有自己搭建 k8s 集群，所以有一些对象只能自己写写 yaml 文件练习一下了。
+
+**Job/Cronjob**
+批处理任务，`Cronjob`则多了一个定时。
+
+```yaml
+apiVersions: batch/v1
+kind: CronJob
+metadata:
+  name: job-demo
+spec:
+  successfulJobsHistoryLimit: 10
+  failedJobsHistoryLimit: 10
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: job-demo
+        spec:
+          restartPolicy: Never # 重启策略：Never/Onfailure
+          containers:
+            - name: counter
+              image: busybox
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "for i in 9 8 7 6 5 4 3 2 1;do echo $i;done"
+```
+
+**Service**
+
+k8s 中有 3 种 IP：
+
+- Node IP: Node 节点的 IP 地址
+- Pod IP： Pod 的 IP 地址
+- Cluster IP： Service 的 IP。(这是一个虚拟 IP，仅仅作用于 Kubernetes 的 Service 对象)
+
+例如，假定我们有一组 Pod 服务，它们对外暴露了 8080 端口，同时都被打上了 app=myapp 这样的标签，那么我们就可以像下面这样来定义一个 Service 对象：
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myService
+spec:
+  selector:
+    app: myapp
+  ports:
+    - name: myService
+      protocal: TCP
+      port: 80
+      targetPort: 8080 # 注意，这里填pod的ports name 更好。
+```
+
+> 这里 Service 的服务类型默认为`ClusterIP`，只能够在集群内部访问；还能为`nodePort`,通过每个 node 节点和静态 port 对外暴露服务。
+
+**ConfigMap**：用于保存一些配置信息的资源对象。
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-demo
+data:
+  key1: hello
+  key2: world
+  config: |
+    key3: !
+```
+
+![](../imgs/k8s/k8s-2.png)
+
+除此之外可以使用命令行的方式来创建：
+
+- 文件或者文件夹：`kubectl create configmap cm-demo --from-file=test.txt`
+- 键值对：`kubectl create configmap --from-literal=key=value`
+
+那么创建好了该如何去访问呢？
+
+- 通过环境变量的形式：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testcm1-pod
+spec:
+  containers:
+    - name: testcm1
+      image: busybox
+      command: ["/bin/sh", "-c", "env"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 10Mi
+        limits:
+          cpu: 10m
+          memory: 10Mi
+      env:
+        - name: Hello
+          valueFrom:
+            configMapKeyRef:
+              name: cm-demo
+              key: key1
+        - name: world
+          valueFrom:
+            configMapKeyRef:
+              name: cm-demo
+              key: key2
+      envFrom:
+        - configMapRef:
+            name: cm-demo
+```
+
+我们通过输出它的 logs 来看一下：
+![](../imgs/k8s/k8s-3.png)
+
+- 通过挂载数据卷的形式（可以热更新）
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testcm-pod
+spec:
+  volumes:
+    - name: config-volume
+      configMap:
+        name: cm-demo1
+        items:
+          - key: mysql.conf
+            path: path/to/msyql.conf
+  containers:
+    - name: testcm
+      image: busybox
+      command: ["/bin/sh", "-c", "cat /etc/config/path/to/msyql.conf"]
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+```
+
+**Secret**：用于存储加密的信息
+`Secret` 有三种类型：`Opaque`、`Dockerconfigjson`、`service-account-token`。
+
+- _Opaque_
+
+采用`base64`加密编码。跟`ConfigMap`的使用形式差不多。
+
+- _Dockerconfigjson_
+
+用于存储私有 docker registry 的认证信息。这里拿本博客做例子。
+
+声明：
+`kubectl create secret docker-registry blog-registry --docker-server=<仓库地址> --docker-username=<用户名> --docker-password=<密码> --docker-email=<>`
+
+> email 并不是必须的，其他信息是必填的。
+
+引用：
+
+```yaml
+imagePullSecrets:
+  - name: blog-registry
+```
+
+- _service-account-token_
+  在创建 ServiceAccount 的时候，自动绑定。
+
+**DaemonSet**
+
+守护进程。用于在每一个节点部署一个 pod。当有新节点加入集群的时候，pod 会被调度到该节点上运行；若节点从集群中移除，pod 也会被移除。如用于监控每个节点信息的 pod。
