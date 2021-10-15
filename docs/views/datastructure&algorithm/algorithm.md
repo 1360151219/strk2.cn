@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-14
+date: 2021-10-15
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1717,6 +1717,60 @@ var reorderList = function(head) {
 ```
 
 ## 字符串
+
+### leetcode 38. 外观数列
+
+给定一个正整数 `n` ，输出外观数列的第 `n` 项。
+
+「外观数列」是一个整数序列，从数字 `1` 开始，序列中的每一项都是对前一项的描述。
+
+你可以将其视作是由递归公式定义的数字字符串序列：
+
+- `countAndSay(1) = "1"`
+- `countAndSay(n) 是对 countAndSay(n-1)` 的描述，然后转换成另一个数字字符串。
+
+```
+1.     1
+2.     11
+3.     21
+4.     1211
+5.     111221
+第一项是数字 1
+描述前一项，这个数是 1 即 “ 一 个 1 ”，记作 "11"
+描述前一项，这个数是 11 即 “ 二 个 1 ” ，记作 "21"
+描述前一项，这个数是 21 即 “ 一 个 2 + 一 个 1 ” ，记作 "1211"
+描述前一项，这个数是 1211 即 “ 一 个 1 + 一 个 2 + 二 个 1 ” ，记作 "111221"
+```
+
+**法** `2021.10.15`
+
+> 思路：简单粗暴，遍历前一个字符串，记录下数字以及其重复的个数，然后拼接成后一个字符串
+
+```js
+/**
+ * @param {number} n
+ * @return {string}
+ */
+var countAndSay = function(n) {
+  let arr = ["0", "1"];
+  for (let i = 2; i <= n; i++) {
+    let prev = arr[i - 1];
+    let str = "";
+    let count = 1;
+    for (let j = 0; j < prev.length; j++) {
+      if (prev[j] === prev[j + 1]) {
+        count++;
+      } else {
+        str += String(count);
+        str += prev[j];
+        count = 1;
+      }
+    }
+    arr.push(str);
+  }
+  return arr[n];
+};
+```
 
 ### leetcode125. 验证回文串
 

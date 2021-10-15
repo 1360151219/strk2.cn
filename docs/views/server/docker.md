@@ -327,3 +327,98 @@ imagePullSecrets:
 **DaemonSet**
 
 守护进程。用于在每一个节点部署一个 pod。当有新节点加入集群的时候，pod 会被调度到该节点上运行；若节点从集群中移除，pod 也会被移除。如用于监控每个节点信息的 pod。
+
+```yaml
+apiVersion: extensions/vibeta1
+kind: DaemonSet
+metadata:
+  name: ds-demo
+  lebels:
+    app: ds-demo
+spec:
+  template:
+    metadata:
+      lebels:
+        app: demo
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+            - name: nginx
+              containerPort: 80
+```
+
+> `DaemonSet`控制器创建的 Pod 事先已经确定被调度在哪个节点上(通过`NodeName`)，因此`unschedulable`对其无效。`DaemonSet`可以创建 Pod 即使调度器还没启动。
+
+**StatefulSet**
+
+- 无状态服务：该服务运行的实例不会在本地存储需要持久化数据，并且多个实例对同一个请求响应的结果是一样的。比如`wordpress`
+- 有状态服务：该服务运行的实例需要在本地存储持久化数据，比如`MySQL`数据库。
+
+`StatefulSet`可以对有状态服务进行部署，可以实现有序、优雅的部署和缩放、删除和终止、稳定持久的数据存储。
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ss-demo
+spec:
+  serviceName: nginx
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        role: stateful
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: web
+              containerPort: 80
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+    - metadata:
+        name: www
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+    - targetPort: web
+      port: 80
+  clusterIP: None
+  selector:
+    app: nginx
+    role: stateful
+---
+# 这里是hostPath类型的pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv
+spec:
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  hostPath:
+    path: /tmp/data
+```
