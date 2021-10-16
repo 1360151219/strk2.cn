@@ -2749,6 +2749,53 @@ var findMinArrowShots = function(points) {
 };
 ```
 
+## dfs
+
+### leetcode 282. 给表达式添加运算符
+
+给定一个仅包含数字  `0-9`  的字符串 `num` 和一个目标值整数 `target` ，在 `num` 的数字之间添加 二元 运算符（不是一元）`+`、`-`  或  `*` ，返回所有能够得到目标值的表达式。
+
+**dfs+回溯** `2021.10.16`
+
+> 思路：今天咕咕了 明天写吧 确实很难
+
+```js
+/**
+ * @param {string} num
+ * @param {number} target
+ * @return {string[]}
+ */
+
+var addOperators = function(num, target) {
+  function dfs(k, prev, cur, str) {
+    if (k === len) {
+      if (cur === t) {
+        ans.push(str);
+        return;
+      }
+    }
+    for (let i = k; i < len; i++) {
+      if (i !== k && s.charAt(k) == "0") break;
+      const next = Number(s.substring(k, i + 1));
+      if (k === 0) {
+        dfs(i + 1, next, next, "" + next);
+      } else {
+        dfs(i + 1, -next, cur - next, str + "-" + next);
+        dfs(i + 1, next, cur + next, str + "+" + next);
+        let x = prev * next;
+        dfs(i + 1, x, cur - prev + x, str + "*" + next);
+      }
+    }
+  }
+  let len = num.length;
+  let ans = [];
+  let t = target;
+  let s = num;
+  dfs(0, 0, 0, "");
+  return ans;
+};
+```
+
 ## 动态规划
 
 ### 714. Best Time to Buy and Sell Stock with Transaction Fee
