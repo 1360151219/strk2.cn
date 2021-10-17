@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-15
+date: 2021-10-17
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -2579,6 +2579,28 @@ var isValidBST = function(root) {
 };
 ```
 
+### leetcode 230. 二叉搜索树中第 K 小的元素
+
+给定一个二叉搜索树的根节点 `root` ，和一个整数 `k` ，请你设计一个算法查找其中第 `k` 个最小元素（从 1 开始计数）。
+
+**法一：中序遍历** `2021.10.17`
+
+> 众所周知，对于二叉搜索树而言中序遍历形成的是一个顺序数组，那么只需要返回第`k-1`个下表元素即可。
+
+```js
+var kthSmallest = function(root, k) {
+  let nums = [];
+  recursion(root, nums);
+  return nums[k - 1];
+};
+function recursion(node, nums) {
+  if (!node) return;
+  recursion(node.left, nums);
+  nums.push(node.val);
+  recursion(node.right, nums);
+}
+```
+
 ## 贪心算法
 
 ### leetcode 455. 分发饼干 `2021.7.9`
@@ -2757,7 +2779,13 @@ var findMinArrowShots = function(points) {
 
 **dfs+回溯** `2021.10.16`
 
-> 思路：今天咕咕了 明天写吧 确实很难
+> 这道题我是看题解做的，实在没想出来。大概思路为 dfs：首先 dfs 函数，记录下的参数分别是遍历到的索引，上一个数，当前计算的结果，拼接的字符串。函数体里，首先判断是否遍历完了数组，若遍历完如果计算结果等于 target，则将字符串 push 到 ins 中；然后从当前索引开始遍历，注意如果第一位是 0 的话就退出循环，然后获取当前索引的数`next`分 3 种情况加符号:
+>
+> - `+`：将`cur`+`next`作为计算结果
+> - `-`：将`cur`-`next`作为计算结果
+> - `*`：要考虑到乘法的优先级，首先将之前的数`prev`减去，再将`prev`\*`next`作为乘法结果加上去。
+>
+> 然后循环的 i++之后，相当于`next`是一个两位数了。然后继续遍历 dfs....
 
 ```js
 /**
@@ -2767,6 +2795,7 @@ var findMinArrowShots = function(points) {
  */
 
 var addOperators = function(num, target) {
+  /* k为开始遍历的索引 */
   function dfs(k, prev, cur, str) {
     if (k === len) {
       if (cur === t) {
