@@ -1,6 +1,6 @@
 ---
-title: 关于 问答类h5 的制造
-date: 2021-9-14
+title: 测一测 h5 开发记录
+date: 2021-10-18
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅
@@ -43,4 +43,8 @@ tags:
 
 ## 埋点
 
-- 对于刷新页面和浏览器关闭，Vue 的 beforeDestory 和 destoryed 是不生效的，而且被 keepalive 缓存的组件也没有这个效果。
+- 对于刷新页面和浏览器关闭，Vue 的 beforeDestory 和 destoryed 是不生效的，而且被 keepalive 缓存的组件也没有这个效果。对于这个问题，我们可以监听`beforeunload`事件来实现。
+
+- 在用`axios`在`beforeunload`事件函数中发请求的时候，会由于服务器响应速度小于浏览器关闭速度而导致请求被取消，这就会导致记录丢失。
+
+- 于是我用了`window.navigator.sendBeacon`这个 API，这个 API 可以完美解决这个问题，`sendBeacon`只关注于发出请求，而不会去管服务器的响应。

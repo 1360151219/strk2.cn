@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-17
+date: 2021-10-18
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -122,6 +122,29 @@ var fizzBuzz = function(n) {
     }
   }
   return res;
+};
+```
+
+### leetcode 476. 数字的补数
+
+对整数的二进制表示取反`（0 变 1 ，1 变 0）`后，再转换为十进制表示，可以得到这个整数的补数。
+
+例如，整数 `5` 的二进制表示是 `"101"` ，取反后得到 `"010"` ，再转回十进制表示得到补数 `2` 。
+给你一个整数 `num` ，输出它的补数。
+
+**位运算** `2021.10.18`
+
+> 思路：将`num`和二进制全为 1 的数进行一个异或操作，即可得到补码
+
+```js
+var findComplement = function(num) {
+  let temp = num;
+  let c = 0;
+  while (temp > 0) {
+    temp = temp >> 1;
+    c = (c << 1) + 1;
+  }
+  return c ^ num;
 };
 ```
 
