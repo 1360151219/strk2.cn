@@ -34,10 +34,10 @@ function throttle(fn: Function, interval: string | number) {
 }
 ```
 
-我们可以实践发现，这种节流方式是属于**头节流**
+我们可以实践发现，这种节流方式是属于**尾节流**
 
-> 即第一次立即执行，最后一次提前停止后，过了`interval`时间却不会再触发。
-> 不同的业务需求需要不同的节流方式，那么**尾节流**要怎么做呢？
+> 即第一次不会执行，最后一次提前停止后，过了`interval`时间会再触发。
+> 不同的业务需求需要不同的节流方式，那么**头节流**要怎么做呢？
 
 ```ts
 function throttle(fn: Function, interval: string | number) {
