@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-18
+date: 2021-10-19
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -2621,6 +2621,131 @@ function recursion(node, nums) {
   recursion(node.left, nums);
   nums.push(node.val);
   recursion(node.right, nums);
+}
+```
+
+### leetcode 208. Trie 的实现(前缀树、字典树)
+
+`Trie`（发音类似 `"try"`）或者说 前缀树 是一种树形数据结构，用于高效地存储和检索字符串数据集中的键。这一数据结构有相当多的应用情景，例如自动补完和拼写检查。
+
+请你实现 `Trie` 类：
+
+- `Trie`() 初始化前缀树对象。
+- `void insert(String word)` 向前缀树中插入字符串 `word` 。
+- `boolean search(String word)` 如果字符串 `word` 在前缀树中，返回 `true`（即，在检索之前已经插入）；否则，返回 `false` 。
+- `boolean startsWith(String prefix)` 如果之前已经插入的字符串  `word` 的前缀之一为 `prefix` ，返回 `true` ；否则，返回 `false` 。
+
+**`2021.10.9`**
+
+前缀树的结构如下：
+![](https://mmbiz.qpic.cn/mmbiz_png/7oynMNMKBahQMfsIVO5UFDjswwo34pmRB2CzOMc7IU4W3fadBzHiaoEic2ciapBUweTATibcylwibibHJiamy3CiaJXTIA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+即每个节点都有 26 条边，表示着为下一个字母铺路。具体的可以看下面的代码思考一下。
+
+```js
+class TrieNode {
+  constructor() {
+    this.isEnd = false;
+    this.ins = new Array(26);
+  }
+}
+class Trie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+  insert(word) {
+    // p是结点指针
+    let p = this.root;
+    for (let i = 0; i < word.length; i++) {
+      // u是字母在26里面的索引
+      let u = word.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) {
+        p.ins[u] = new TrieNode();
+      }
+      p = p.ins[u];
+    }
+    p.isEnd = true;
+  }
+  search(word) {
+    let p = this.root;
+    for (let i = 0; i < word.length; i++) {
+      let u = word.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) return false;
+      p = p.ins[u];
+    }
+    return p.isEnd;
+  }
+  startsWith(prefix) {
+    let p = this.root;
+    for (let i = 0; i < prefix.length; i++) {
+      let u = prefix.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) return false;
+      p = p.ins[u];
+    }
+    return true;
+  }
+}
+```
+
+### leetcode 211. 添加与搜索单词 - 数据结构设计
+
+请你设计一个数据结构，支持 添加新单词 和 查找字符串是否与任何先前添加的字符串匹配 。
+
+实现词典类 `WordDictionary` ：
+
+- `WordDictionary()` 初始化词典对象
+- `void addWord(word)` 将 `word` 添加到数据结构中，之后可以对它进行匹配
+- `bool search(word)` 如果数据结构中存在字符串与  `word` 匹配，则返回 `true` ；否则，返回   `false` 。`word` 中可能包含一些 `'.- '` ，每个  `.` 都可以表示任何一个字母。
+
+**`2021.10.19`**
+具体思路可以参照 208 题，这里主要是如果遇到了`.`，就直接遍历这个节点后所有的路，都走一遍，相当于是跳过判断该字符。
+
+```js
+class TrieNode {
+  constructor() {
+    this.isEnd = false;
+    this.ins = new Array(26);
+  }
+}
+class WordDictionary {
+  constructor() {
+    this.root = new TrieNode();
+  }
+  addWord(word) {
+    // p是结点指针
+    let p = this.root;
+    for (let i = 0; i < word.length; i++) {
+      // u是字母在26里面的索引
+      let u = word.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) {
+        p.ins[u] = new TrieNode();
+      }
+      p = p.ins[u];
+    }
+    p.isEnd = true;
+  }
+  search(word) {
+    function dfs(i, node) {
+      if (i === word.length) return node.isEnd;
+      else {
+        const ch = word.charAt(i);
+        if (ch !== ".") {
+          let next = node.ins[ch.charCodeAt() - "a".charCodeAt()];
+          if (next && dfs(++i, next)) {
+            return true;
+          }
+        } else {
+          for (let next of node.ins) {
+            if (next && dfs(i + 1, next)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+    return dfs(0, this.root);
+  }
 }
 ```
 
