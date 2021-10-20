@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-19
+date: 2021-10-20
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -145,6 +145,30 @@ var findComplement = function(num) {
     c = (c << 1) + 1;
   }
   return c ^ num;
+};
+```
+
+### leetcode 453. 最小操作次数使数组元素相等
+
+给你一个长度为 `n` 的整数数组，每次操作将会使 `n - 1` 个元素增加 `1` 。返回让数组所有元素相等的最小操作次数。
+
+**2021.10.20**
+
+> 思路：我们可以反其道而行，n-1 个元素加一，这不就相当于 1 个元素减一。因此只需要找到数组的最小值，然后所有数组数据与之差值之和即为答案
+
+```js
+var minMoves = function(nums) {
+  let min = Infinity;
+  for (let i = 0; i < nums.length; i++) {
+    if (min > nums[i]) {
+      min = nums[i];
+    }
+  }
+  let sum = 0;
+  for (let i = 0; i < nums.length; i++) {
+    sum += nums[i] - min;
+  }
+  return sum;
 };
 ```
 
