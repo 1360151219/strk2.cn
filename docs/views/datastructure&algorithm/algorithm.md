@@ -90,6 +90,46 @@ const divide = (a, b) => {
 };
 ```
 
+### leetcode 66.加一
+
+给定一个由 整数 组成的 非空 数组所表示的非负整数，在该数的基础上加一。
+
+最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。
+
+你可以假设除了整数 0 之外，这个整数不会以零开头。
+
+**2021.10.21**
+
+> 思路：从最低位开始遍历数组，首先+1，如果等于 10 则有进位，进位记为 1，然后接下来每一次遍历都加进位数，若加完之后没有进位则退出循环。注意一个特殊情况：即遍历到最高位的时候仍有进位，则直接在数组前面`unshift`一个 1
+
+```js
+/**
+ * @param {number[]} digits
+ * @return {number[]}
+ */
+var plusOne = function(digits) {
+  let len = digits.length;
+  let carry = 0;
+  let i = len - 1;
+  do {
+    if (i === len - 1) digits[i] += 1 + carry;
+    else digits[i] += carry;
+    if (digits[i] >= 10) {
+      carry = 1;
+      digits[i] %= 10;
+      if (i === 0) {
+        digits.unshift(1);
+        break;
+      }
+    } else {
+      carry = 0;
+    }
+    i--;
+  } while (carry !== 0);
+  return digits;
+};
+```
+
 ### 412. Fizz Buzz
 
 给你一个整数 n ，找出从 1 到 n 各个整数的 Fizz Buzz 表示，并用字符串数组 answer（下标从 1 开始）返回结果，其中：
