@@ -1,18 +1,14 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-20
+date: 2021-10-23
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
 tags:
   - 算法
----
+---# leetcode----算法日记
 
-# leetcode----算法日记
-
----
-
-现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
+---现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
 
 ## 数学
 
@@ -72,10 +68,11 @@ const divide = (a, b) => {
 
   // 是否为负数
   const isNeg = (a ^ b) < 0;
+
   // 取绝对值
   [a, b] = [Math.abs(a), Math.abs(b)];
 
-  let res = 0;
+  let res = 0;   
   for (let i = 31; i >= 0; i--) {
     // 找出满足条件的最大的倍数
     if (a >>> i >= b) {
@@ -209,6 +206,46 @@ var minMoves = function(nums) {
     sum += nums[i] - min;
   }
   return sum;
+};
+```
+
+### leetcode 492. 构造矩形
+
+作为一位 web 开发者， 懂得怎样去规划一个页面的尺寸是很重要的。 现给定一个具体的矩形页面面积，你的任务是设计一个长度为 L 和宽度为 W 且满足以下要求的矩形的页面。要求：
+
+```
+1. 你设计的矩形页面必须等于给定的目标面积。
+
+2. 宽度 W 不应大于长度 L，换言之，要求 L >= W 。
+
+3. 长度 L 和宽度 W 之间的差距应当尽可能小。
+```
+
+**循环** `2021.10.23`
+
+```js
+/**
+ * @param {number} area
+ * @return {number[]}
+ */
+var constructRectangle = function(area) {
+  let width = Math.floor(Math.sqrt(area));
+  while (1) {
+    if (area % width === 0) return [area / width, width];
+    else width--;
+  }
+};
+```
+
+这种写法效率居然不是最高的。后来想了想，可能是每一次都要判断，效率就低了，因此我直接不做判断了。这样就快多了~~
+
+```js
+var constructRectangle = function(area) {
+  let width = Math.floor(Math.sqrt(area));
+  while (area % width !== 0) {
+    width--;
+  }
+  return [area / width, width];
 };
 ```
 
