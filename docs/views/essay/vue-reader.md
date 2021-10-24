@@ -149,6 +149,8 @@ export default class Observer {
 - this.obj.name=value
 - delete this.obj.name
 
+了解了以上 3 个类，我们可以知道，当一个 Vue 实例在创建出来的时候，**首先会通过一个`_proxyData`方法将`data`中的所有属性绑定在 Vue 实例上，并且增加监听拦截。然后就是有一个`Compliler`方法或类对 Vue 实例中的`data`以及模板字符串做一个编译**。
+
 ::: details
 我自己写了一个[基于响应式原理的 Vue 简单框架](https://github.com/1360151219/A-person-Vue/tree/master)
 :::

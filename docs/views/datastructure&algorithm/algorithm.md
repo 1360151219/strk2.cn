@@ -1,12 +1,14 @@
 ---
+
 title: leetcode----算法日记
-date: 2021-10-23
+date: 2021-10-24
 categories:
-  - datastructure&algorithm
-author: 盐焗乳鸽还要砂锅
-tags:
-  - 算法
----# leetcode----算法日记
+
+- datastructure&algorithm
+  author: 盐焗乳鸽还要砂锅
+  tags:
+- 算法
+  ---# leetcode----算法日记
 
 ---现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
 
@@ -72,7 +74,7 @@ const divide = (a, b) => {
   // 取绝对值
   [a, b] = [Math.abs(a), Math.abs(b)];
 
-  let res = 0;   
+  let res = 0;
   for (let i = 31; i >= 0; i--) {
     // 找出满足条件的最大的倍数
     if (a >>> i >= b) {
@@ -124,6 +126,119 @@ var plusOne = function(digits) {
     i--;
   } while (carry !== 0);
   return digits;
+};
+```
+
+### leetcode. 229. 求众数 II
+
+给定一个大小为 n 的整数数组，找出其中所有出现超过 ⌊ n/3 ⌋ 次的元素。
+
+**法一：哈希表**
+
+> 利用哈希表来做我相信大部分人都应该会。时间和空间复杂度都为 O(n)。
+
+```js
+var majorityElement = function(nums) {
+  if (nums.length === 1) return nums;
+  let count = 1;
+  let hashmap = {};
+  let res = [];
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] in hashmap) {
+      hashmap[nums[i]]++;
+    } else {
+      hashmap[nums[i]] = 1;
+    }
+  }
+  for (let key in hashmap) {
+    if (hashmap[key] > Math.floor(nums.length / 3)) {
+      res.push(key);
+    }
+  }
+  return res;
+};
+```
+
+**法二：摩尔投票法** `2021.10.23`
+
+首先我们先来了解一下什么是摩尔投票法。它是用于针对选出如何在任意多的候选人中，选出票数超过一半的那个人。注意，**是超出一半票数的那个人**。
+
+假设投票是这样的，`[A, C, A, A, B]`，`ABC` 是指三个候选人。
+
+第一张票与第二张票进行对坑，如果票不同则互相抵消掉；
+
+接着第三票与第四票进行对坑，如果票相同，则增加这个候选人的可抵消票数；
+
+这个候选人拿着可抵消票数与第五张票对坑，如果票不同，则互相抵消掉，即候选人的可抵消票数 -1。
+
+> 关键点在于，候选人遍历完 n 次之后，还能剩余 1 以上的票数，假设票数有一半，则可抵消票数刚好为 0。
+
+之后还需要一个计数阶段来验证一下该候选人是否票数超过一半。
+
+---了解完摩尔投票法以后，我们回到题目，题目要求返回选出票数超过`⌊ 1/3 ⌋`的候选人。
+我们可以知道：（**这里非常非常重要**，摩尔投票法本身与候选人数相关）
+
+- 如果至多选一个代表，那他的票数至少要超过一半`（⌊ 1/2 ⌋）`的票数；
+
+- 如果至多选两个代表，那他们的票数至少要超过 `⌊ 1/3 ⌋`的票数；
+
+- 如果至多选 m 个代表，那他们的票数至少要超过 `⌊ 1/(m+1) ⌋` 的票数。
+
+因此题目只需要返回 2 个代表即可。
+
+我们首先初始化两位候选人，然后开始遍历：
+
+- 若票数配对上一个候选人，则该候选人票数++
+- 若票数没有配对上任何一位候选人，则两位候选人票数--；且若票数已经为 0，则更换候选人。
+- 最后计数阶段验证两位候选人是否票数达标。
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var majorityElement = function(nums) {
+  if (nums.length == 0) return [];
+  let cand1 = nums[0];
+  let count1 = 0;
+  let cand2 = nums[0];
+  let count2 = 0;
+  for (let num of nums) {
+    if (cand1 === num) {
+      count1++;
+      continue;
+    }
+    if (cand2 === num) {
+      count2++;
+      continue;
+    }
+    if (count1 === 0) {
+      cand1 = num;
+      count1++;
+      continue;
+    }
+    if (count2 === 0) {
+      count2++;
+      cand2 = num;
+      continue;
+    }
+    count1--;
+    count2--;
+  }
+  count1 = 0;
+  count2 = 0;
+  let res = new Set(); // 这里是防止两位候选人相同
+  for (let num of nums) {
+    if (cand1 === num) count1++;
+    if (cand2 === num) count2++;
+  }
+  if (count1 > nums.length / 3) {
+    res.add(cand1);
+  }
+  if (count2 > nums.length / 3) {
+    res.add(cand2);
+  }
+  return [...res];
 };
 ```
 
@@ -1242,9 +1357,7 @@ var getKthFromEnd = function(head, k) {
 };
 ```
 
----
-
-**二刷**
+---**二刷**
 
 > 思路：上述的做法实际上遍历了 2 次链表，感觉还可以再优化一下。看了一下各路大佬的题解，发现一种快慢指针法只需要遍历一次链表即可。关键是让快指针先移动 k-1 步，这样的话快慢指针就分别指向所求链表的尾、头节点了。
 
@@ -3022,6 +3135,8 @@ var findMinArrowShots = function(points) {
 
 ## dfs
 
+### 剑指 Offer 12. 矩阵中的路径 ---- leetcode 72 单词搜索 （剑指 offer）
+
 ### leetcode 282. 给表达式添加运算符
 
 给定一个仅包含数字  `0-9`  的字符串 `num` 和一个目标值整数 `target` ，在 `num` 的数字之间添加 二元 运算符（不是一元）`+`、`-`  或  `*` ，返回所有能够得到目标值的表达式。
@@ -3070,6 +3185,48 @@ var addOperators = function(num, target) {
   let t = target;
   let s = num;
   dfs(0, 0, 0, "");
+  return ans;
+};
+```
+
+### 653. 两数之和 IV - 输入 BST （树）
+
+### 638. 大礼包
+
+在 LeetCode 商店中， 有 `n` 件在售的物品。每件物品都有对应的价格。然而，也有一些大礼包，每个大礼包以优惠的价格捆绑销售一组物品。
+
+给你一个整数数组 `price` 表示物品价格，其中 `price[i]` 是第 `i` 件物品的价格。另有一个整数数组 `needs` 表示购物清单，其中 `needs[i]` 是需要购买第 `i` 件物品的数量。
+
+还有一个数组 `special` 表示大礼包，`special[i]` 的长度为 `n + 1` ，其中 `special[i][j]` 表示第 `i` 个大礼包中内含第 `j` 件物品的数量，且 `special[i][n]` （也就是数组中的最后一个整数）为第 `i` 个大礼包的价格。
+
+返回 `确切` 满足购物清单所需花费的最低价格，你可以充分利用大礼包的优惠活动。你不能购买超出购物清单指定数量的物品，即使那样会降低整体价格。任意大礼包可无限次购买。
+
+**dfs 回溯** `2021.10.24`
+
+> 思路：首先实现一个 dfs 的函数，主要逻辑是首先判断如果全部单买的话，需要的全部 Cost，然后记录下总消费额 ans 的最小值。边界条件：当 Cost 为 0 的时候则已经买齐了。若没买齐，则遍历礼包，判断购买礼包不会导致超过需要数量，然后买礼包后继续 dfs。
+
+```js
+var shoppingOffers = function(price, special, needs) {
+  let ans = Infinity;
+  function dfs(needs, cost) {
+    //计算如果单买，需要的全部Cost
+    const totalCost = needs.reduce((c, need, i) => c + need * price[i], 0);
+    ans = Math.min(ans, totalCost + cost);
+    if (totalCost === 0) return; // 证明已经买齐了
+    // 遍历礼包
+    for (const sp of special) {
+      // 保证不超过需要的数量
+      if (needs.every((n, i) => n - sp[i] >= 0)) {
+        // 买礼包
+        needs.forEach((_, i) => (needs[i] -= sp[i]));
+        // 买完礼包之后继续dfs
+        dfs(needs, cost + sp[needs.length]);
+        // 回溯：继续遍历其他礼包
+        needs.forEach((_, i) => (needs[i] += sp[i]));
+      }
+    }
+  }
+  dfs(needs, 0);
   return ans;
 };
 ```
