@@ -1,14 +1,13 @@
 ---
-
 title: leetcode----算法日记
-date: 2021-10-24
+date: 2021-10-25
 categories:
-
-- datastructure&algorithm
-  author: 盐焗乳鸽还要砂锅
-  tags:
-- 算法
-  ---# leetcode----算法日记
+  - datastructure&algorithm
+author: 盐焗乳鸽还要砂锅
+tags:
+  - 算法
+--- 
+# leetcode----算法日记
 
 ---现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
 
