@@ -242,6 +242,43 @@ var majorityElement = function(nums) {
 };
 ```
 
+### leetcode 240. 搜索二维矩阵 II
+
+编写一个高效的算法来搜索  `m x n`  矩阵 `matrix` 中的一个目标值 `target` 。该矩阵具有以下特性：
+
+- 每行的元素从左到右升序排列。
+- 每列的元素从上到下升序排列。
+
+**法一：BST** `2021.10.25`
+
+> 思路：我们从右上角看起，发现这不就是一个 BST 嘛。。。
+
+```js
+/**
+ * @param {number[][]} matrix
+ * @param {number} target
+ * @return {boolean}
+ */
+var searchMatrix = function(matrix, target) {
+  let m = matrix[0].length - 1; //列
+  let n = matrix.length - 1; //行
+  let row = 0;
+  let col = m;
+  let start = matrix[row][col];
+  while (row <= n && col >= 0) {
+    start = matrix[row][col];
+    if (start === target) {
+      return true;
+    } else if (start < target) {
+      row++;
+    } else {
+      col--;
+    }
+  }
+  return false;
+};
+```
+
 ### 412. Fizz Buzz
 
 给你一个整数 n ，找出从 1 到 n 各个整数的 Fizz Buzz 表示，并用字符串数组 answer（下标从 1 开始）返回结果，其中：
