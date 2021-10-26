@@ -6,7 +6,8 @@ categories:
 author: 盐焗乳鸽还要砂锅
 tags:
   - 算法
---- 
+---
+
 # leetcode----算法日记
 
 ---现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
@@ -2413,6 +2414,31 @@ var nextGreaterElement = function(nums1, nums2) {
       }
     }
     if (!temp) res.push(-1);
+  }
+  return res;
+};
+```
+
+**法二：单调栈** `2021.10.26`
+
+对于寻找下一个更大的元素，我们就知道得用**单调栈**。
+
+对于这道题，我们需要遍历`nums2`数组，并且维护一个从大到小的一个单调栈。如果`nums2[i]<=nums2[stack.top]`，则继续入栈，因为没有找到比栈顶更大的元素；若`nums2[i]>nums2[stack.top]`，即满足题意，则将栈顶元素弹栈，并且用哈希表记录下来。这里要有一个循环，直到将单调栈中满足题意的所有元素弹出为止。
+
+```js
+var nextGreaterElement = function(nums1, nums2) {
+  let stack = [];
+  let map = new Map();
+  for (let i = 0; i < nums2.length; i++) {
+    while (stack.length > 0 && nums2[i] > nums2[stack[stack.length - 1]]) {
+      const index = stack.pop();
+      map.set(nums2[index], nums2[i]);
+    }
+    stack.push(i);
+  }
+  let res = [];
+  for (let i = 0; i < nums1.length; i++) {
+    res.push(map.get(nums1[i]) || -1);
   }
   return res;
 };
