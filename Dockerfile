@@ -1,5 +1,5 @@
 
-FROM node:latest as builder
+FROM node:14.15.0 as builder
 COPY . .
 RUN npm config set -g registry https://registry.npm.taobao.org
 RUN npm install
