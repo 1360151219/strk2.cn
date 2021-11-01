@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-10-25
+date: 2021-11-1
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -106,7 +106,7 @@ const divide = (a, b) => {
  * @param {number[]} digits
  * @return {number[]}
  */
-var plusOne = function(digits) {
+var plusOne = function (digits) {
   let len = digits.length;
   let carry = 0;
   let i = len - 1;
@@ -138,7 +138,7 @@ var plusOne = function(digits) {
 > 利用哈希表来做我相信大部分人都应该会。时间和空间复杂度都为 O(n)。
 
 ```js
-var majorityElement = function(nums) {
+var majorityElement = function (nums) {
   if (nums.length === 1) return nums;
   let count = 1;
   let hashmap = {};
@@ -197,7 +197,7 @@ var majorityElement = function(nums) {
  * @param {number[]} nums
  * @return {number[]}
  */
-var majorityElement = function(nums) {
+var majorityElement = function (nums) {
   if (nums.length == 0) return [];
   let cand1 = nums[0];
   let count1 = 0;
@@ -259,7 +259,7 @@ var majorityElement = function(nums) {
  * @param {number} target
  * @return {boolean}
  */
-var searchMatrix = function(matrix, target) {
+var searchMatrix = function (matrix, target) {
   let m = matrix[0].length - 1; //列
   let n = matrix.length - 1; //行
   let row = 0;
@@ -274,6 +274,70 @@ var searchMatrix = function(matrix, target) {
     } else {
       col--;
     }
+  }
+  return false;
+};
+```
+
+### 260. 只出现一次的数字 III
+
+给定一个整数数组  nums，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。你可以按 任意顺序 返回答案。
+
+**进阶：你的算法应该具有线性时间复杂度。你能否仅使用常数空间复杂度来实现？**
+
+**法一：常数空间复杂度遍历** `2021.10.30`
+
+> 先排个序，在遍历过程中比较前后两个数即可，这个方法我只考虑了空间复杂度的简化
+
+```js
+var singleNumber = function (nums) {
+  nums.sort((a, b) => a - b);
+  let res = [];
+  let i = 0;
+  while (i < nums.length) {
+    if (nums[i] === nums[i + 1]) {
+      i += 2;
+    } else {
+      res.push(nums[i]);
+      i++;
+    }
+  }
+  return res;
+};
+```
+
+### 335. 路径交叉
+
+给你一个整数数组 `distance` 。
+
+从 X-Y 平面上的点  `(0,0)`  开始，先向北移动 `distance[0]` 米，然后向西移动 `distance[1]` 米，向南移动 `distance[2]` 米，向东移动 `distance[3]` 米，持续移动。也就是说，每次移动后你的方位会发生逆时针变化。
+
+判断你所经过的路径是否相交。如果相交，返回 `true` ；否则，返回 `false` 。
+
+**2021.10.28**
+
+> 主要是需要发掘出发生相交的仅仅 3 种情况。
+
+```js
+var isSelfCrossing = function (distance) {
+  if (distance.length < 4) return false;
+  for (let i = 3; i < distance.length; i++) {
+    if (distance[i - 1] <= distance[i - 3] && distance[i] >= distance[i - 2])
+      return true;
+    if (
+      i >= 4 &&
+      distance[i] + distance[i - 4] >= distance[i - 2] &&
+      distance[i - 1] === distance[i - 3]
+    )
+      return true;
+    if (
+      i >= 5 &&
+      distance[i - 1] + distance[i - 5] >= distance[i - 3] &&
+      distance[i] >= distance[i - 2] - distance[i - 4] &&
+      distance[i - 1] <= distance[i - 3] &&
+      distance[i - 2] > distance[i - 4]
+    )
+      return true;
   }
   return false;
 };
@@ -297,7 +361,7 @@ var searchMatrix = function(matrix, target) {
  * @param {number} n
  * @return {string[]}
  */
-var fizzBuzz = function(n) {
+var fizzBuzz = function (n) {
   let res = [];
   for (let i = 1; i <= n; i++) {
     if (i % 3 === 0 && i % 5 !== 0) {
@@ -326,7 +390,7 @@ var fizzBuzz = function(n) {
 > 思路：将`num`和二进制全为 1 的数进行一个异或操作，即可得到补码
 
 ```js
-var findComplement = function(num) {
+var findComplement = function (num) {
   let temp = num;
   let c = 0;
   while (temp > 0) {
@@ -346,7 +410,7 @@ var findComplement = function(num) {
 > 思路：我们可以反其道而行，n-1 个元素加一，这不就相当于 1 个元素减一。因此只需要找到数组的最小值，然后所有数组数据与之差值之和即为答案
 
 ```js
-var minMoves = function(nums) {
+var minMoves = function (nums) {
   let min = Infinity;
   for (let i = 0; i < nums.length; i++) {
     if (min > nums[i]) {
@@ -380,7 +444,7 @@ var minMoves = function(nums) {
  * @param {number} area
  * @return {number[]}
  */
-var constructRectangle = function(area) {
+var constructRectangle = function (area) {
   let width = Math.floor(Math.sqrt(area));
   while (1) {
     if (area % width === 0) return [area / width, width];
@@ -392,12 +456,68 @@ var constructRectangle = function(area) {
 这种写法效率居然不是最高的。后来想了想，可能是每一次都要判断，效率就低了，因此我直接不做判断了。这样就快多了~~
 
 ```js
-var constructRectangle = function(area) {
+var constructRectangle = function (area) {
   let width = Math.floor(Math.sqrt(area));
   while (area % width !== 0) {
     width--;
   }
   return [area / width, width];
+};
+```
+
+### leetcode 869. 重新排序得到 2 的幂
+
+给定正整数 `N` ，我们按任何顺序（包括原始顺序）将数字重新排序，注意其前导数字不能为零。
+
+如果我们可以通过上述方式得到  `2` 的幂，返回 `true`；否则，返回 `false`。
+
+**法一：哈希表** `2021.10.28`
+
+> 思路：将 N 的各个数字存在哈希表中以及将对应长度的 2 的 k 次方的值都存起来，然后遍历这些值，判断是否跟哈希表中数字匹配。
+
+```js
+/**
+ * @param {number} n
+ * @return {boolean}
+ */
+var reorderedPowerOf2 = function (n) {
+  let arr = String(n).split("");
+  let init = 1;
+  let i = 0;
+  let matchArr = [];
+  while (String(init).length <= arr.length) {
+    if (String(init).length === arr.length) matchArr.push(String(init));
+    i++;
+    init = Math.pow(2, i);
+  }
+  let map = {};
+  for (let num of arr) {
+    if (num in map) {
+      map[num]++;
+    } else {
+      map[num] = 1;
+    }
+  }
+  for (let match of matchArr) {
+    let obj = clone(map);
+    let temp = true;
+    let str = match.split("");
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] in obj && obj[str[i]] > 0) {
+        obj[str[i]]--;
+      } else {
+        temp = false;
+        break;
+      }
+    }
+    if (temp) {
+      return true;
+    }
+  }
+  return false;
+  function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
 };
 ```
 
@@ -413,7 +533,7 @@ var constructRectangle = function(area) {
 :::
 
 ```js
-var containsDuplicate = function(nums) {
+var containsDuplicate = function (nums) {
   let list = new Set();
   for (let i = 0; i < nums.length; i++) {
     list.add(nums[i]);
@@ -431,7 +551,7 @@ var containsDuplicate = function(nums) {
 > 思路：遍历数组，在每一步的时候，比较当前数以及当前和，若当前和小于当前数，则可以无情的抛弃之前的和啦。然后再比较记录的最大和以及刚刚比较出来的最大值，若大于最大和则更新。最后返回最大和。
 
 ```js
-var maxSubArray = function(nums) {
+var maxSubArray = function (nums) {
   if (nums.length === 1) return nums[0];
   let cur_sum = (max_sum = nums[0]);
   for (let i = 1; i < nums.length; i++) {
@@ -470,7 +590,7 @@ const getInfo = (a, l, r) => {
   return pushUp(lSub, rSub);
 };
 
-var maxSubArray = function(nums) {
+var maxSubArray = function (nums) {
   return getInfo(nums, 0, nums.length - 1).mSum;
 };
 ```
@@ -497,7 +617,7 @@ var maxSubArray = function(nums) {
 > 思路：没啥好说的，两个 for 遍历完事了。时间复杂度 O(n^2)
 
 ```js
-var twoSum = function(nums, target) {
+var twoSum = function (nums, target) {
   for (let i = 0; i < nums.length; i++) {
     for (let j = i + 1; j < nums.length; j++) {
       if (nums[i] + nums[j] === target) return [i, j];
@@ -512,7 +632,7 @@ var twoSum = function(nums, target) {
 > 思路：我们可以换一种想法，每次遍历用 target-nums[i]来求出另一个值，这样的话只要寻找到另一个值，则 OK；找不到则继续遍历。时间复杂度 O(n^2)
 
 ```js
-var twoSum = function(nums, target) {
+var twoSum = function (nums, target) {
   let hashMap = {};
   for (let i = 0; i < nums.length; i++) {
     let another = target - nums[i];
@@ -536,7 +656,7 @@ var twoSum = function(nums, target) {
  * @param {number[][]} intervals
  * @return {number[][]}
  */
-var merge = function(intervals) {
+var merge = function (intervals) {
   intervals.sort((a, b) => a[0] - b[0]);
   let start = intervals[0][0];
   let end = intervals[0][1];
@@ -572,7 +692,7 @@ var merge = function(intervals) {
 它这道题不可以改变 num1 的指向，即 num1=。。。。。就很离谱。
 
 ```js
-var merge = function(nums1, m, nums2, n) {
+var merge = function (nums1, m, nums2, n) {
   nums1.splice(m, nums1.length - m, ...nums2);
   nums1.sort((a, b) => a - b);
 };
@@ -610,7 +730,7 @@ var merge = function(nums1, m, nums2, n) {
 > 思路：首先遍历数组一，将元素出现的个数存在哈希表中，然后遍历数组二，如果存在于哈希表中的元素出现的次数大于 0，则 push 到结果中，并且次数减小。这样就可以保证输出元素在两个数组中出现次数的最小值啦。这个方法的时间、空间复杂度都为 O(n)
 
 ```js
-var intersect = function(nums1, nums2) {
+var intersect = function (nums1, nums2) {
   let res = [];
   let hashMap = {};
   for (let i = 0; i < nums1.length; i++) {
@@ -635,7 +755,7 @@ var intersect = function(nums1, nums2) {
 > 思路：先给两个数组排好序，这样的话每个数组里相同的元素就会挨在一起了。然后通过两个指针分别遍历 2 个数组即可。这个方法时间复杂度为 O(nlogn) ，空间复杂度是 1
 
 ```js
-var intersect = function(nums1, nums2) {
+var intersect = function (nums1, nums2) {
   nums1.sort((a, b) => a - b);
   nums2.sort((a, b) => a - b);
   let res = [];
@@ -676,7 +796,7 @@ _示例:_
 > 思路：记录下最小值以及每天理论上可获取的最大利润。
 
 ```js
-var maxProfit = function(prices) {
+var maxProfit = function (prices) {
   if (prices.length < 1) return 0;
   let max = 0;
   let min = prices[0];
@@ -697,7 +817,7 @@ var maxProfit = function(prices) {
 > 思路：维护 3 个变量分别是第一大、第二大和第三大，初始化的时候设置为`-Infinity`。在遍历过程中不断更新 3 个变量的值，如果遇到相同的数则直接`contiune`，最后返回的时候则只需要判断这 3 个变量是否都有了值，即不为`-Infinity`，如果都有了值则证明存在第三大的数，若有一个没有值则直接返回第一大的数。
 
 ```js
-var thirdMax = function(nums) {
+var thirdMax = function (nums) {
   let max = -Infinity;
   let secondmax = -Infinity;
   let thirdmax = -Infinity;
@@ -741,7 +861,7 @@ var thirdMax = function(nums) {
  * @param {number} c
  * @return {number[][]}
  */
-var matrixReshape = function(mat, r, c) {
+var matrixReshape = function (mat, r, c) {
   let row = mat.length;
   let col = mat[0].length;
   if (row * col !== r * c) return mat;
@@ -772,7 +892,7 @@ var matrixReshape = function(mat, r, c) {
  * @param {number} numRows
  * @return {number[][]}
  */
-var generate = function(numRows) {
+var generate = function (numRows) {
   let res = [];
   for (let i = 0; i < numRows; i++) {
     let row = Array(i + 1).fill(1);
@@ -803,7 +923,7 @@ var generate = function(numRows) {
  * @param {character[][]} board
  * @return {boolean}
  */
-var isValidSudoku = function(board) {
+var isValidSudoku = function (board) {
   let row = {};
   let col = {};
   let box = {};
@@ -840,7 +960,7 @@ var isValidSudoku = function(board) {
 > 思路：这里先讲一下什么叫原地算法：即在函数的输入矩阵上直接修改，而不是 return 一个矩阵。所以，力扣判定程序正确性的时候，仍然根据同一个 matrix 变量来判定。首先先遍历依次矩阵，分别用 2 个哈希表记录下需要置零的行和列。然后第二次遍历的时候，将需要置零的元素置零。时间复杂度：O(2m\*n)，空间复杂度：O(m+n)。
 
 ```js
-var setZeroes = function(matrix) {
+var setZeroes = function (matrix) {
   let r = matrix.length;
   let c = matrix[0].length;
   let row = {};
@@ -870,7 +990,7 @@ var setZeroes = function(matrix) {
 > 思路：1.首先把首行首列都遍历一次，记录下 2 个 Boolean 值表示是否需要置零。2.然后遍历非首行首列，遇到 0 的时候，把对应的首行首列的元素设为 0。3.根据首行首列的信息，将对应的行与列置零。4.根据一开始的 Boolean 值，置零需要的首行首列。空间复杂度：O(1)
 
 ```js
-var setZeroes = function(matrix) {
+var setZeroes = function (matrix) {
   let r = matrix.length;
   let c = matrix[0].length;
   let isR0 = false;
@@ -995,7 +1115,7 @@ class SummaryRanges {
 :::
 
 ```js
-var firstUniqChar = function(s) {
+var firstUniqChar = function (s) {
   let hashMap = {};
   for (let i = 0; i < s.length; i++) {
     if (s[i] in hashMap) {
@@ -1019,7 +1139,7 @@ var firstUniqChar = function(s) {
 > 思路：因为字符串一共只有 26 个字母，我们可以创建一个长度为 26 的数组来存储字母出现次数，第一次遍历字符串并把对应的 arr[index]++，第二次再遍历的时候判断 arr[index]为 1 即可。
 
 ```js
-var firstUniqChar = function(s) {
+var firstUniqChar = function (s) {
   let arr = Array(26).fill(0);
   for (let i = 0; i < s.length; i++) {
     arr[s.charCodeAt(i) - "a".charCodeAt()]++;
@@ -1045,7 +1165,7 @@ var firstUniqChar = function(s) {
 > 思路：遍历一次杂志，把字母出现次数记录在哈希表中，然后遍历一次赎金信，每一次出现字母都将对应的哈希表中次数减一，当次数小于 0 则为 false，当字母在哈希表中没出现的时候也为 false。
 
 ```js
-var canConstruct = function(ransomNote, magazine) {
+var canConstruct = function (ransomNote, magazine) {
   let hashMap = {};
   for (let i = 0; i < magazine.length; i++) {
     if (magazine[i] in hashMap) {
@@ -1077,7 +1197,7 @@ var canConstruct = function(ransomNote, magazine) {
 > 思路：首先先判断两个字符串的长度，若长度不一样则直接返回 false；然后将两字符串转化为数组进行排序，js 的`sort`方法在没有参数情况下按照 ascii 来排序，排序后再转化回字符串进行比较。时间复杂度：O(nlog n)其中 n 为 s 的长度。排序的时间复杂度为 O(nlogn)，比较两个字符串是否相等时间复杂度为 O(n)，因此总体时间复杂度为 O(nlogn)。
 
 ```js
-var isAnagram = function(s, t) {
+var isAnagram = function (s, t) {
   return s.length === t.length
     ? [...s].sort().join("") === [...t].sort().join("")
     : false;
@@ -1099,7 +1219,7 @@ var isAnagram = function(s, t) {
 > 思路：先 copy 一份数组，然后把它进行排序，然后将两个数组进行对比，将变化的连续子数组的长度返回即可。时间复杂度：O(nlogn+n)
 
 ```js
-var findUnsortedSubarray = function(nums) {
+var findUnsortedSubarray = function (nums) {
   let copy = [...nums];
   copy.sort((i, j) => i - j);
   let low = nums.length - 1;
@@ -1121,7 +1241,7 @@ var findUnsortedSubarray = function(nums) {
 > 思路：从左到右遍历数组，记录下需要被调整位置的最大值 high；从右到左遍历数组，记录下需要被调整位置的最小值 low。
 
 ```js
-var findUnsortedSubarray = function(nums) {
+var findUnsortedSubarray = function (nums) {
   let start = 0;
   let end = nums.length - 1;
   let max = nums[0];
@@ -1155,7 +1275,7 @@ var findUnsortedSubarray = function(nums) {
  * @param {number} num
  * @return {string}
  */
-var numberToWords = function(num) {
+var numberToWords = function (num) {
   // 最大就10位数
   const singles = [
     "",
@@ -1194,7 +1314,7 @@ var numberToWords = function(num) {
     "Ninety",
   ];
   const thousands = ["", "Thousand", "Million", "Billion"];
-  const recursion = function(curArr, num) {
+  const recursion = function (curArr, num) {
     if (num === 0) return;
     else if (num < 10) {
       curArr.push(singles[num] + " ");
@@ -1228,6 +1348,23 @@ var numberToWords = function(num) {
 };
 ```
 
+### leetcode 575. 分糖果
+
+给定一个**偶数**长度的数组，其中不同的数字代表着不同种类的糖果，每一个数字代表一个糖果。你需要把这些糖果**平均**分给一个弟弟和一个妹妹。返回妹妹可以获得的**最大**糖果的种类数。
+
+**法一：Set** `2021.11.1`
+
+使用 Set 找到种类数量，如果这个数量大于总数量的一半，则返回总数量一半；若小于，则直接返回种类数量
+
+```js
+var distributeCandies = function (candyType) {
+  let set = new Set(candyType);
+  let size = set.size;
+  if (size >= candyType.length / 2) return candyType.length / 2;
+  else return size;
+};
+```
+
 ## 链表
 
 ### leetcode234.回文链表
@@ -1250,7 +1387,7 @@ var numberToWords = function(num) {
  * @param {ListNode} head
  * @return {boolean}
  */
-var isPalindrome = function(head) {
+var isPalindrome = function (head) {
   let slow = head;
   let pre = null;
   let reverse = null;
@@ -1291,7 +1428,7 @@ var isPalindrome = function(head) {
  * @param {ListNode} head
  * @return {ListNode}
  */
-var reverseList = function(head) {
+var reverseList = function (head) {
   let pre = null;
   let current = head;
   if (!head) return head;
@@ -1329,7 +1466,7 @@ var reverseList = function(head) {
  * @param {ListNode} l2
  * @return {ListNode}
  */
-var mergeTwoLists = function(l1, l2) {
+var mergeTwoLists = function (l1, l2) {
   if (l1 === null) return l2;
   if (l2 === null) return l1;
   let head = new ListNode(-1);
@@ -1377,7 +1514,7 @@ var mergeTwoLists = function(l1, l2) {
  * @param {number} k
  * @return {ListNode}
  */
-var getKthFromEnd = function(head, k) {
+var getKthFromEnd = function (head, k) {
   if (!head.next) return head;
   let traverse = head;
   let length = 1;
@@ -1399,7 +1536,7 @@ var getKthFromEnd = function(head, k) {
 > 思路：上述的做法实际上遍历了 2 次链表，感觉还可以再优化一下。看了一下各路大佬的题解，发现一种快慢指针法只需要遍历一次链表即可。关键是让快指针先移动 k-1 步，这样的话快慢指针就分别指向所求链表的尾、头节点了。
 
 ```js
-var getKthFromEnd = function(head, k) {
+var getKthFromEnd = function (head, k) {
   if (!head) return null;
   let fast = head;
   let slow = head;
@@ -1428,7 +1565,7 @@ var getKthFromEnd = function(head, k) {
  * @param {ListNode} head
  * @return {ListNode}
  */
-var middleNode = function(head) {
+var middleNode = function (head) {
   if (!head.next) return head;
   let slow = head;
   let fast = head;
@@ -1616,7 +1753,7 @@ class LRUCache {
  * @param {ListNode} head
  * @return {boolean}
  */
-var hasCycle = function(head) {
+var hasCycle = function (head) {
   let pos = -1;
   let index = 0;
   let current = head;
@@ -1646,7 +1783,7 @@ var hasCycle = function(head) {
  * @param {ListNode} head
  * @return {boolean}
  */
-var hasCycle = function(head) {
+var hasCycle = function (head) {
   let pos = -1;
   let index = 0;
   let slow = head;
@@ -1674,7 +1811,7 @@ var hasCycle = function(head) {
 > 第一次的代码是这样的：
 
 ```js
-var removeNthFromEnd = function(head, n) {
+var removeNthFromEnd = function (head, n) {
   if (!head) return head;
   let slower = null;
   let slow = head;
@@ -1732,14 +1869,14 @@ if (!head) return head
  * @param {ListNode} l2
  * @return {ListNode}
  */
-var TenPowers = function(n) {
+var TenPowers = function (n) {
   let res = 1;
   for (let i = 0; i < n; i++) {
     res *= 10;
   }
   return res;
 };
-var addTwoNumbers = function(l1, l2) {
+var addTwoNumbers = function (l1, l2) {
   let n = 0;
   let r1 = 0;
   let r2 = 0;
@@ -1769,7 +1906,7 @@ var addTwoNumbers = function(l1, l2) {
 > 果不其然，这种方法被[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]教做人了。js 表示这个数字是 1e+30，所以在变成数组的时候，字母也进去了。最后看了一下评论，别人用小学数学的方式，一位位的相加，引入进位 carry 来表示进位。同时创建新链表，这样就可以避免超出精度的问题了。
 
 ```js
-var addTwoNumbers = function(l1, l2) {
+var addTwoNumbers = function (l1, l2) {
   let carry = 0;
   let dummy = new ListNode(0);
   let current = dummy;
@@ -1805,7 +1942,7 @@ var addTwoNumbers = function(l1, l2) {
  * @param {ListNode} head
  * @return {ListNode}
  */
-var deleteDuplicates = function(head) {
+var deleteDuplicates = function (head) {
   let pre = null;
   let current = head;
   let hashMap = {};
@@ -1826,7 +1963,7 @@ var deleteDuplicates = function(head) {
 > 其实上面的代码有点复杂了。因为题目规定是有序链表，所以可以直接一个节点遍历到底就完事了~
 
 ```js
-var deleteDuplicates = function(head) {
+var deleteDuplicates = function (head) {
   let current = head;
   while (current && current.next) {
     if (current.val === current.next.val) {
@@ -1847,7 +1984,7 @@ var deleteDuplicates = function(head) {
 > 思路：最简单也是最容易想到的方法，就是遍历一次 A 链表，把所有节点存在哈希表中，然后再遍历 B 链表，并判断是否存在于哈希表内，若存在则相交，不存在则不相交。
 
 ```js
-var getIntersectionNode = function(headA, headB) {
+var getIntersectionNode = function (headA, headB) {
   const visited = new Set();
   let temp = headA;
   while (temp !== null) {
@@ -1886,7 +2023,7 @@ var getIntersectionNode = function(headA, headB) {
   因此返回 A 即可。
 
 ```js
-var getIntersectionNode = function(headA, headB) {
+var getIntersectionNode = function (headA, headB) {
   if (headB === null || headA === null) return null;
   let a = headA;
   let b = headB;
@@ -1911,7 +2048,7 @@ var getIntersectionNode = function(headA, headB) {
 > 思路：首先看到有点复杂的重排，我首先想到就是暴力解法，首先遍历一次链表并用数组存储节点。然后再分别从头、尾开始遍历，逐步从数组中找到相应的节点并重排链表。该做法的时间和空间复杂度都是 **O(n)**
 
 ```js
-var reorderList = function(head) {
+var reorderList = function (head) {
   if (head === null) return;
   let current = head;
   let hashMap = [];
@@ -1968,7 +2105,7 @@ function reverseList(head) {
   }
   return pre;
 }
-var reorderList = function(head) {
+var reorderList = function (head) {
   if (head === null) return;
   let mid = findMid(head);
   /* 反转后半链表 */
@@ -2025,7 +2162,7 @@ var reorderList = function(head) {
  * @param {number} n
  * @return {string}
  */
-var countAndSay = function(n) {
+var countAndSay = function (n) {
   let arr = ["0", "1"];
   for (let i = 2; i <= n; i++) {
     let prev = arr[i - 1];
@@ -2059,7 +2196,7 @@ var countAndSay = function(n) {
  * @param {string} s
  * @return {boolean}
  */
-var isPalindrome = function(s) {
+var isPalindrome = function (s) {
   let arr = s.toLowerCase().match(/[a-z0-9]+/g);
   if (!arr) return true;
   let str = arr.join("");
@@ -2088,7 +2225,7 @@ var isPalindrome = function(s) {
 > 思路：先用 sort()将数组内字符串按照 ascii 进行排序，排序后只需找到头尾的公共前缀即可。
 
 ```js
-var longestCommonPrefix = function(strs) {
+var longestCommonPrefix = function (strs) {
   strs.sort();
   let start = strs[0];
   let end = strs[strs.length - 1];
@@ -2117,7 +2254,7 @@ var longestCommonPrefix = function(strs) {
 > 思路：我们先获取一个前缀和数组，这个数组是必然递增的；如果长度为 n 的连续子数组和大于 target 的话，那么 n+1 长度的子数组和也必定大于 target，因此我们只需要从 0 开始找到符合条件小于的 n，即是答案。
 
 ```js
-var minSubArrayLen = function(target, nums) {
+var minSubArrayLen = function (target, nums) {
   let prefix = [nums[0]];
   for (let i = 1; i < nums.length; i++) {
     prefix[i] = prefix[i - 1] + nums[i];
@@ -2142,7 +2279,7 @@ var minSubArrayLen = function(target, nums) {
 > ![](../imgs/leetcode209.gif)
 
 ```js
-var minSubArrayLen = function(target, nums) {
+var minSubArrayLen = function (target, nums) {
   let start = (end = 0);
   let res = Infinity;
   let sum = 0;
@@ -2168,7 +2305,7 @@ var minSubArrayLen = function(target, nums) {
 > 思路：创建一个类似上题的滑动窗口，且每次把末尾指向的字符添加在哈希表中，哈希表存储字符所在的下标，当窗口扩大的时候遇到相同的字符，则将窗口缩小到第一个相同字符的后一位位置，并且更新长度最小值和哈希表。
 
 ```js
-var lengthOfLongestSubstring = function(s) {
+var lengthOfLongestSubstring = function (s) {
   let map = {};
   let start = 0;
   let res = 0;
@@ -2195,7 +2332,7 @@ var lengthOfLongestSubstring = function(s) {
 > 思路：先遍历一次字符串，把每个字符出现次数记录在哈希表中，然后再遍历哈希表，将所有偶数次数加起来，把所有奇数次数-1 加起来(相当于偶数)，最后加 1 是因为要把最大的奇数次数的字符全部加在回文串中间，所以不需要-1.
 
 ```js
-var longestPalindrome = function(s) {
+var longestPalindrome = function (s) {
   let map = {};
   for (let i = 0; i < s.length; i++) {
     let char = s.charAt(i);
@@ -2229,7 +2366,7 @@ var longestPalindrome = function(s) {
 > 思路：首先用`trim`把首尾的空格都去掉了，然后用`split`方法根据空格分隔成数组，再遍历数组，遍历到字符串则加 1 即可。
 
 ```js
-var countSegments = function(s) {
+var countSegments = function (s) {
   if (s.trim().length === 0) return 0;
   let arr = s.trim().split(" ");
   let res = 0;
@@ -2246,7 +2383,7 @@ var countSegments = function(s) {
 > 思路：上面的方法感觉太繁琐，直接一次遍历字符串将单词给挑出来即可。
 
 ```js
-var countSegments = function(s) {
+var countSegments = function (s) {
   let res = 0;
   for (let i = 0; i < s.length; i++) {
     if (s[i] !== " " && (i === 0 || s[i - 1] === " ")) res++;
@@ -2264,7 +2401,7 @@ var countSegments = function(s) {
 > 思路：从定义 n=s.length 长度的字串开始，依次长度递减，找到第一个符合条件的子串，即是最长回文子串。
 
 ```js
-var longestPalindrome = function(s) {
+var longestPalindrome = function (s) {
   let n = s.length;
   while (n > 1) {
     for (let i = 0; i < s.length - n + 1; i++) {
@@ -2278,7 +2415,7 @@ var longestPalindrome = function(s) {
   return s[0];
 };
 // 判断是否为回文串 ： 双指针法
-var isPalindromic = function(s) {
+var isPalindromic = function (s) {
   let start = 0;
   let end = s.length - 1;
   while (start <= end) {
@@ -2290,6 +2427,58 @@ var isPalindromic = function(s) {
     }
   }
   return true;
+};
+```
+
+### 500. 键盘行
+
+判断字符串是否能在键盘中用同一行的字母输出。
+
+```js
+var findWords = function (words) {
+  let str1 = "qwertyuiop";
+  let str2 = "asdfghjkl";
+  let str3 = "zxcvbnm";
+  let res = [];
+  for (let word of words) {
+    let t1 = false;
+    let t2 = false;
+    let t3 = false;
+    for (let ch of word) {
+      if (str1.includes(ch.toLowerCase())) {
+        if (t2 || t3) {
+          t1 = false;
+          t2 = false;
+          t3 = false;
+          break;
+        }
+        t1 = true;
+        continue;
+      }
+      if (str2.includes(ch.toLowerCase())) {
+        if (t1 || t3) {
+          t1 = false;
+          t2 = false;
+          t3 = false;
+          break;
+        }
+        t2 = true;
+        continue;
+      }
+      if (str3.includes(ch.toLowerCase())) {
+        if (t1 || t2) {
+          t1 = false;
+          t2 = false;
+          t3 = false;
+          break;
+        }
+        t3 = true;
+        continue;
+      }
+    }
+    if (t1 || t2 || t3) res.push(word);
+  }
+  return res;
 };
 ```
 
@@ -2308,7 +2497,7 @@ var isPalindromic = function(s) {
  * @param {string[][]} paths
  * @return {string}
  */
-var destCity = function(paths) {
+var destCity = function (paths) {
   let map = {};
   for (let i = 0; i < paths.length; i++) {
     map[paths[i][0]] = paths[i][1];
@@ -2339,7 +2528,7 @@ var destCity = function(paths) {
  * @param {string} s
  * @return {boolean}
  */
-var isValid = function(s) {
+var isValid = function (s) {
   let stack = [];
   let map = new Map([
     [")", "("],
@@ -2398,7 +2587,7 @@ nums1  中数字  x  的下一个更大元素是指  x  在  nums2  中�
 > 思路：先遍历 num2，将数据以及其索引记录在哈希表中。然后再遍历 num1，取出哈希表中对应索引用来内嵌遍历 num2。
 
 ```js
-var nextGreaterElement = function(nums1, nums2) {
+var nextGreaterElement = function (nums1, nums2) {
   let res = [];
   let map = {};
   for (let i = 0; i < nums2.length; i++) {
@@ -2426,7 +2615,7 @@ var nextGreaterElement = function(nums1, nums2) {
 对于这道题，我们需要遍历`nums2`数组，并且维护一个从大到小的一个单调栈。如果`nums2[i]<=nums2[stack.top]`，则继续入栈，因为没有找到比栈顶更大的元素；若`nums2[i]>nums2[stack.top]`，即满足题意，则将栈顶元素弹栈，并且用哈希表记录下来。这里要有一个循环，直到将单调栈中满足题意的所有元素弹出为止。
 
 ```js
-var nextGreaterElement = function(nums1, nums2) {
+var nextGreaterElement = function (nums1, nums2) {
   let stack = [];
   let map = new Map();
   for (let i = 0; i < nums2.length; i++) {
@@ -2455,13 +2644,13 @@ var nextGreaterElement = function(nums1, nums2) {
  * @param {TreeNode} root
  * @return {number[]}
  */
-var recursion = function(node, res) {
+var recursion = function (node, res) {
   if (node === null) return res;
   res.push(node.val);
   recursion(node.left, res);
   recursion(node.right, res);
 };
-var preorderTraversal = function(root) {
+var preorderTraversal = function (root) {
   let res = [];
   recursion(root, res);
   return res;
@@ -2473,7 +2662,7 @@ var preorderTraversal = function(root) {
 > 思路：迭代法的思路需要用到栈，我们需要以右左的顺序入栈，这样一来弹栈的时候顺序就变成了中左右。
 
 ```js
-var preorderTraversal = function(root, res = []) {
+var preorderTraversal = function (root, res = []) {
   if (!root) return res;
   let stack = [root];
   let cur = null;
@@ -2497,13 +2686,13 @@ var preorderTraversal = function(root, res = []) {
  * @param {TreeNode} root
  * @return {number[]}
  */
-var recursion = function(node, res) {
+var recursion = function (node, res) {
   if (node === null) return res;
   recursion(node.left, res);
   res.push(node.val);
   recursion(node.right, res);
 };
-var inorderTraversal = function(root) {
+var inorderTraversal = function (root) {
   let res = [];
   recursion(root, res);
   return res;
@@ -2517,7 +2706,7 @@ var inorderTraversal = function(root) {
 ![](../imgs/algorithm1.gif)
 
 ```js
-var inorderTraversal = function(root, res = []) {
+var inorderTraversal = function (root, res = []) {
   if (root === null) return res;
   let stack = [];
   let cur = root;
@@ -2544,13 +2733,13 @@ var inorderTraversal = function(root, res = []) {
  * @param {TreeNode} root
  * @return {number[]}
  */
-var recursion = function(node, res) {
+var recursion = function (node, res) {
   if (node === null) return res;
   recursion(node.left, res);
   recursion(node.right, res);
   res.push(node.val);
 };
-var postorderTraversal = function(root) {
+var postorderTraversal = function (root) {
   let res = [];
   recursion(root, res);
   return res;
@@ -2562,7 +2751,7 @@ var postorderTraversal = function(root) {
 > 思路：先序遍历是中左右，后序遍历是左右中，因此我们需要把先序遍历的代码顺序改一下，变成中右左，最后再反转数组即可。
 
 ```js
-var postorderTraversal = function(root, res = []) {
+var postorderTraversal = function (root, res = []) {
   if (!root) return res;
   let stack = [root];
   let cur = null;
@@ -2590,7 +2779,7 @@ var postorderTraversal = function(root, res = []) {
  * @param {TreeNode} root
  * @return {number[][]}
  */
-var levelOrder = function(root) {
+var levelOrder = function (root) {
   if (!root) return [];
   let queue = [root];
   let res = [];
@@ -2620,7 +2809,7 @@ var levelOrder = function(root) {
 > 思路：如上题，只要改一改 res 相关的代码即可。
 
 ```js
-var maxDepth = function(root) {
+var maxDepth = function (root) {
   if (!root) return [];
   let queue = [root];
   let res = 0;
@@ -2640,7 +2829,7 @@ var maxDepth = function(root) {
 **法二：深度优先搜索** `2021.7.20`
 
 ```js
-var maxDepth = function(root) {
+var maxDepth = function (root) {
   if (!root) return 0;
   return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
 };
@@ -2655,7 +2844,7 @@ var maxDepth = function(root) {
 > 思路：我刚开始的时候，总是写不出递归的代码。后来整理了以下思路：首先判断根节点是否为空，然后写一个比较的函数(左，右):首先判断左右是否相等，然后再判断左树的左节点是否等于右树的右节点、左树的右节点是否等于右树的左节点，只有当这些都满足的情况下，才返回 true。
 
 ```js
-var isSymmetric = function(root) {
+var isSymmetric = function (root) {
   if (!root) return true;
   return compare(root.left, root.right);
 };
@@ -2695,7 +2884,7 @@ function compare(left, right) {
 > 思路：看到二叉树首先想到的就是递归。我们先从根节点开始，判断临界情况，然后交换左右子树。这就是一次翻转的操作，只要依次递归下去就 OK 了
 
 ```js
-var invertTree = function(root) {
+var invertTree = function (root) {
   if (!root) return root;
   let tree = root.left;
   root.left = root.right;
@@ -2727,7 +2916,7 @@ var invertTree = function(root) {
 > 思路：我们每次遍历树节点的时候，都把 targetSum 减去相应的值。若为 0 且当前节点为叶子节点的时候则返回 true，若不是叶子的时候，则继续遍历左右子树，注意这里用并集。当当前节点为 NULL 的时候，则只有可能是上一节点只有一个度，因此不是叶子直接返回 false。
 
 ```js
-var hasPathSum = function(root, targetSum) {
+var hasPathSum = function (root, targetSum) {
   if (!root) return false;
   targetSum -= root.val;
   if (!root.left && !root.right) {
@@ -2750,7 +2939,7 @@ var hasPathSum = function(root, targetSum) {
 > 思路：对比传入节点的值和 val，若等于则返回该节点，小于则继续递归左子树，大于则继续递归右子树，退出条件：当传入节点为 NULL 的时候，返回 NULL 。写多了递归一下子就写出来了~~
 
 ```js
-var searchBST = function(root, val) {
+var searchBST = function (root, val) {
   if (!root) return null;
   if (root.val === val) return root;
   else if (val < root.val) return searchBST(root.left, val);
@@ -2767,7 +2956,7 @@ var searchBST = function(root, val) {
 > 思路：遍历该树，记录 cur 和 prev 指针，当 cur 为 null 的时候，此时 cur 的位置就是应该插入节点的位置。根据此时 cur 在 prev 的左边还是右边来进行插入操作。临界情况：当 root 为空的时候，直接将新节点赋值给 root
 
 ```js
-var insertIntoBST = function(root, val) {
+var insertIntoBST = function (root, val) {
   let newNode = new TreeNode(val);
   if (!root) {
     root = newNode;
@@ -2811,7 +3000,7 @@ var insertIntoBST = function(root, val) {
 > - 若 p 或者 q 等于 root 的值，则 root 就是它们的祖先
 
 ```js
-var lowestCommonAncestor = function(root, p, q) {
+var lowestCommonAncestor = function (root, p, q) {
   if (!root) return null;
   if (p.val > q.val) {
     let temp = p;
@@ -2836,11 +3025,11 @@ var lowestCommonAncestor = function(root, p, q) {
 > 思路：遍历二叉树，同时把遍历到的元素 val 加入到哈希表中，判断 k-当前节点 val 在哈希表中是否存在，存在则返回 true
 
 ```js
-var findTarget = function(root, k) {
+var findTarget = function (root, k) {
   let map = {};
   return recursion(root, map, k);
 };
-var recursion = function(root, map, k) {
+var recursion = function (root, map, k) {
   if (!root) return false;
   //to do
   if (k - root.val in map) return true;
@@ -2856,7 +3045,7 @@ var recursion = function(root, map, k) {
 > 思路：RT
 
 ```js
-var isValidBST = function(root) {
+var isValidBST = function (root) {
   let num = -Infinity;
   let stack = [];
   let cur = root;
@@ -2887,7 +3076,7 @@ var isValidBST = function(root) {
 > 众所周知，对于二叉搜索树而言中序遍历形成的是一个顺序数组，那么只需要返回第`k-1`个下表元素即可。
 
 ```js
-var kthSmallest = function(root, k) {
+var kthSmallest = function (root, k) {
   let nums = [];
   recursion(root, nums);
   return nums[k - 1];
@@ -3040,7 +3229,7 @@ class WordDictionary {
  * @param {number[]} s
  * @return {number}
  */
-var findContentChildren = function(g, s) {
+var findContentChildren = function (g, s) {
   if (s.length === 0) return 0;
   g.sort((i, j) => i - j);
   s.sort((i, j) => i - j);
@@ -3073,7 +3262,7 @@ var findContentChildren = function(g, s) {
 > 思路：维护一个变量 farthest 来表明能到达的最远距离（这里是从 1 算起，也就是下标为 0 的时候，位置是 1，若位置 1 能跳 2 格，则到达的最远距离为位置 3），**这里的最远距离指的是最大覆盖范围，贪心算法就是要每一步都获取最大的覆盖范围，看所有覆盖范围加起来能不能到达终点**。首先进行一次判断临界情况。然后在最远距离的前提下遍历数组，对 farthest 进行更新，以及判断，如果 farthest 超出了数组长度即返回 true，没必要遍历了。
 
 ```js
-var canJump = function(nums) {
+var canJump = function (nums) {
   let farthest = 0 + nums[0] + 1;
   let target = nums.length;
   if (farthest >= target) return true;
@@ -3088,7 +3277,7 @@ var canJump = function(nums) {
 这样看起来似乎有点繁琐，我们不如换个思路，我们遍历整个数组，同样维护一个 farthest（下标）,只需要判断 i>farthest 的情况后进行返回 false 即可。
 
 ```js
-var canJump = function(nums) {
+var canJump = function (nums) {
   let farthest = 0;
   let target = nums.length;
   for (let i = 0; i < target; i++) {
@@ -3116,7 +3305,7 @@ var canJump = function(nums) {
  * @param {number[][]} intervals
  * @return {number}
  */
-var eraseOverlapIntervals = function(intervals) {
+var eraseOverlapIntervals = function (intervals) {
   intervals.sort((a, b) => a[1] - b[1]); //排序
   if (intervals.length <= 1) return 0; // 临界情况
   let count = 0;
@@ -3148,7 +3337,7 @@ var eraseOverlapIntervals = function(intervals) {
 代码优化后：
 
 ```js
-var eraseOverlapIntervals = function(intervals) {
+var eraseOverlapIntervals = function (intervals) {
   intervals.sort((a, b) => a[1] - b[1]);
   if (intervals.length <= 1) return 0;
   let count = 1;
@@ -3180,7 +3369,7 @@ var eraseOverlapIntervals = function(intervals) {
  * @param {number[][]} points
  * @return {number}
  */
-var findMinArrowShots = function(points) {
+var findMinArrowShots = function (points) {
   if (points.length === 0) return 0;
   const sortArr = points.sort((a, b) => a[1] - b[1]);
   let count = 1;
@@ -3220,7 +3409,7 @@ var findMinArrowShots = function(points) {
  * @return {string[]}
  */
 
-var addOperators = function(num, target) {
+var addOperators = function (num, target) {
   /* k为开始遍历的索引 */
   function dfs(k, prev, cur, str) {
     if (k === len) {
@@ -3251,6 +3440,65 @@ var addOperators = function(num, target) {
 };
 ```
 
+### leetcode 301. 删除无效的括号
+
+给你一个由若干括号和字母组成的字符串 `s` ，删除最小数量的无效括号，使得输入的字符串有效。
+
+返回所有可能的结果。答案可以按 `任意顺序` 返回。
+
+**法一：dfs 回溯+剪枝** `2021.10.27`
+
+> 思路：首先记录一个比分：匹配到左括号则+1 分，右括号则-1 分，记录一个最大比分`maxSroce`即首先遇到全部为左括号的情况。开始 dfs 遍历：
+>
+> - 剪枝：当前比分`sroce`小于 0 或者大于`maxSroce`
+> - 遍历到末尾的时候，判断`sroce===0&&str.length>=len`，如果当前长度大于 len（len 是不断匹配成功案例的长度），则更新 len。然后推进`set`中
+> - 遍历到左、右括号的时候，可以选择不加或者加
+> - 遍历到字符的时候，直接拼接上即可
+
+```js
+/**
+ * @param {string} s
+ * @return {string[]}
+ */
+var removeInvalidParentheses = function (s) {
+  let maxScore = 0;
+  let n = s.length - 1;
+  let l = 0;
+  let r = 0;
+  let len = 0; // 最长的字符串即删除最小字符
+  let set = new Set();
+  for (let ch of s) {
+    if (ch === "(") l++;
+    else if (ch === ")") r++;
+  }
+  maxScore = Math.max(l, r);
+  dfs(0, "", 0);
+  return [...set];
+  function dfs(i, str, score) {
+    if (score < 0 || score > maxScore) return;
+    if (i == n) {
+      if (score === 0 && str.length >= len) {
+        if (str.length > len) {
+          set.clear();
+        }
+        len = str.length;
+        set.add(str);
+      }
+      return;
+    }
+    if (s[i] == "(") {
+      dfs(i + 1, str + "(", score + 1);
+      dfs(i + 1, str, score);
+    } else if (s[i] === ")") {
+      dfs(i + 1, str + ")", score - 1);
+      dfs(i + 1, str, score);
+    } else {
+      dfs(i + 1, str + s[i], score);
+    }
+  }
+};
+```
+
 ### 653. 两数之和 IV - 输入 BST （树）
 
 ### 638. 大礼包
@@ -3268,7 +3516,7 @@ var addOperators = function(num, target) {
 > 思路：首先实现一个 dfs 的函数，主要逻辑是首先判断如果全部单买的话，需要的全部 Cost，然后记录下总消费额 ans 的最小值。边界条件：当 Cost 为 0 的时候则已经买齐了。若没买齐，则遍历礼包，判断购买礼包不会导致超过需要数量，然后买礼包后继续 dfs。
 
 ```js
-var shoppingOffers = function(price, special, needs) {
+var shoppingOffers = function (price, special, needs) {
   let ans = Infinity;
   function dfs(needs, cost) {
     //计算如果单买，需要的全部Cost
@@ -3295,6 +3543,109 @@ var shoppingOffers = function(price, special, needs) {
 
 ## 动态规划
 
+动态规划一般具有**没有后效性**，即只关注状态的值而不需要关注状态是如何转移过来的。而且是不需要遍历完所有情况的。我们需要对具体问题确定具体的状态转移方程。
+
+### 62. 不同路径
+
+一个机器人位于一个 `m x n`  网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+问总共有多少条不同的路径？
+
+**法一：DP** `2021.10.28`
+
+```js
+var uniquePaths = function (m, n) {
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(m).fill(0);
+  }
+  dp[0][0] = 1;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (i > 0 && j > 0) {
+        dp[i][j] = dp[i][j - 1] + dp[i - 1][j];
+      } else {
+        dp[i][j] = 1;
+      }
+    }
+  }
+  return dp[n - 1][m - 1];
+};
+```
+
+### leetcode 63. 不同路径 II
+
+现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？
+
+**法一：DP** `2021.10.28`
+
+> 思路：与上题相比，状态转移方程有些变化和需要将有障碍物的格子的可到达方案设为 0 即可
+
+```js
+var uniquePathsWithObstacles = function (obstacleGrid) {
+  let n = obstacleGrid.length;
+  let m = obstacleGrid[0].length;
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(m).fill(0);
+  }
+  if (!obstacleGrid[0][0]) dp[0][0] = 1;
+  else return 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (obstacleGrid[i][j] === 1) {
+        dp[i][j] = 0;
+        continue;
+      }
+      if (i > 0 && j > 0) {
+        dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+      } else if (j > 0) {
+        dp[i][j] = dp[i][j - 1];
+      } else if (i > 0) {
+        dp[i][j] = dp[i - 1][j];
+      }
+    }
+  }
+  return dp[n - 1][m - 1];
+};
+```
+
+### leetcode 64. 最小路径和
+
+给定一个包含非负整数的 `m x n` 网格 `grid` ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+
+说明：每次只能向下或者向右移动一步。
+
+**DP** `2021.11.1`
+
+思路与上题相似，这里建立一个 dp 二维数组用来记录到达每一格的最小路径和。这里不一样的是当遍历到`i>0&&j>0`的时候，需要找到左、上两个中的最小值，而不是把他们相加。
+
+```js
+var minPathSum = function (grid) {
+  let m = grid[0].length;
+  let n = grid.length;
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(m).fill(0);
+  }
+  dp[0][0] = grid[0][0];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (i > 0 && j > 0) {
+        dp[i][j] += Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+      } else if (i > 0) {
+        dp[i][j] += grid[i][j] + dp[i - 1][j];
+      } else if (j > 0) {
+        dp[i][j] += grid[i][j] + dp[i][j - 1];
+      }
+    }
+  }
+  return dp[n - 1][m - 1];
+};
+```
+
 ### 714. Best Time to Buy and Sell Stock with Transaction Fee
 
 给定一个整数数组  prices，其中第  i  个元素代表了第  i  天的股票价格 ；整数  fee 代表了交易股票的手续费用。
@@ -3315,7 +3666,7 @@ var shoppingOffers = function(price, special, needs) {
  * @param {number} fee
  * @return {number}
  */
-var maxProfit = function(prices, fee) {
+var maxProfit = function (prices, fee) {
   const n = prices.length;
   let dp = new Array(n);
   for (let i = 0; i < n; i++) {
@@ -3347,7 +3698,7 @@ var maxProfit = function(prices, fee) {
 > 思路：首先先说一下为什么用 Set，因为用 Set 寻找指定元素的时间复杂度为 O(1),而数组的话时间复杂度是 O(n)。主要思路是遍历所有的元素，最外层循环从头开始遍历，中层循环从后一个元素开始遍历，计算这 2 个元素的和，判断如果 Set 中含有这个和的元素（即符合斐波那契原则），则 cur++，这 3 个元素**之间**向前移动。并且记录长度的最大值
 
 ```js
-var lenLongestFibSubseq = function(arr) {
+var lenLongestFibSubseq = function (arr) {
   let length = arr.length;
   let max = 2;
   let set = new Set(arr);
@@ -3375,7 +3726,7 @@ var lenLongestFibSubseq = function(arr) {
 > 思路：_这个思路我想不出来~~_ 我定义一个网络 dp，dp[i][j]为末尾是 arr[I]和 arr[j]的斐波那契式子序列的最大长度。比如说 dp[5][8]是[1,2,3,5,8]的长度为 5，然后我只需要找到 arr[j]-arr[i]是否存在于数组中，记为 arr[k],那么我们得到一个状态转移方程：**dp[k][i]+1=dp[i][j]**。
 
 ```js
-var lenLongestFibSubseq = function(arr) {
+var lenLongestFibSubseq = function (arr) {
   let length = arr.length;
   let max = 2;
   let dp = Array.from({ length: arr.length }, () =>
@@ -3412,7 +3763,7 @@ var lenLongestFibSubseq = function(arr) {
  * @param {number} n
  * @return {number}
  */
-var arrangeCoins = function(n) {
+var arrangeCoins = function (n) {
   let sum = 0;
   for (let k = 1; k < n; k++) {
     sum += k;
@@ -3434,7 +3785,7 @@ var arrangeCoins = function(n) {
 请实现一个函数，把字符串 s 中的每个空格替换成"%20"。 `2021.8.10`
 
 ```js
-var replaceSpace = function(s) {
+var replaceSpace = function (s) {
   return s.replace(/ /g, "%20");
 };
 ```
@@ -3448,12 +3799,12 @@ var replaceSpace = function(s) {
  * @param {ListNode} head
  * @return {number[]}
  */
-var reversePrint = function(head) {
+var reversePrint = function (head) {
   let res = [];
   rescurion(head, res);
   return res;
 };
-var rescurion = function(node, res) {
+var rescurion = function (node, res) {
   if (!node) {
     return;
   }
@@ -3503,7 +3854,7 @@ class CQueue {
 > 思路：首先看到这题，很容易的就想到用递归。但是却超出时间限制了。理由很简单，递归的时候需要计算许许多多重复计算过的数据。因此，我们可以用一个数组/哈希表来保存计算过的数据。
 
 ```js
-var fib = function(n) {
+var fib = function (n) {
   let arr = new Array(n + 1);
   arr[0] = 0;
   arr[1] = 1;
@@ -3525,7 +3876,7 @@ var fib = function(n) {
 > 思路：一级台阶只有 1 种跳法，二级台阶有 2 种跳法，而三级台阶的情况，我们反向思考，（3-1=2）和(3-2=1) 有两种情况能跳上，因此我们只需要考虑 1、2 级台阶的跳法即可，即三级台阶=1、2 级台阶跳法之和。因此可以总结出规律了。
 
 ```js
-var climbStairs = function(n) {
+var climbStairs = function (n) {
   let arr = new Array(n + 1);
   arr[1] = 1;
   arr[2] = 2;
@@ -3552,7 +3903,7 @@ var climbStairs = function(n) {
  * @param {string} word
  * @return {boolean}
  */
-var exist = function(board, word) {
+var exist = function (board, word) {
   let mark = [];
   const row = board.length;
   const col = board[0].length;
@@ -3569,7 +3920,7 @@ var exist = function(board, word) {
   }
   return false;
 };
-var dfs = function(board, word, i, j, mark, len) {
+var dfs = function (board, word, i, j, mark, len) {
   const row = board.length;
   const col = board[0].length;
   if (len === word.length) return true;
@@ -3604,14 +3955,14 @@ B 是 A 的子结构， 即 A 中有出现和 B 相同的结构和节点值。
 > 思路：首先判断如果 A 或者 B 有一个是空，则直接返回 false(特殊情况条件)。那么要判断 B 是否是 A 的子树，一般是从 A、B 的根节点开始遍历往下，当 B 为空的时候则 true。除此之外，还需要把这个遍历操作，针对 A 的所有节点都进行一次。因此，**这实际上是运用了 2 种树的遍历**。
 
 ```js
-var isSubStructure = function(A, B) {
+var isSubStructure = function (A, B) {
   if (!B || !A) return false;
   // 第一层遍历，遍历整个A树
   return (
     isSubStructure(A.left, B) || isSubStructure(A.right, B) || iscursion(A, B)
   );
 };
-var iscursion = function(a, b) {
+var iscursion = function (a, b) {
   // 第二层遍历，判断是否为子树
   if (!b) return true;
   if (!a && b) return false;
@@ -3629,7 +3980,7 @@ var iscursion = function(a, b) {
 > 思路：首先遍历一遍原链表，遍历过程中创建新节点并存储在哈希表中。第二次遍历原链表的时候，取出对应在哈希表中的新节点，然后给新节点的指针赋值即可。
 
 ```js
-var copyRandomList = function(head) {
+var copyRandomList = function (head) {
   let cur = head;
   let map = new Map();
   while (cur) {
@@ -3655,7 +4006,7 @@ var copyRandomList = function(head) {
 > 思路：只能向下或者向右走，那么我们全部遍历一次，判断各种情况，采用逐步累加的方式，把每一种情况的总价值都记录在矩阵里。
 
 ```js
-var maxValue = function(grid) {
+var maxValue = function (grid) {
   const row = grid.length;
   const col = grid[0].length;
   let i = 0;
@@ -3683,7 +4034,7 @@ var maxValue = function(grid) {
 **法一：字符串方法运用** `2021.8.11`
 
 ```js
-var reverseLeftWords = function(s, n) {
+var reverseLeftWords = function (s, n) {
   return s.substr(n) + s.substring(0, n);
 };
 ```
@@ -3713,7 +4064,7 @@ var reverseLeftWords = function(s, n) {
 > 思路：外层遍历数组，内层遍历窗口内数据，找到最大值并记录下来。
 
 ```js
-var maxSlidingWindow = function(nums, k) {
+var maxSlidingWindow = function (nums, k) {
   if (nums.length === 0) return [];
   let res = [];
   for (let i = 0; i < nums.length - k + 1; i++) {
@@ -3775,7 +4126,7 @@ const maxSlidingWindow = (nums, k) => {
 > 思路：简单二分。
 
 ```js
-var peakIndexInMountainArray = function(arr) {
+var peakIndexInMountainArray = function (arr) {
   let l = 0;
   let r = arr.length - 1;
   let mid = Math.floor((l + r) / 2);
