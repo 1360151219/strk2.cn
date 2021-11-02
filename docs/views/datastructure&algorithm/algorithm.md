@@ -1367,81 +1367,127 @@ var distributeCandies = function (candyType) {
 
 ## 链表
 
-### leetcode234.回文链表
+### leetcode 2.两数相加 `2021.7.9`
 
-**问题**：请判断一个链表是否为回文链表。
+给你两个   非空 的链表，表示两个非负的整数。它们每位数字都是按照   逆序   的方式存储的，并且每个节点只能存储   一位   数字.请你将两个数相加，并以相同形式返回一个表示和的链表。
+你可以假设除了数字 0 之外，这两个数都不会以 0  开头。
 
-> 思路：利用快慢指针，慢指针一次走一步，快指针一次走两步。对于奇数链表，当快指针走到尾节点的时候，慢指针走到中间节点；对于偶数链表，当快指针走到倒数第二个节点的时候，慢指针走到前半段的尾节点处。同时，在慢指针走的时候讲前半段链表反转。（如果是奇数链表，慢指针再走一步，因为中间节点不需要比较）然后比较前半段反转的链表和后半段链表即可。
-
-**代码实现**
+> 第一次：第一次见到这个题目，我首先想到的就是遍历两链表，然后几下其表示的两个数，然后相加，再把其转成数组再一个一个遍历转成新链表。
 
 ```js
 /**
- * Definition for singly-linked list.
- * function ListNode(val, next) {
- *     this.val = (val===undefined ? 0 : val)
- *     this.next = (next===undefined ? null : next)
- * }
+ * @param {ListNode} l1
+ * @param {ListNode} l2
+ * @return {ListNode}
  */
-/**
- * @param {ListNode} head
- * @return {boolean}
- */
-var isPalindrome = function (head) {
-  let slow = head;
-  let pre = null;
-  let reverse = null;
-  while (head && head.next) {
-    pre = slow;
-    slow = slow.next;
-    head = head.next.next;
-    /* 反转前半链表 */
-    pre.next = reverse;
-    reverse = pre;
+var TenPowers = function (n) {
+  let res = 1;
+  for (let i = 0; i < n; i++) {
+    res *= 10;
   }
-  if (head) slow = slow.next;
-  while (slow) {
-    if (slow.val === pre.val) {
-      slow = slow.next;
-      pre = pre.next;
-    } else return false;
+  return res;
+};
+var addTwoNumbers = function (l1, l2) {
+  let n = 0;
+  let r1 = 0;
+  let r2 = 0;
+  while (l1 || l2) {
+    if (l1) {
+      r1 += l1.val * TenPowers(n);
+      l1 = l1.next;
+    }
+    if (l2) {
+      r2 += l2.val * TenPowers(n);
+      l2 = l2.next;
+    }
+    n++;
   }
-  return true;
+  r = r1 + r2;
+  let arr = String(r).split("");
+  let dummy = new ListNode(-1);
+  let current = dummy;
+  for (let i = arr.length - 1; i >= 0; i--) {
+    current.next = new ListNode(arr[i]);
+    current = current.next;
+  }
+  return dummy.next;
 };
 ```
 
-### 剑指 24.反转链表
-
-> 思路：利用前中后 3 个指针，边遍历边反转。
-
-**代码实现:**
+> 果不其然，这种方法被[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]教做人了。js 表示这个数字是 1e+30，所以在变成数组的时候，字母也进去了。最后看了一下评论，别人用小学数学的方式，一位位的相加，引入进位 carry 来表示进位。同时创建新链表，这样就可以避免超出精度的问题了。
 
 ```js
-/**
- * Definition for singly-linked list.
- * function ListNode(val) {
- *     this.val = val;
- *     this.next = null;
- * }
- */
-/**
+var addTwoNumbers = function (l1, l2) {
+  let carry = 0;
+  let dummy = new ListNode(0);
+  let current = dummy;
+  while (l1 || l2) {
+    let v1 = l1 ? l1.val : 0;
+    let v2 = l2 ? l2.val : 0;
+    let sum = v1 + v2 + carry;
+    carry = Math.floor(sum / 10);
+    let newNode = new ListNode(sum % 10);
+    current.next = newNode;
+    current = current.next;
+    if (l1) l1 = l1.next;
+    if (l2) l2 = l2.next;
+  }
+  /* 注意，这里最后的时候也要判断有没有进位 */
+  if (carry) {
+    current.next = new ListNode(carry);
+  }
+  return dummy.next;
+};
+```
+
+### leetcode 19. 删除倒数第 n 个节点 `2021.7.8`
+
+> 解题思路:看到这道题的第一反应我想到的就是快慢指针，可是我一开始写的代码发现当传入的节点只有 1 个的时候，无法删除 head。
+> 第一次的代码是这样的：
+
+```js
+var removeNthFromEnd = function (head, n) {
+  if (!head) return head;
+  let slower = null;
+  let slow = head;
+  let fast = head;
+  for (let i = 0; i < n - 1; i++) {
+    fast = fast.next;
+  }
+  while (fast.next !== null) {
+    slower = slow;
+    slow = slow.next;
+    fast = fast.next;
+  }
+  //这里的slower.next在只有一个节点的时候会报错
+  slower.next = slow.next;
+  slow.next = null;
+  return head;
+};
+```
+
+后来我想起了之前做的一道 LRU 缓存的题，也是巧妙的利用了**虚拟节点**来规避了临界情况的错误，我就试着写一写。而且还可以通过调整快指针一开始走的步数，来让**slow 指针可以到达该删除节点的前驱**，这样的话就可以少创建一个指针了。代码如下。
+
+```js
  * @param {ListNode} head
+ * @param {number} n
  * @return {ListNode}
  */
-var reverseList = function (head) {
-  let pre = null;
-  let current = head;
-  if (!head) return head;
-  let ahead = head.next;
-  while (current) {
-    current.next = pre;
-    pre = current;
-    current = ahead;
-    if (ahead) {
-      ahead = ahead.next;
-    }
+var removeNthFromEnd = function(head, n) {
+if (!head) return head
+  let dummy=new ListNode(0,head)
+  let slow = dummy
+  let fast = dummy
+  for (let i = 0; i < n; i++) {
+    fast = fast.next
   }
-  return pre;
+  while (fast.next !== null) {
+    slow = slow.next
+    fast = fast.next
+  }
+  //此时slow是该删除节点的前驱
+  slow.next = slow.next.next
+  return dummy.next
 };
 ```
 
@@ -1552,29 +1598,154 @@ var getKthFromEnd = function (head, k) {
 };
 ```
 
-### leetcode 876. 求链表的中间节点 `2021.7.6`
+### 剑指 24.反转链表
 
-给定一个头结点为 head 的非空单链表，返回链表的中间结点。如果有两个中间结点，则返回第二个中间结点。
+> 思路：利用前中后 3 个指针，边遍历边反转。
 
-> 思路：因为之前刷过快慢指针的题，所以我一看到要获取中间节点，我一下子就想到了快慢指针。
+**代码实现:**
 
-**代码如下：**
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function (head) {
+  let pre = null;
+  let current = head;
+  if (!head) return head;
+  let ahead = head.next;
+  while (current) {
+    current.next = pre;
+    pre = current;
+    current = ahead;
+    if (ahead) {
+      ahead = ahead.next;
+    }
+  }
+  return pre;
+};
+```
+
+### leetcode 83.删除排序链表中重复元素
+
+`2021.7.10`
+
+> 思路：遍历链表，通过哈希表来存储每个节点的值，判断如果重复的话，则删除。
+
+**代码思路**:
 
 ```js
 /**
  * @param {ListNode} head
  * @return {ListNode}
  */
-var middleNode = function (head) {
-  if (!head.next) return head;
-  let slow = head;
-  let fast = head;
-  /* 兼容奇数和偶数长度的链表 */
-  while (fast && fast.next) {
-    slow = slow.next;
-    fast = fast.next.next;
+var deleteDuplicates = function (head) {
+  let pre = null;
+  let current = head;
+  let hashMap = {};
+  while (current) {
+    if (current.val in hashMap) {
+      pre.next = current.next;
+      current = current.next;
+    } else {
+      hashMap[current.val] = current;
+      pre = current;
+      current = current.next;
+    }
   }
-  return slow;
+  return head;
+};
+```
+
+> 其实上面的代码有点复杂了。因为题目规定是有序链表，所以可以直接一个节点遍历到底就完事了~
+
+```js
+var deleteDuplicates = function (head) {
+  let current = head;
+  while (current && current.next) {
+    if (current.val === current.next.val) {
+      current.next = current.next.next;
+    } else {
+      current = current.next;
+    }
+  }
+  return head;
+};
+```
+
+### leetcode 141. 判断链表是否有环 `2021.7.7`
+
+如果链表中有某个节点，可以通过连续跟踪 next 指针再次到达，则链表中存在环。 为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。注意：pos 不作为参数进行传递，仅仅是为了标识链表的实际情况。
+
+如果链表中存在环，则返回 true 。 否则，返回 false 。
+
+**进阶：使用 O(1)内存解决该问题**
+
+> 思路：第一次做的时候，我首先想到的是遍历链表，遍历的过程中用哈希表来存储链表，并且判断目前节点是否在哈希表中存在，若存在则代表有环，不存在则没有环，返回 false
+
+**代码实现**
+
+```js
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var hasCycle = function (head) {
+  let pos = -1;
+  let index = 0;
+  let current = head;
+  let hashMap = {};
+  while (current) {
+    for (let key in hashMap) {
+      if (hashMap[key] === current) {
+        pos = key;
+        return true;
+      }
+    }
+    hashMap[index] = current;
+    current = current.next;
+    index++;
+  }
+  return false;
+};
+```
+
+这种方法，**时间复杂度**以及**空间复杂度**都为 **O(n)**,要完成进阶的要求的话，我在题解看到一种很有趣的方法：**快慢指针**
+即快指针要是能追上慢指针，就可以知道链表中存在环，是不是特别神奇呢。
+
+**代码实现**
+
+```js
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var hasCycle = function (head) {
+  let pos = -1;
+  let index = 0;
+  let slow = head;
+  /* 当传入空链表的时候 */
+  if (!slow) return false;
+  let fast = head.next;
+  /* 当只有一个节点的时候 */
+  if (!fast) return false;
+  while (slow != fast) {
+    if (!fast || !fast.next) {
+      return false;
+    }
+    fast = fast.next.next;
+    slow = slow.next;
+    index++;
+  }
+  pos = index;
+  return true;
 };
 ```
 
@@ -1736,305 +1907,6 @@ class LRUCache {
 }
 ```
 
-### leetcode 141. 判断链表是否有环 `2021.7.7`
-
-如果链表中有某个节点，可以通过连续跟踪 next 指针再次到达，则链表中存在环。 为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。注意：pos 不作为参数进行传递，仅仅是为了标识链表的实际情况。
-
-如果链表中存在环，则返回 true 。 否则，返回 false 。
-
-**进阶：使用 O(1)内存解决该问题**
-
-> 思路：第一次做的时候，我首先想到的是遍历链表，遍历的过程中用哈希表来存储链表，并且判断目前节点是否在哈希表中存在，若存在则代表有环，不存在则没有环，返回 false
-
-**代码实现**
-
-```js
-/**
- * @param {ListNode} head
- * @return {boolean}
- */
-var hasCycle = function (head) {
-  let pos = -1;
-  let index = 0;
-  let current = head;
-  let hashMap = {};
-  while (current) {
-    for (let key in hashMap) {
-      if (hashMap[key] === current) {
-        pos = key;
-        return true;
-      }
-    }
-    hashMap[index] = current;
-    current = current.next;
-    index++;
-  }
-  return false;
-};
-```
-
-这种方法，**时间复杂度**以及**空间复杂度**都为 **O(n)**,要完成进阶的要求的话，我在题解看到一种很有趣的方法：**快慢指针**
-即快指针要是能追上慢指针，就可以知道链表中存在环，是不是特别神奇呢。
-
-**代码实现**
-
-```js
-/**
- * @param {ListNode} head
- * @return {boolean}
- */
-var hasCycle = function (head) {
-  let pos = -1;
-  let index = 0;
-  let slow = head;
-  /* 当传入空链表的时候 */
-  if (!slow) return false;
-  let fast = head.next;
-  /* 当只有一个节点的时候 */
-  if (!fast) return false;
-  while (slow != fast) {
-    if (!fast || !fast.next) {
-      return false;
-    }
-    fast = fast.next.next;
-    slow = slow.next;
-    index++;
-  }
-  pos = index;
-  return true;
-};
-```
-
-### leetcode 19. 删除倒数第 n 个节点 `2021.7.8`
-
-> 解题思路:看到这道题的第一反应我想到的就是快慢指针，可是我一开始写的代码发现当传入的节点只有 1 个的时候，无法删除 head。
-> 第一次的代码是这样的：
-
-```js
-var removeNthFromEnd = function (head, n) {
-  if (!head) return head;
-  let slower = null;
-  let slow = head;
-  let fast = head;
-  for (let i = 0; i < n - 1; i++) {
-    fast = fast.next;
-  }
-  while (fast.next !== null) {
-    slower = slow;
-    slow = slow.next;
-    fast = fast.next;
-  }
-  //这里的slower.next在只有一个节点的时候会报错
-  slower.next = slow.next;
-  slow.next = null;
-  return head;
-};
-```
-
-后来我想起了之前做的一道 LRU 缓存的题，也是巧妙的利用了**虚拟节点**来规避了临界情况的错误，我就试着写一写。而且还可以通过调整快指针一开始走的步数，来让**slow 指针可以到达该删除节点的前驱**，这样的话就可以少创建一个指针了。代码如下。
-
-```js
- * @param {ListNode} head
- * @param {number} n
- * @return {ListNode}
- */
-var removeNthFromEnd = function(head, n) {
-if (!head) return head
-  let dummy=new ListNode(0,head)
-  let slow = dummy
-  let fast = dummy
-  for (let i = 0; i < n; i++) {
-    fast = fast.next
-  }
-  while (fast.next !== null) {
-    slow = slow.next
-    fast = fast.next
-  }
-  //此时slow是该删除节点的前驱
-  slow.next = slow.next.next
-  return dummy.next
-};
-```
-
-### leetcode 2.两数相加 `2021.7.9`
-
-给你两个   非空 的链表，表示两个非负的整数。它们每位数字都是按照   逆序   的方式存储的，并且每个节点只能存储   一位   数字.请你将两个数相加，并以相同形式返回一个表示和的链表。
-你可以假设除了数字 0 之外，这两个数都不会以 0  开头。
-
-> 第一次：第一次见到这个题目，我首先想到的就是遍历两链表，然后几下其表示的两个数，然后相加，再把其转成数组再一个一个遍历转成新链表。
-
-```js
-/**
- * @param {ListNode} l1
- * @param {ListNode} l2
- * @return {ListNode}
- */
-var TenPowers = function (n) {
-  let res = 1;
-  for (let i = 0; i < n; i++) {
-    res *= 10;
-  }
-  return res;
-};
-var addTwoNumbers = function (l1, l2) {
-  let n = 0;
-  let r1 = 0;
-  let r2 = 0;
-  while (l1 || l2) {
-    if (l1) {
-      r1 += l1.val * TenPowers(n);
-      l1 = l1.next;
-    }
-    if (l2) {
-      r2 += l2.val * TenPowers(n);
-      l2 = l2.next;
-    }
-    n++;
-  }
-  r = r1 + r2;
-  let arr = String(r).split("");
-  let dummy = new ListNode(-1);
-  let current = dummy;
-  for (let i = arr.length - 1; i >= 0; i--) {
-    current.next = new ListNode(arr[i]);
-    current = current.next;
-  }
-  return dummy.next;
-};
-```
-
-> 果不其然，这种方法被[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]教做人了。js 表示这个数字是 1e+30，所以在变成数组的时候，字母也进去了。最后看了一下评论，别人用小学数学的方式，一位位的相加，引入进位 carry 来表示进位。同时创建新链表，这样就可以避免超出精度的问题了。
-
-```js
-var addTwoNumbers = function (l1, l2) {
-  let carry = 0;
-  let dummy = new ListNode(0);
-  let current = dummy;
-  while (l1 || l2) {
-    let v1 = l1 ? l1.val : 0;
-    let v2 = l2 ? l2.val : 0;
-    let sum = v1 + v2 + carry;
-    carry = Math.floor(sum / 10);
-    let newNode = new ListNode(sum % 10);
-    current.next = newNode;
-    current = current.next;
-    if (l1) l1 = l1.next;
-    if (l2) l2 = l2.next;
-  }
-  /* 注意，这里最后的时候也要判断有没有进位 */
-  if (carry) {
-    current.next = new ListNode(carry);
-  }
-  return dummy.next;
-};
-```
-
-### leetcode 83.删除排序链表中重复元素
-
-`2021.7.10`
-
-> 思路：遍历链表，通过哈希表来存储每个节点的值，判断如果重复的话，则删除。
-
-**代码思路**:
-
-```js
-/**
- * @param {ListNode} head
- * @return {ListNode}
- */
-var deleteDuplicates = function (head) {
-  let pre = null;
-  let current = head;
-  let hashMap = {};
-  while (current) {
-    if (current.val in hashMap) {
-      pre.next = current.next;
-      current = current.next;
-    } else {
-      hashMap[current.val] = current;
-      pre = current;
-      current = current.next;
-    }
-  }
-  return head;
-};
-```
-
-> 其实上面的代码有点复杂了。因为题目规定是有序链表，所以可以直接一个节点遍历到底就完事了~
-
-```js
-var deleteDuplicates = function (head) {
-  let current = head;
-  while (current && current.next) {
-    if (current.val === current.next.val) {
-      current.next = current.next.next;
-    } else {
-      current = current.next;
-    }
-  }
-  return head;
-};
-```
-
-### leetcode160. 相交链表
-
-`2021.7.11`
-给你两个单链表的头节点 headA 和 headB ，请你找出并返回两个单链表相交的起始节点。如果两个链表没有交点，返回 null 。
-
-> 思路：最简单也是最容易想到的方法，就是遍历一次 A 链表，把所有节点存在哈希表中，然后再遍历 B 链表，并判断是否存在于哈希表内，若存在则相交，不存在则不相交。
-
-```js
-var getIntersectionNode = function (headA, headB) {
-  const visited = new Set();
-  let temp = headA;
-  while (temp !== null) {
-    visited.add(temp);
-    temp = temp.next;
-  }
-  temp = headB;
-  while (temp !== null) {
-    if (visited.has(temp)) {
-      return temp;
-    }
-    temp = temp.next;
-  }
-  return null;
-};
-```
-
-> 如果要实现 O(1)的空间复杂度的话，我在评论区看到了一个非常浪漫的解答：
-
-![](../imgs/algorithm3.jpg)
-
-考虑构建两个节点指针 A​ , B 分别指向两链表头节点 headA , headB ，做如下操作：
-
-- 指针 A 先遍历完链表 headA ，再开始遍历链表 headB ，当走到 node 时，共走步数为：
-  `a + (b - c)`
-
-* 指针 B 先遍历完链表 headB ，再开始遍历链表 headA ，当走到 node 时，共走步数为：
-  `b + (a - c)`
-
-如下式所示，此时指针 A , B 重合，并有两种情况：
-
-`a + (b - c) = b + (a - c)`
-
-- 若两链表 有 公共尾部 (即 c > 0c>0 ) ：指针 A , B 同时指向「第一个公共节点」node 。
-- 若两链表 无 公共尾部 (即 c = 0c=0 ) ：指针 A , B 同时指向 nullnull 。
-  因此返回 A 即可。
-
-```js
-var getIntersectionNode = function (headA, headB) {
-  if (headB === null || headA === null) return null;
-  let a = headA;
-  let b = headB;
-  while (a != b) {
-    a = a ? a.next : headB;
-    b = b ? b.next : headA;
-  }
-  return a;
-};
-```
-
 ### leetcode143. 重排链表
 
 `2021.7.12`
@@ -2124,6 +1996,151 @@ var reorderList = function (head) {
     head2.next = head;
     head2 = next2;
   }
+};
+```
+
+### leetcode160. 相交链表
+
+`2021.7.11`
+给你两个单链表的头节点 headA 和 headB ，请你找出并返回两个单链表相交的起始节点。如果两个链表没有交点，返回 null 。
+
+> 思路：最简单也是最容易想到的方法，就是遍历一次 A 链表，把所有节点存在哈希表中，然后再遍历 B 链表，并判断是否存在于哈希表内，若存在则相交，不存在则不相交。
+
+```js
+var getIntersectionNode = function (headA, headB) {
+  const visited = new Set();
+  let temp = headA;
+  while (temp !== null) {
+    visited.add(temp);
+    temp = temp.next;
+  }
+  temp = headB;
+  while (temp !== null) {
+    if (visited.has(temp)) {
+      return temp;
+    }
+    temp = temp.next;
+  }
+  return null;
+};
+```
+
+> 如果要实现 O(1)的空间复杂度的话，我在评论区看到了一个非常浪漫的解答：
+
+![](../imgs/algorithm3.jpg)
+
+考虑构建两个节点指针 A​ , B 分别指向两链表头节点 headA , headB ，做如下操作：
+
+- 指针 A 先遍历完链表 headA ，再开始遍历链表 headB ，当走到 node 时，共走步数为：
+  `a + (b - c)`
+
+* 指针 B 先遍历完链表 headB ，再开始遍历链表 headA ，当走到 node 时，共走步数为：
+  `b + (a - c)`
+
+如下式所示，此时指针 A , B 重合，并有两种情况：
+
+`a + (b - c) = b + (a - c)`
+
+- 若两链表 有 公共尾部 (即 c > 0c>0 ) ：指针 A , B 同时指向「第一个公共节点」node 。
+- 若两链表 无 公共尾部 (即 c = 0c=0 ) ：指针 A , B 同时指向 nullnull 。
+  因此返回 A 即可。
+
+```js
+var getIntersectionNode = function (headA, headB) {
+  if (headB === null || headA === null) return null;
+  let a = headA;
+  let b = headB;
+  while (a != b) {
+    a = a ? a.next : headB;
+    b = b ? b.next : headA;
+  }
+  return a;
+};
+```
+
+### leetcode234.回文链表
+
+**问题**：请判断一个链表是否为回文链表。
+
+> 思路：利用快慢指针，慢指针一次走一步，快指针一次走两步。对于奇数链表，当快指针走到尾节点的时候，慢指针走到中间节点；对于偶数链表，当快指针走到倒数第二个节点的时候，慢指针走到前半段的尾节点处。同时，在慢指针走的时候讲前半段链表反转。（如果是奇数链表，慢指针再走一步，因为中间节点不需要比较）然后比较前半段反转的链表和后半段链表即可。
+
+**代码实现**
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var isPalindrome = function (head) {
+  let slow = head;
+  let pre = null;
+  let reverse = null;
+  while (head && head.next) {
+    pre = slow;
+    slow = slow.next;
+    head = head.next.next;
+    /* 反转前半链表 */
+    pre.next = reverse;
+    reverse = pre;
+  }
+  if (head) slow = slow.next;
+  while (slow) {
+    if (slow.val === pre.val) {
+      slow = slow.next;
+      pre = pre.next;
+    } else return false;
+  }
+  return true;
+};
+```
+
+### leetcode 237. 删除链表中的节点
+
+请编写一个函数，用于 **删除单链表中某个特定节点** 。在设计函数时需要注意，你**无法访问链表的头节点  head** ，只能直接访问 要被删除的节点 。
+
+题目数据保证需要删除的节点 **不是末尾节点** 。
+
+**2021.11.2**
+
+> 我成为了你，然后杀了你...
+
+```js
+var deleteNode = function (node) {
+  node.val = node.next.val;
+  node.next = node.next.next;
+};
+```
+
+### leetcode 876. 求链表的中间节点 `2021.7.6`
+
+给定一个头结点为 head 的非空单链表，返回链表的中间结点。如果有两个中间结点，则返回第二个中间结点。
+
+> 思路：因为之前刷过快慢指针的题，所以我一看到要获取中间节点，我一下子就想到了快慢指针。
+
+**代码如下：**
+
+```js
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var middleNode = function (head) {
+  if (!head.next) return head;
+  let slow = head;
+  let fast = head;
+  /* 兼容奇数和偶数长度的链表 */
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  return slow;
 };
 ```
 
@@ -3643,6 +3660,43 @@ var minPathSum = function (grid) {
     }
   }
   return dp[n - 1][m - 1];
+};
+```
+
+### leetcode 120. 三角形最小路径和
+
+给定一个三角形 `triangle` ，找出自顶向下的最小路径和。
+
+每一步只能移动到下一行中相邻的结点上。**相邻的结点** 在这里指的是 **下标** 与 **上一层结点下标** 相同或者等于 **上一层结点下标 + 1** 的两个结点。也就是说，如果正位于当前行的下标 `i` ，那么下一步可以移动到下一行的下标 `i` 或 `i + 1` 。
+
+**法一：原地法+DP** `2021.11.2`
+
+原地法：不断修改原数组即可
+
+DP：这里从第 2 层开始遍历，分 2 种情况：
+
+- 当`j==0`或者`j==triangle[i].length-1`的时候，只能分别由上一层的`j`和`j-1`叠加而成。
+- 其余情况，可以由上一层的`j-1`和`j`叠加而成，这里只需要取一个最小值即可
+
+```js
+/**
+ * @param {number[][]} triangle
+ * @return {number}
+ */
+var minimumTotal = function (triangle) {
+  let n = triangle.length;
+  for (let i = 1; i < n; i++) {
+    for (let j = 0; j < triangle[i].length; j++) {
+      if (j === 0) {
+        triangle[i][j] += triangle[i - 1][j];
+      } else if (j === triangle[i].length - 1) {
+        triangle[i][j] += triangle[i - 1][j - 1];
+      } else {
+        triangle[i][j] += Math.min(triangle[i - 1][j - 1], triangle[i - 1][j]);
+      }
+    }
+  }
+  return Math.min(...triangle[n - 1]);
 };
 ```
 
