@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-1
+date: 2021-11-3
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -2567,6 +2567,57 @@ var isValid = function (s) {
 };
 ```
 
+### leetcode 42.接雨水
+
+给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+![](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png)
+
+**法一：暴力法** `2021.11.3`
+对于每一格而言，我们只需要找到*其左边最高的柱子*以及*其右边最高的柱子*，取两者最小值与当前格子高度之差就是这个格子可以接雨水的高度。
+
+```js
+var trap = function (height) {
+  let n = height.length;
+  let res = 0;
+  for (let i = 1; i < n - 1; i++) {
+    let h = height[i];
+    let l = -Infinity;
+    let r = -Infinity;
+    for (let j = i - 1; j >= 0; j--) l = Math.max(l, height[j]);
+    for (let j = i + 1; j < n; j++) r = Math.max(r, height[j]);
+    res += Math.min(l, r) - h < 0 ? 0 : Math.min(l, r) - h; //避免当前格子比其左右两边柱子高的情况。
+  }
+  return res;
+};
+```
+
+**法二：单调栈** `2021.11.3`
+对于上述做法，由于每一次遍历都需要找到其左右两边最高的柱子，浪费了时间。于是我们可以使用单调栈。
+
+**PS. 找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；找某侧最近一个比其小的值，使用单调栈维持栈内元素递增 ...**
+
+如果当前柱子`i`低于栈顶柱子，则入栈；反之，则弹栈，此时`i`为弹栈柱子右侧高柱子的索引，栈顶则为其左侧高柱子索引，因为可以根据`长*宽`来计算该格子可接的雨水。
+
+```js
+var trap = function (height) {
+  let n = height.length;
+  let res = 0;
+  let stack = [];
+  for (let i = 0; i < n; i++) {
+    while (stack.length > 0 && height[i] > height[stack[stack.length - 1]]) {
+      let index = stack.pop();
+      if (stack.length === 0) continue; //
+      let r = i;
+      let l = stack[stack.length - 1];
+      let h = Math.min(height[l], height[r]) - height[index];
+      res += (r - l - 1) * h;
+    }
+    stack.push(i);
+  }
+  return res;
+};
+```
+
 ### leetcode232. 栈实现队列
 
 > 直接写吧 没啥好说的 `2021.7.18`
@@ -3797,6 +3848,37 @@ var lenLongestFibSubseq = function (arr) {
     }
   }
   return max < 3 ? 0 : max;
+};
+```
+
+### 931. 下降路径最小和
+
+给你一个 `n x n` 的 **方形** 整数数组  `matrix` ，请你找出并返回通过 `matrix` 的下降路径 的 最小和 。
+
+下降路径 **可以从第一行中的任何元素开始**，并从每一行中选择一个元素。在下一行选择的元素和当前行所选元素最多相隔一列（即位于正下方或者沿对角线向左或者向右的第一个元素）。具体来说，位置 `(row, col)` 的下一个元素应当是 `(row + 1, col - 1)`、`(row + 1, col)` 或者 `(row + 1, col + 1)` 。
+
+**2021.11.3**
+
+这题跟 leetcode120 一样的思路，一开始我的思路是首先遍历第一行的元素，然后分别从每个元素作为起点去做 DP 状态转移，最后返回 DP 中最后一行中的最小值。这种思路时间复杂度为 O(n^3)。后来我认为可以直接省略第一步，直接从第一行开始状态转移，这样就少遍历了一次，时间复杂度降为 O(n^2)
+
+```js
+var minFallingPathSum = function (matrix) {
+  let min = find(matrix);
+  return min;
+};
+var find = function (matrix) {
+  let n = matrix.length;
+  for (let i = 1; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      let val = matrix[i][j];
+      matrix[i][j] = matrix[i - 1][j] + val;
+      if (j - 1 >= 0)
+        matrix[i][j] = Math.min(matrix[i][j], matrix[i - 1][j - 1] + val);
+      if (j + 1 < n)
+        matrix[i][j] = Math.min(matrix[i][j], matrix[i - 1][j + 1] + val);
+    }
+  }
+  return Math.min(...matrix[n - 1]);
 };
 ```
 
