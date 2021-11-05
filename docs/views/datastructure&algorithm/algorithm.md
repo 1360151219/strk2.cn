@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-3
+date: 2021-11-5
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3879,6 +3879,148 @@ var find = function (matrix) {
     }
   }
   return Math.min(...matrix[n - 1]);
+};
+```
+
+### leetcode 1218. 最长定差子序列
+
+给你一个整数数组  `arr`  和一个整数  `difference`，请你找出并返回 `arr`  中最长等差子序列的长度，该子序列中相邻元素之间的差等于 `difference` 。
+
+**子序列** 是指在不改变其余元素顺序的情况下，通过删除一些元素或不删除任何元素而从 `arr` 派生出来的序列。
+
+对于这道题我一开始使用的是暴力解法即 dfs，时间复杂度 O(n^2) 但是却超时了呜呜。。
+
+```js
+var longestSubsequence = function (arr, difference) {
+  let n = arr.length;
+  let max = 1;
+  let len = 1;
+  for (let i = 0; i < n; i++) {
+    let target = arr[i] + difference;
+    let j = i;
+    let next = arr.indexOf(target, j + 1);
+    while (next > j) {
+      len++;
+      j = arr.indexOf(target, j + 1);
+      target = arr[j] + difference;
+    }
+    max = Math.max(max, len);
+    len = 1;
+  }
+  return max;
+};
+```
+
+**动态规划哈希表** `2021.11.5`
+
+这道题建议使用动态规划，我们维护一个哈希表或者数组 dp，存储以当前元素结尾的等差数列的长度。如`dp[3]=2`即以 3 结尾的等差数列长度为 2
+
+```js
+var longestSubsequence = function (arr, difference) {
+  let n = arr.length;
+  let map = new Map();
+  let max = 1;
+  for (let num of arr) {
+    if (map.has(num - difference)) {
+      let l = map.get(num - difference) + 1;
+      map.set(num, l);
+      max = Math.max(max, l);
+    } else {
+      map.set(num, 1);
+    }
+  }
+  return max;
+};
+```
+
+### leetcode 1289. 下降路径最小和 II
+
+给你一个整数方阵  `arr` ，定义「非零偏移下降路径」为：从  `arr` 数组中的每一行选择一个数字（自上而下），且按顺序选出来的数字中，相邻数字不在原数组的同一列。
+
+请你返回非零偏移下降路径数字和的最小值。
+
+**法一：dp** `2021.11.5`
+
+在这道题里，我们依然使用`dp[][]`用于记录遍历到该位置上的路径最小和。只不过在状态转移的时候需要记录下上一列选择的数字索引`j`以及加一个判断当前索引`k`不等于`j`。
+
+```js
+var minFallingPathSum = function (grid) {
+    let n = grid.length
+    let dp = new Array(n)
+    for (let i = 0; i < n; i++) {
+        dp[i] = new Array(n).fill(0)
+    }
+    for (let i = 0; i < n; i++) {
+        dp[0][i] = grid[0][i]
+    }
+    // 初始化结束..
+    for (let i = 1; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            dp[i][j] = Infinity
+            for (let k = 0; k < n; k++) {
+                if (k !== j) {
+                    dp[i][j] = Math.min(dp[i][j], dp[i - 1][k] + grid[i][j])
+                }
+            }
+        }
+    }
+    return Math.min(...dp[n - 1])
+```
+
+上述做法时间复杂度是 O(N^3)的，要是想再优化一下时间效率的话，可从 2 方面入手：
+
+- dp 状态转移部分，一共有 n^2 个状态需要转移，这部分无法优化
+- 每次遍历的时候都需要再遍历一次上一行的数据
+
+我们从第二点开始入手，其实我们只需要记录下上一行的最小值和次小值即可，若当前索引`j`等于上一行最小值索引，则加上次小值，反之，加上最小值。这样的话我们的时间复杂度可优化到 O(N^2)
+
+```js
+var minFallingPathSum = function (grid) {
+  let n = grid.length;
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(n).fill(0);
+  }
+  for (let i = 0; i < n; i++) {
+    dp[0][i] = grid[0][i];
+  }
+  // 初始化结束..
+  // 这里维护上一行的最小值 和次小值索引 l1 l2
+  let l1 = -1;
+  let l2 = -1;
+  for (let i = 0; i < n; i++) {
+    let val = grid[0][i];
+    dp[0][i] = val;
+    if (val < (l1 === -1 ? Infinity : dp[0][l1])) {
+      l2 = l1;
+      l1 = i;
+    } else if (val < (l2 === -1 ? Infinity : dp[0][l2])) {
+      l2 = i;
+    }
+  }
+  for (let i = 1; i < n; i++) {
+    // 这里是记录下当前行的最小值和次小值索引，用于更新l1 l2
+    let t1 = -1;
+    let t2 = -1;
+    for (let j = 0; j < n; j++) {
+      dp[i][j] = Infinity;
+      let val = grid[i][j];
+      if (j !== l1) {
+        dp[i][j] = Math.min(dp[i][j], dp[i - 1][l1] + val);
+      } else {
+        dp[i][j] = Math.min(dp[i][j], dp[i - 1][l2] + val);
+      }
+      if (dp[i][j] < (t1 === -1 ? Infinity : dp[i][t1])) {
+        t2 = t1;
+        t1 = j;
+      } else if (dp[i][j] < (t2 === -1 ? Infinity : dp[i][t2])) {
+        t2 = j;
+      }
+    }
+    l1 = t1;
+    l2 = t2;
+  }
+  return Math.min(...dp[n - 1]);
 };
 ```
 
