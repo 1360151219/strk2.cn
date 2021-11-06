@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-5
+date: 2021-11-6
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -518,6 +518,41 @@ var reorderedPowerOf2 = function (n) {
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
+};
+```
+
+### leetcode 268. 丢失的数字
+
+给定一个包含 `[0, n]` 中 `n` 个数的数组 `nums` ，找出 `[0, n]` 这个范围内没有出现在数组中的那个数。
+
+**法一：排序** `2021.11.6`
+
+```js
+var missingNumber = function (nums) {
+  let n = nums.length;
+  nums.sort((a, b) => a - b);
+  for (let i = 0; i < n; i++) {
+    if (nums[i] !== i) {
+      return i;
+    }
+  }
+  return n;
+};
+```
+
+**法二：异或** `2021.11.6`
+
+```js
+var missingNumber = function (nums) {
+  let n = nums.length;
+  let ans = 0;
+  for (let i = 0; i <= n; i++) {
+    ans ^= i;
+  }
+  for (let i = 0; i < n; i++) {
+    ans ^= nums[i];
+  }
+  return ans;
 };
 ```
 
@@ -4021,6 +4056,109 @@ var minFallingPathSum = function (grid) {
     l2 = t2;
   }
   return Math.min(...dp[n - 1]);
+};
+```
+
+### leetcode 1575. 统计所有可行路径
+
+给你一个 **互不相同**  的整数数组，其中  `locations[i]`  表示第  `i`  个城市的位置。同时给你  `start`，`finish`  和  `fuel`  分别表示出发城市、目的地城市和你初始拥有的汽油总量
+
+每一步中，如果你在城市 `i` ，你可以选择任意一个城市 `j` ，满足  `j != i 且 0 <= j < locations.length `，并移动到城市  `j` 。从城市  `i`  移动到  `j`  消耗的汽油量为  `|locations[i] - locations[j]|`，|x|  表示  x  的绝对值。
+
+请注意， `fuel`  任何时刻都**不能**为负，且你  **可以**  经过任意城市超过一次（包括  `start`  和  `finish` ）。
+
+请你返回从  `start`  到  `finish`  所有可能路径的数目。
+
+由于答案可能很大， 请将它对  `10^9 + 7`  取余后返回。
+
+**法一：dfs+记忆化搜索** `2021.11.6`
+
+一看这道题首先想到的是 DFS，但是这里我学到了一种判断方式:**dfs 一般处理的数据不超过 30，但这里数据有 10^2，因此我们需要使用记忆化搜索**
+
+首先我们想到递归函数的入口，即传入现在所在位置、目的地以及现在的油量。但出口呢？出口自然就能想到，当`fuel===0`的时候，判断是否到达目的地而返回 0 或 1；当`fuel>0`但是却不足够前往任何城市的时候，也返回 0 或 1。
+
+其次就是记忆化搜索，我们维护一个`cache[u][fuel]`来表示以 u 为起点，fuel 为油量的路径数量，因为这道题中只要起点以及油量决定了，那么它能选择的路径数量也决定了。
+
+```js
+var countRoutes = function (locations, start, finish, fuel) {
+  // 初始化
+  let n = locations.length;
+  let cache = new Array(n);
+  for (let i = 0; i < n; i++) {
+    cache[i] = new Array(fuel + 1).fill(-1); // 初始化-1是为了判断有没有记忆
+  }
+  // 对于dfs来说，出口为:
+  // 1. fuel===0
+  // 2. fuel!==0但是走不了下一步
+  return dfs(locations, start, finish, fuel);
+  function dfs(ls, u, end, fuel) {
+    if (cache[u][fuel] > -1) return cache[u][fuel];
+    //case 1
+    if (fuel === 0) {
+      cache[u][fuel] = u === end ? 1 : 0;
+      return u === end ? 1 : 0;
+    }
+    //case 2
+    let hasNext = false;
+    for (let i = 0; i < n; i++) {
+      if (i !== u) {
+        let need = Math.abs(ls[u] - ls[i]);
+        if (fuel >= need) {
+          hasNext = true;
+          break;
+        }
+      }
+    }
+    if (!hasNext) {
+      cache[u][fuel] = u === end ? 1 : 0;
+      return u === end ? 1 : 0;
+    }
+    let sum = u === end ? 1 : 0;
+    for (let i = 0; i < n; i++) {
+      if (i !== u) {
+        let need = Math.abs(ls[u] - ls[i]);
+        if (fuel >= need) {
+          sum += dfs(ls, i, end, fuel - need);
+          sum %= 1000000007;
+        }
+      }
+    }
+    cache[u][fuel] = sum;
+    return sum;
+  }
+};
+```
+
+其实这个做法的出口判断有点累赘了。因为只要我们移动过，我们消耗的油量是大于 0 的。所以只需要判断当前位置的油量是否足以一步到达目的地，如果不可以则直接返回 0。
+
+```js
+var countRoutes = function (locations, start, finish, fuel) {
+  let n = locations.length;
+  let cache = new Array(n);
+  for (let i = 0; i < n; i++) {
+    cache[i] = new Array(fuel + 1).fill(-1);
+  }
+  return dfs(locations, start, finish, fuel);
+  function dfs(ls, u, end, fuel) {
+    if (cache[u][fuel] > -1) return cache[u][fuel];
+    let need = Math.abs(ls[u] - ls[end]);
+    if (need > fuel) {
+      cache[u][fuel] = 0;
+      return 0;
+    }
+    let sum = u === end ? 1 : 0;
+    for (let i = 0; i < n; i++) {
+      if (i !== u) {
+        let need = Math.abs(ls[u] - ls[i]);
+        if (fuel >= need) {
+          sum += dfs(ls, i, end, fuel - need);
+          sum %= 1000000007;
+        }
+      }
+    }
+    cache[u][fuel] = sum;
+    return sum;
+  }
 };
 ```
 

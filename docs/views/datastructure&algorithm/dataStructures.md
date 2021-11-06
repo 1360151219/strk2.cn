@@ -1309,7 +1309,7 @@ class Node {
     this.left = null;
     this.right = null;
     this.color = RED;
-    this.flipColor = function() {
+    this.flipColor = function () {
       if (this.color === RED) {
         this.color = BLACK;
       } else {
@@ -1672,6 +1672,59 @@ function shellSort(arr) {
 
 快速排序几乎是所有排序算法中，最快速的，最好的算法了。它被称为 20 世纪十大算法之一，其平均时间复杂度可达到 O(n\*logn)。
 其思路是：首先选择一个中枢数据，然后将其他所有小于中枢的数据排在左边，所有大于中枢的数据排在后边，然后分而治之，再对左右两边的数据进行同样的操作，以此类推。
+
+比较简单的实现代码如下：
+
+```js
+function quickSort(arr) {
+  const cur = function (arr) {
+    if (arr.length <= 1) return arr;
+    let pivot = arr[0];
+    let left = [];
+    let right = [];
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i] < pivot) left.push(arr[i]);
+      else right.push(arr[i]);
+    }
+    return [...cur(left), pivot, ...cur(right)];
+  };
+  return cur(arr);
+}
+```
+
+或者选择一个中枢数据为尾元素：
+
+```js
+const quickSort = (array) => {
+  const sort = (arr, left = 0, right = arr.length - 1) => {
+    if (left >= right) {
+      return;
+    }
+    let i = left;
+    let j = right;
+    const baseVal = arr[j]; // 取无序数组最后一个数为基准值
+    while (i < j) {
+      //把所有比基准值小的数放在左边大的数放在右边
+      while (i < j && arr[i] <= baseVal) {
+        //找到一个比基准值大的数交换
+        i++;
+      }
+      arr[j] = arr[i]; // 将较大的值放在右边如果没有比基准值大的数就是将自己赋值给自己（i 等于 j）
+      while (j > i && arr[j] >= baseVal) {
+        //找到一个比基准值小的数交换
+        j--;
+      }
+      arr[i] = arr[j]; // 将较小的值放在左边如果没有找到比基准值小的数就是将自己赋值给自己（i 等于 j）
+    }
+    arr[j] = baseVal; // 将基准值放至中央位置完成一次循环（这时候 j 等于 i ）
+    sort(arr, left, j - 1);
+    sort(arr, j + 1, right);
+  };
+  const newArr = array.concat();
+  sort(newArr);
+  return newArr;
+};
+```
 
 那么应该怎么选择中枢会让快速排序的效率最高呢？一般用数据的头尾中 3 个数据中的中位数作为中枢数据。
 
