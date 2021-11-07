@@ -8,6 +8,8 @@ tags:
   - JavaScript
 ---
 
+> 以下大多数内容最初灵感启发来自于[冴羽博客](https://github.com/mqyqingfeng/Blog)
+
 `new`关键字的作用我们用一句话来概括：
 
 > new 运算符创建一个用户定义的对象类型的实例或具有构造函数的内置对象类型之一
@@ -113,3 +115,5 @@ function objectFactory() {
 第一种是实的，我推测是`Object.create`将`__proto__`当成一个属性。
 
 我们在[JS 之深入原型链](http://www.strk2.cn/views/frontend/JSPrototype.html#%E5%8E%9F%E5%9E%8B%E9%93%BE)中提到过，`__proto__`实际上是在`Object.prototype`中，而 Object.create(null) 生成的对象的原型链是 null，即没有这个属性。
+
+> `Object.create(prototype)` 这里传入的是一个原型对象，返回的对象的`__proto__`为传入的原型。我认为这里是因为原型传入的是 NULL 所以才会产生这样的问题。

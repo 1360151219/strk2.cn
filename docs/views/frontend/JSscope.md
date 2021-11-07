@@ -8,6 +8,8 @@ tags:
   - JavaScript
 ---
 
+> 以下大多数内容最初灵感启发来自于[冴羽博客](https://github.com/mqyqingfeng/Blog)
+
 ## 作用域
 
 作用域是程序定义变量的区域。
@@ -63,13 +65,13 @@ function foo() {
 对于 JavaScript 代码的执行顺序，一般来说都是顺序执行的，比如说：
 
 ```js
-var foo = function() {
+var foo = function () {
   console.log("foo1");
 };
 
 foo(); // foo1
 
-var foo = function() {
+var foo = function () {
   console.log("foo2");
 };
 
@@ -177,7 +179,7 @@ function f1() {
 }
 var obj = {
   length: 10,
-  f2: function(f1) {
+  f2: function (f1) {
     f1();
     arguments[0]();
   },

@@ -8,6 +8,8 @@ tags:
   - JavaScript
 ---
 
+> 以下大多数内容最初灵感启发来自于[冴羽博客](https://github.com/mqyqingfeng/Blog)
+
 ## Call
 
 **第一次模拟**
@@ -32,7 +34,7 @@ sayName.call(obj); // Tony
 - 调用结束后 delete 掉
 
 ```js
-Function.prototype._call = function(context = window) {
+Function.prototype._call = function (context = window) {
   context.fn = this; // this指向调用者，即sayName
   context.fn();
   delete context.fn;
@@ -69,7 +71,7 @@ bar.call(foo, "kevin", 18);
 这个我们可以利用`arguments`来获取参数。
 
 ```js
-Function.prototype._call = function(context = window) {
+Function.prototype._call = function (context = window) {
   arguments.splice(0, 1); // 将context除去
   context.fn = this;
   context.fn(...arguments);
@@ -96,7 +98,7 @@ bar._call(foo, "kevin", 18);
 `call`还支持有返回值的函数。因此我们可以在执行 fn 的时候将其返回值 return 出来。而且当`context`传入 null 的时候，默认指向`window`对象。完成了这些，一个`call`模拟函数就成功完成啦。
 
 ```js
-Function.prototype._call = function(context) {
+Function.prototype._call = function (context) {
   context = context || window;
   let args = Array.from(arguments);
   args.splice(0, 1); // 将context除去
@@ -112,7 +114,7 @@ Function.prototype._call = function(context) {
 `apply`跟`call`也是一样的原理，只需要在传参的时候修改一下即可。
 
 ```js
-Function.prototype._apply = function(context, args) {
+Function.prototype._apply = function (context, args) {
   context = context || window;
   context.fn = this;
   const res = context.fn(...args);
@@ -128,7 +130,7 @@ Function.prototype._apply = function(context, args) {
 ```js
 function _bind(context = window, ...outer) {
   const _this = this; // fn(){}
-  return function(...inner) {
+  return function (...inner) {
     _this.call(context, ...outer.concat(inner));
   };
 }
@@ -142,7 +144,7 @@ Function.prototype._bind = _bind;
 ```js
 function _bind(context = window, ...outer) {
   const _this = this; // fn(){}
-  return function(...inner) {
+  return function (...inner) {
     return _this.call(context, ...outer.concat(inner));
   };
 }
@@ -187,7 +189,7 @@ console.log(obj.friend);
 ```js
 function _bind(context = window, ...outer) {
   const _this = this; // fn(){}
-  let fBound = function(...inner) {
+  let fBound = function (...inner) {
     // 当作为构造函数的时候，this指向实例，就会返回true
     // 普通函数的时候，this指向window
     return _this.call(
@@ -204,11 +206,11 @@ Function.prototype._bind = _bind;
 现在我们还剩下最后的一个问题，我们在修改 fBound 的原型的时候，会直接改变原来绑定的 this 的原型。
 
 ```js
-Function.prototype._bind = function(context) {
+Function.prototype._bind = function (context) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 1);
 
-  var fBound = function() {
+  var fBound = function () {
     var bindArgs = Array.prototype.slice.call(arguments);
     self.apply(this instanceof fBound ? this : context, args.concat(bindArgs));
   };

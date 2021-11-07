@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-6
+date: 2021-11-7
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -553,6 +553,31 @@ var missingNumber = function (nums) {
     ans ^= nums[i];
   }
   return ans;
+};
+```
+
+### leetcode 598. 范围求和 II
+
+给定一个初始元素全部为  `0`，大小为 `m*n` 的矩阵  M  以及在  M  上的一系列更新操作。
+
+操作用二维数组表示，其中的每个操作用一个含有两个正整数  `a` 和 `b` 的数组表示，含义是将所有符合  `0 <= i < a` 以及 `0 <= j < b` 的元素  `M[i][j]`  的值都增加 `1`。
+
+在执行给定的一系列操作后，你需要返回矩阵中含有最大整数的元素个数。
+
+**模拟** `2021.11.7`
+
+主要思路是，最大整数即每一次操作的矩形重合的地方。因此只需要找到所有操作中，a、b 的最小值即可。
+
+```js
+var maxCount = function (m, n, ops) {
+  if (ops.length < 1) return m * n;
+  let minA = [];
+  let minB = [];
+  for (let op of ops) {
+    minA.push(op[0]);
+    minB.push(op[1]);
+  }
+  return Math.min(...minA) * Math.min(...minB);
 };
 ```
 
@@ -3786,6 +3811,58 @@ var minimumTotal = function (triangle) {
 };
 ```
 
+### leetcode 576. 出界的路径数
+
+给你一个大小为 `m x n` 的网格和一个球。球的起始坐标为 `[startRow, startColumn]` 。你可以将球移到在四个方向上相邻的单元格内（_可以穿过网格边界到达网格之外）_。你 **最多** 可以移动 `maxMove` 次球。
+
+给你五个整数 `m`、`n`、`maxMove`、`startRow` 以及 `startColumn` ，找出并返回可以将球移出边界的路径数量。因为答案可能非常大，返回对 109 + 7 取余 后的结果。
+
+**法一：dfs+记忆化搜索** `2021.11.7`
+
+这题跟 1575 一样，我们首先使用记忆化搜索来做。这道题变化的有 3 个值:目前能移动步数`step`、当前位置`u`和`v`。在这里我们可以定义一个索引来对应每一个位置`index=u*n+v`。定义一个缓存数组`cache[index][step]`来表示在当前位置下当前步数的所有的路径。
+
+dfs 的出口：当出界情况的时候，返回 1；当没有出界但是`step`已经为 0 的时候，返回 0
+
+处理逻辑：定义 4 个方向，分别对 4 个方向进行搜索。
+
+```js
+var findPaths = function (m, n, maxMove, startRow, startColumn) {
+  function getIndex(x, y) {
+    return x * n + y;
+  }
+  let dir = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  let cache = new Array(m * n);
+  for (let i = 0; i < m * n; i++) {
+    cache[i] = new Array(maxMove + 1).fill(-1);
+  }
+  return dfs(m, n, maxMove, startRow, startColumn);
+  function dfs(m, n, step, u, v) {
+    // (u,v)=(index/n,index%n)
+    let index = getIndex(u, v);
+    // 出口
+    if (u < 0 || u >= m || v < 0 || v >= n) {
+      return 1;
+    }
+    if (cache[index][step] !== -1) return cache[index][step];
+    if (step === 0) return 0;
+    let sum = 0;
+    for (let d of dir) {
+      let nu = u + d[0];
+      let nv = v + d[1];
+      sum += dfs(m, n, step - 1, nu, nv);
+      sum %= 1000000007;
+    }
+    cache[index][step] = sum;
+    return sum;
+  }
+};
+```
+
 ### 714. Best Time to Buy and Sell Stock with Transaction Fee
 
 给定一个整数数组  prices，其中第  i  个元素代表了第  i  天的股票价格 ；整数  fee 代表了交易股票的手续费用。
@@ -4159,6 +4236,41 @@ var countRoutes = function (locations, start, finish, fuel) {
     cache[u][fuel] = sum;
     return sum;
   }
+};
+```
+
+**法二：动态规划** `2021.11.7`
+
+要从记忆化搜索转换成动态规划，首先我们关注一下 dfs 函数，其参数其实只有`u`、`fuel`是动态变化的。因此我们可以定义 dp 二维数组`dp[u][fuel]`，_这个状态定义跟记忆化搜索中的缓存器是一样的_。
+
+然后我们需要定义状态转移方程，在 dfs 中主要逻辑是从 u、现有 fuel 出发枚举所有所能到达的位置有哪些。因此我们可以定义`dp[u][fuel]+=dp[k][fuel-need]`。
+
+这里要注意一点，`dp[u][fuel]`是依赖于`dp[k][fuel-need]`的，因此我们可以从小到达遍历 fuel。
+
+```js
+var countRoutes = function (locations, start, finish, fuel) {
+  let n = locations.length;
+  // 变的只有当前位置u以及fuel
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(fuel + 1).fill(0);
+  }
+  // 先把所有到达目的地的路径初始化为1
+  for (let i = 0; i <= fuel; i++) {
+    dp[finish][i] = 1;
+  }
+  for (let j = 0; j <= fuel; j++) {
+    for (let u = 0; u < n; u++) {
+      for (let i = 0; i < n; i++) {
+        if (i !== u) {
+          let need = Math.abs(locations[u] - locations[i]);
+          if (j >= need) dp[u][j] += dp[i][j - need];
+          dp[u][j] %= 1000000007;
+        }
+      }
+    }
+  }
+  return dp[start][fuel];
 };
 ```
 
