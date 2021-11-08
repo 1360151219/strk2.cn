@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-7
+date: 2021-11-8
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -12,7 +12,7 @@ tags:
 
 ---现在是 2021 的 7 月份初，我刚好大二结束了。为了想在大三可以通过自己的努力去大厂实习，除了学习前端知识外，还得补补一些计算机基础知识：数据结构以及算法。因此我决定开始每日至少刷一道 leetcode 题。以前的我是非常讨厌做算法题的，因为我很菜 但是希望能通过努力来弥补这一点。奥里给~~
 
-## 数学
+## 数学-模拟
 
 ### 29. 两数相除
 
@@ -305,6 +305,62 @@ var singleNumber = function (nums) {
   return res;
 };
 ```
+
+### 299. 猜数字游戏
+
+你在和朋友一起玩 猜数字（Bulls and Cows）游戏，该游戏规则如下：
+
+写出一个秘密数字，并请朋友猜这个数字是多少。朋友每猜测一次，你就会给他一个包含下述信息的提示：
+
+猜测数字中有多少位属于数字和确切位置都猜对了（称为 "Bulls", 公牛），
+有多少位属于数字猜对了但是位置不对（称为 "Cows", 奶牛）。也就是说，这次猜测中有多少位非公牛数字可以通过重新排列转换成公牛数字。
+给你一个秘密数字  `secret` 和朋友猜测的数字  `guess` ，请你返回对朋友这次猜测的提示。
+
+提示的格式为 `"xAyB"` ，`x` 是公牛个数， `y` 是奶牛个数，`A` 表示公牛，`B`  表示奶牛。
+
+请注意秘密数字和朋友猜测的数字都可能含有重复数字。
+
+**法一：哈希表遍历 3 次** `2021.11.8`
+
+使用哈希表统计 secret 中每个数字出现的次数，然后遍历一次 guess 数组，将公牛统计出来，再遍历一次，将奶牛找出来。
+
+```js
+var getHint = function (secret, guess) {
+  let count_a = 0;
+  let count_b = 0;
+  let n = secret.length;
+  let map = new Map();
+  for (let i = 0; i < n; i++) {
+    if (map.has(secret[i])) {
+      let count = map.get(secret[i]);
+      map.set(secret[i], ++count);
+    } else {
+      map.set(secret[i], 1);
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    if (map.has(guess[i])) {
+      let count = map.get(guess[i]);
+      if (map.get(guess[i]) > 0 && secret[i] === guess[i]) {
+        count_a++;
+        map.set(guess[i], count - 1);
+      }
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    if (map.has(guess[i])) {
+      let count = map.get(guess[i]);
+      if (map.get(guess[i]) > 0 && secret[i] != guess[i]) {
+        count_b++;
+        map.set(guess[i], count - 1);
+      }
+    }
+  }
+  return count_a + "A" + count_b + "B";
+};
+```
+
+上述做法非常冗杂，其实在找奶牛的时候只需要二个数组记录下 secret 和 guess 各个数字出现次数，然后取最小值即可。
 
 ### 335. 路径交叉
 
@@ -3860,6 +3916,56 @@ var findPaths = function (m, n, maxMove, startRow, startColumn) {
     cache[index][step] = sum;
     return sum;
   }
+};
+```
+
+**法二：动态规划** `2021.11.8`
+
+根据上述记忆化搜索中的缓存数组，我们可以定义一个状态转移数组`dp[index][step]`, **注意与记忆化搜索不同的是，初始化数组操作不同、返回形式不同。** 然后状态转移方程为`dp[index][step]+=dp[nextIndex][step]-1`,这里 nextIndex 是指四个方向行走后的位置索引。
+
+```js
+var findPaths = function (m, n, maxMove, startRow, startColumn) {
+  function getIndex(x, y) {
+    return x * n + y;
+  }
+  function parseIndex(index) {
+    return [Math.floor(index / n), index % n];
+  }
+  let dir = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  let dp = new Array(m * n);
+  for (let i = 0; i < m * n; i++) {
+    dp[i] = new Array(maxMove + 1).fill(0);
+  }
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      for (let step = 1; step <= maxMove; step++) {
+        if (i === 0) dp[getIndex(i, j)][step]++;
+        if (j === 0) dp[getIndex(i, j)][step]++;
+        if (i === m - 1) dp[getIndex(i, j)][step]++;
+        if (j === n - 1) dp[getIndex(i, j)][step]++;
+      }
+    }
+  }
+  for (let step = 1; step <= maxMove; step++) {
+    for (let k = 0; k < n * m; k++) {
+      let x = parseIndex(k)[0];
+      let y = parseIndex(k)[1];
+      for (let d of dir) {
+        let nx = x + d[0];
+        let ny = y + d[1];
+        if (nx >= 0 && nx < m && ny >= 0 && ny < n) {
+          dp[k][step] += dp[getIndex(nx, ny)][step - 1];
+          dp[k][step] %= 1000000007;
+        }
+      }
+    }
+  }
+  return dp[getIndex(startRow, startColumn)][maxMove];
 };
 ```
 
