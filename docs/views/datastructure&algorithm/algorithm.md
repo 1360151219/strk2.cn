@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-8
+date: 2021-11-10
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3683,6 +3683,68 @@ var removeInvalidParentheses = function (s) {
 };
 ```
 
+### leetcode 488. 祖玛游戏
+
+你正在参与祖玛游戏的一个变种。
+
+在这个祖玛游戏变体中，桌面上有 一排 彩球，每个球的颜色可能是：`红色 'R'`、`黄色 'Y'`、`蓝色 'B'`、`绿色 'G'` 或`白色 'W'` 。你的手中也有一些彩球。
+
+你的目标是 **清空** 桌面上所有的球。每一回合：
+
+从你手上的彩球中选出 **任意一颗** ，然后将其插入桌面上那一排球中：两球之间或这一排球的任一端。
+接着，如果有出现 **三个或者三个以上 且 颜色相同** 的球相连的话，就把它们移除掉。
+如果这种移除操作同样导致出现三个或者三个以上且颜色相同的球相连，则可以继续移除这些球，直到不再满足移除条件。
+如果桌面上所有球都被移除，则认为你赢得本场游戏。
+重复这个过程，直到你赢了游戏或者手中没有更多的球。
+给你一个字符串 `board` ，表示桌面上最开始的那排球。另给你一个字符串`hand`，表示手里的彩球。请你按上述操作步骤移除掉桌上所有球，计算并返回所需的 **最少** 球数。如果不能移除桌上所有的球，返回 `-1 `。
+
+**法一：dfs+记忆化搜索** `2021.11.10`
+
+首先我们要知道，这题中只要插入位置以及次数定死了，那么就有一种方案被定好了。因此我们可以定义一个缓存用的数据结构用于存这两个变量。
+
+其次定义 dfs 出口：当 board 的长度为 0 时，可以更新最小次数；当 hand 为 0 或者遇到缓存，则直接返回。
+
+具体逻辑:合并的逻辑，以及 dfs 的逻辑。
+
+```js
+/**
+ * @param {string} board
+ * @param {string} hand
+ * @return {number}
+ */
+var findMinStep = function (board, hand) {
+  let map = new Map();
+  let min = Infinity;
+  const combine = (board) => {
+    for (let slow = (fast = 0); fast <= board.length; fast++) {
+      if (board[slow] == board[fast]) continue;
+      if (fast - slow > 2) {
+        board = board.substring(0, slow) + board.substring(fast);
+        fast = 0;
+      }
+      slow = fast;
+    }
+    return board;
+  };
+  const dfs = (board, hand, count) => {
+    if (board.length === 0) return (min = Math.min(min, count));
+    if (hand.length === 0 || map.has(board + count)) return;
+    map.set(board + count, 1);
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < hand.length; j++) {
+        dfs(
+          combine(board.substring(0, i) + hand[j] + board.substring(i)),
+          hand.substring(0, j) + hand.substring(j + 1),
+          count + 1
+        );
+      }
+    }
+  };
+  dfs(board, hand, 0);
+  return min === Infinity ? -1 : min;
+};
+```
+
 ### 653. 两数之和 IV - 输入 BST （树）
 
 ### 638. 大礼包
@@ -4239,6 +4301,100 @@ var minFallingPathSum = function (grid) {
     l2 = t2;
   }
   return Math.min(...dp[n - 1]);
+};
+```
+
+### 1301. 最大得分的路径数目
+
+给你一个正方形字符数组  `board` ，你从数组最右下方的字符  `'S'`  出发。
+
+你的目标是到达数组最左上角的字符  `'E'` ，数组剩余的部分为数字字符  `1, 2, ..., 9`  或者障碍 `'X'`。在每一步移动中，你可以向上、向左或者左上方移动，可以移动的前提是到达的格子没有障碍。
+
+一条路径的 `「得分」` 定义为：路径上所有数字的和。
+
+请你返回一个列表，包含两个整数：第一个整数是 `「得分」` 的最大值，第二个整数是得到`最大得分的方案数`，请把结果对  `10^9 + 7` 取余。
+
+如果没有任何路径可以到达终点，请返回  `[0, 0]` 。
+
+**法一：dp** `2021.11.10`
+
+```js
+/**
+ * @param {string[]} board
+ * @return {number[]}
+ */
+var pathsWithMaxScore = function (board) {
+  function getIndex(x, y) {
+    return x * n + y;
+  }
+  function parseIndex(index) {
+    return [Math.floor(index / n), index % n];
+  }
+  let n = board.length;
+  let dp = new Array(n * n).fill(0);
+  let plans = new Array(n * n);
+  for (let i = 0; i < n; i++) {
+    board[i] = board[i].split("");
+  }
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      let index = getIndex(i, j);
+      //初始化
+      if (i === n - 1 && j === n - 1) {
+        plans[index] = 1;
+        continue;
+      }
+      // 障碍点
+      if (board[i][j] === "X") {
+        dp[index] = -Infinity;
+        continue;
+      }
+      let score = i === 0 && j === 0 ? 0 : board[i][j] - "0";
+      let maxS = -Infinity;
+      let maxP = 0;
+      //
+      if (i + 1 < n) {
+        let curS = dp[getIndex(i + 1, j)] + score;
+        let curP = plans[getIndex(i + 1, j)];
+        if (curS > maxS) {
+          maxS = curS;
+          maxP = curP;
+        } else if (curS === maxS) {
+          maxP += curP;
+        }
+        maxP %= 1000000007;
+      }
+      if (j + 1 < n) {
+        let curS = dp[getIndex(i, j + 1)] + score;
+        let curP = plans[getIndex(i, j + 1)];
+        if (curS > maxS) {
+          maxS = curS;
+          maxP = curP;
+        } else if (curS === maxS) {
+          maxP += curP;
+        }
+        maxP %= 1000000007;
+      }
+      if (i + 1 < n && j + 1 < n) {
+        let curS = dp[getIndex(i + 1, j + 1)] + score;
+        let curP = plans[getIndex(i + 1, j + 1)];
+        if (curS > maxS) {
+          maxS = curS;
+          maxP = curP;
+        } else if (curS === maxS) {
+          maxP += curP;
+        }
+        maxP %= 1000000007;
+      }
+      dp[index] = maxS < 0 ? -Infinity : maxS;
+      plans[index] = maxP;
+    }
+  }
+  console.log(dp);
+  return [
+    dp[getIndex(0, 0)] < 0 ? 0 : dp[getIndex(0, 0)],
+    dp[getIndex(0, 0)] < 0 ? 0 : plans[getIndex(0, 0)],
+  ];
 };
 ```
 
