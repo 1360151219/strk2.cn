@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-10
+date: 2021-11-14
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3785,6 +3785,65 @@ var shoppingOffers = function (price, special, needs) {
   dfs(needs, 0);
   return ans;
 };
+```
+
+### leetcode 677. 键值映射
+
+实现一个 `MapSum` 类，支持两个方法，`insert`  和  `sum`：
+
+- `MapSum()` 初始化 `MapSum` 对象
+- `void insert(String key, int val)` 插入 `key-val` 键值对，字符串表示键 `key` ，整数表示值 `val` 。如果键 `key` 已经存在，那么原来的键值对将被替代成新的键值对。
+- `int sum(string prefix)` 返回所有以该前缀 `prefix` 开头的键 `key` 的值的总和。
+
+**法一:dfs+trie** `2021.11.14`
+很明显，应该使用 trie。然后只需要做一些小小的更改。
+
+- 在每一个节点都定义一个 val 属性，在插入字符的尾节点给 val 赋值。
+- 只需要遍历到前缀的最后一个节点，然后开始 dfs，将所有可到达的节点的 val 值求和即可。
+
+```js
+class Node {
+  constructor() {
+    this.ins = new Array(26);
+    this.key = 0;
+  }
+}
+class MapSum {
+  constructor() {
+    this.root = new Node();
+  }
+  insert(val, key) {
+    let p = this.root;
+    for (let i = 0; i < val.length; i++) {
+      let u = val.charCodeAt(i) - 97;
+      if (!p.ins[u]) {
+        p.ins[u] = new Node();
+      }
+      p = p.ins[u];
+    }
+    p.key = key;
+  }
+  dfs(p) {
+    if (!p) return 0;
+    let sum = p.key;
+    for (let i = 0; i < 26; i++) {
+      let vp = p.ins[i];
+      sum += this.dfs(vp, sum);
+    }
+    return sum;
+  }
+  sum(s) {
+    let p = this.root;
+    for (let i = 0; i < s.length; i++) {
+      let u = s.charCodeAt(i) - 97;
+      if (!p.ins[u]) {
+        return 0;
+      }
+      p = p.ins[u];
+    }
+    return this.dfs(p);
+  }
+}
 ```
 
 ## 动态规划
