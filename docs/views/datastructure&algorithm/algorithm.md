@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-14
+date: 2021-11-15
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -361,6 +361,24 @@ var getHint = function (secret, guess) {
 ```
 
 上述做法非常冗杂，其实在找奶牛的时候只需要二个数组记录下 secret 和 guess 各个数字出现次数，然后取最小值即可。
+
+### 319. 灯泡开关
+
+初始时有  `n` 个灯泡处于关闭状态。第一轮，你将会打开所有灯泡。接下来的第二轮，你将会每两个灯泡关闭一个。
+
+第三轮，你每三个灯泡就切换一个灯泡的开关（即，打开变关闭，关闭变打开）。第 `i` 轮，你每 `i` 个灯泡就切换一个灯泡的开关。直到第 `n` 轮，你只需要切换最后一个灯泡的开关。
+
+找出并返回 `n`  轮后有多少个亮着的灯泡。
+
+**模拟** `2021.11.15`
+
+很容易知道，第`n`个灯泡会被切换其约数的个数次。因此只有约数个数为奇数，才能被打开。即完全平方数。问题就转换成了`n`中有多少个完全平方数。即 n 的开方向下取整
+
+```js
+var bulbSwitch = function (n) {
+  return Math.floor(Math.sqrt(n));
+};
+```
 
 ### 335. 路径交叉
 
@@ -4843,6 +4861,33 @@ var copyRandomList = function (head) {
     cur = cur.next;
   }
   return map.get(head);
+};
+```
+
+### 剑指 Offer II 046. 二叉树的右侧视图
+
+给定一个二叉树的 根节点 root，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+**层序遍历** `2021.11.15`
+
+只需要在层序遍历过程中，将每一行最后一个元素记录下来即可。
+
+```js
+var rightSideView = function (root) {
+  if (!root) return [];
+  let res = [];
+  let queue = [root];
+  while (queue.length) {
+    let val = 0;
+    for (let i = queue.length; i > 0; i--) {
+      let node = queue.shift();
+      val = node.val;
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+    res.push(val);
+  }
+  return res;
 };
 ```
 
