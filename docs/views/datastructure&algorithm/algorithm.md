@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-15
+date: 2021-11-17
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -361,6 +361,36 @@ var getHint = function (secret, guess) {
 ```
 
 上述做法非常冗杂，其实在找奶牛的时候只需要二个数组记录下 secret 和 guess 各个数字出现次数，然后取最小值即可。
+
+### 318. 最大单词长度乘积
+
+给定一个字符串数组  `words`，找到  `length(word[i]) * length(word[j])`  的最大值，并且这两个单词不含有公共字母。你可以认为每个单词只包含小写字母。如果不存在这样的两个单词，返回 `0`。
+
+**法一：位运算** `2021.11.17`
+
+今天这道题让我又掌握了一种位运算的新方法。找出两个不含公共字母的单词，我们只需要将其每一位字母转成数字存在一个 26 位的 2 进制数字中。然后只需要执行**与**操作，如果为 0 则表示两单词不含公共字母
+
+```js
+var maxProduct = function (words) {
+  let n = words.length;
+  let max = 0;
+  let arr = [];
+  for (let w of words) {
+    let temp = 0;
+    for (let i = 0; i < w.length; i++) {
+      temp |= 1 << (w.charCodeAt(i) - 97);
+    }
+    arr.push(temp);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if ((arr[i] & arr[j]) === 0)
+        max = Math.max(words[i].length * words[j].length, max);
+    }
+  }
+  return max;
+};
+```
 
 ### 319. 灯泡开关
 
