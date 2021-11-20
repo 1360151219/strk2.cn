@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-17
+date: 2021-11-20
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3619,6 +3619,40 @@ var findMinArrowShots = function (points) {
 ## dfs
 
 ### 剑指 Offer 12. 矩阵中的路径 ---- leetcode 72 单词搜索 （剑指 offer）
+
+### leetcode 46.全排列
+
+给定一个不含重复数字的数组 `nums` ，返回其 **所有可能的全排列** 。你可以 **按任意顺序** 返回答案。
+
+**法一：dfs 回溯** `2021.11.20`
+
+回溯最大的特点就是遍历出所有的答案，所以时间复杂度很高。对于这道题，我们只需要在递归函数记录目前的步数以及目前的排列数组，在函数中遍历`nums`依次添加进数组中，注意调用完递归函数本身后要撤销操作继续遍历。
+
+我们还可以再优化一下，我们发现添加进数组中的数字不需要再添加一次，因此可以剪枝一下。
+
+> 这里我遇到的一个问题是返回很多个空数组，原因是数组是引用数据类型，因此我如果不把`arr`拷贝一份再 push 的话，`arr`会被撤回为空数组状态。
+
+```js
+var permute = function (nums) {
+  function backtrack(i, n, nums, arr) {
+    if (i === n) {
+      let ans = arr.concat();
+      res.push(ans);
+      return;
+    }
+    for (let k = 0; k < n; k++) {
+      if (arr.includes(nums[k])) continue;
+      arr.push(nums[k]);
+      backtrack(i + 1, n, nums, arr);
+      arr.pop();
+    }
+  }
+  let n = nums.length;
+  let res = [];
+  backtrack(0, n, nums, []);
+  return res;
+};
+```
 
 ### leetcode 282. 给表达式添加运算符
 
