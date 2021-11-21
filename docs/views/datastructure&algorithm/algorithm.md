@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-20
+date: 2021-11-21
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3159,6 +3159,39 @@ var hasPathSum = function (root, targetSum) {
       hasPathSum(root.left, targetSum) || hasPathSum(root.right, targetSum)
     );
   }
+};
+```
+
+### leetcode 559. N 叉树的最大深度
+
+给定一个 N 叉树，找到其最大深度。
+
+最大深度是指从根节点到最远叶子节点的最长路径上的节点总数。
+
+**法一：dfs** `2021.11.21`
+直接上代码：
+
+```js
+/**
+ * // Definition for a Node.
+ * function Node(val,children) {
+ *    this.val = val;
+ *    this.children = children;
+ * };
+ */
+var maxDepth = function (root) {
+  function dfs(node) {
+    if (!node) return 0;
+    let ans = 1;
+    for (let c of node.children) {
+      let t = 0;
+      t += dfs(c) + 1;
+      ans = Math.max(ans, t);
+    }
+    return ans;
+  }
+  if (!root) return 0;
+  return dfs(root);
 };
 ```
 
