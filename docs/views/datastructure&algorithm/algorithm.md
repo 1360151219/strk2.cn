@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-21
+date: 2021-11-22
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -445,6 +445,53 @@ var isSelfCrossing = function (distance) {
   }
   return false;
 };
+```
+
+### leetcode 384.打乱数组
+
+给你一个整数数组`nums` ，设计算法来打乱一个没有重复元素的数组。
+
+实现 `Solution class`:
+
+- `Solution(int[] nums)` 使用整数数组 nums 初始化对象
+- `int[] reset()` 重设数组到它的初始状态并返回
+- `int[] shuffle()` 返回数组随机打乱后的结果
+
+**Knuth 洗牌算法** `2021.11.22`
+
+这道题主要是考验洗牌算法的实现。这里我们知道公平的洗牌算法，是要等概率的返回 n！种全排列情况中的任意一种，或者可以说每个元素都可以等概率独立出现在每一个位置上。
+
+而 Knuth 洗牌算法可以帮我们实现这样一种公平的洗牌算法。思路也很简单，每个元素都需要随机与数组中一个元素换一次位置。这里注意，**一定包括它自己**。
+
+[点击这里有一个简单的对该算法的数学证明](https://www.cnblogs.com/zhanghongfeng/p/11216793.html)
+
+```js
+class Solution {
+  constructor(nums) {
+    this.nums = nums;
+  }
+  reset() {
+    return this.nums;
+  }
+  shuffle() {
+    let res = this.nums.concat();
+    let n = res.length;
+    for (let i = 0; i < n; i++) {
+      this.swap(res, i, i + Math.floor(Math.random() * (n - i)));
+    }
+    // 或者从尾开始
+    // for(let i=n-1;i>=0;i--){
+    //     this.swap(res,i,Math.floor(Math.random()*(i+1)))
+    // }
+    return res;
+  }
+
+  swap(arr, i, j) {
+    let temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+}
 ```
 
 ### 412. Fizz Buzz
@@ -3192,6 +3239,39 @@ var maxDepth = function (root) {
   }
   if (!root) return 0;
   return dfs(root);
+};
+```
+
+这个写法有点乱但是容易理解，下面版本是更加简洁一点的：
+
+```js
+var maxDepth = function (root) {
+  if (!root) return 0;
+  let ans = 0;
+  for (let c of root.children) {
+    ans = Math.max(ans, maxDepth(c));
+  }
+  return ans + 1;
+};
+```
+
+**法二：Bfs** `2021.11.22`
+
+```js
+var maxDepth = function (root) {
+  if (!root) return 0;
+  let ans = 0;
+  let queue = [root];
+  while (queue.length > 0) {
+    for (let n = queue.length; n > 0; n--) {
+      const node = queue.shift();
+      for (let chi of node.children) {
+        queue.push(chi);
+      }
+    }
+    ans++;
+  }
+  return ans;
 };
 ```
 
