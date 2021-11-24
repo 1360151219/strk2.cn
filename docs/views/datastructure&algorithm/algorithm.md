@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-22
+date: 2021-11-24
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -529,6 +529,57 @@ var fizzBuzz = function (n) {
 };
 ```
 
+### leetcode 423. 从英文中重建数字
+
+给你一个字符串 s ，其中包含字母顺序打乱的用英文单词表示的若干数字（0-9）。按 升序 返回原始的数字。
+
+**法一：模拟** `2021.11.24`
+这道题的关键就是要判断我们筛选数字的优先顺序。应该是`[0, 8, 6, 3, 2, 7, 5, 9, 4, 1]`。因为 0 中有`z`是唯一的。然后 8 中有`e`...以此类推
+
+```js
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var originalDigits = function (s) {
+  let ss = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+  ];
+  let priority = [0, 8, 6, 3, 2, 7, 5, 9, 4, 1];
+  let cnt = new Array(26).fill(0);
+  let n = s.length;
+  let res = [];
+  for (let i = 0; i < n; i++) {
+    cnt[s.charCodeAt(i) - 97]++;
+  }
+  for (let i of priority) {
+    let ch = ss[i];
+    let k = Infinity;
+    // 这里为了删除元素，必须找到单词所有字母中的最小值，这才代表着这个单词的个数
+    for (let i = 0; i < ch.length; i++) {
+      k = Math.min(k, cnt[ch.charCodeAt(i) - 97]);
+    }
+    for (let i = 0; i < ch.length; i++) {
+      cnt[ch.charCodeAt(i) - 97] -= k;
+    }
+    while (k > 0) {
+      res.push(i);
+      k--;
+    }
+  }
+  return res.sort().join("");
+};
+```
+
 ### leetcode 476. 数字的补数
 
 对整数的二进制表示取反`（0 变 1 ，1 变 0）`后，再转换为十进制表示，可以得到这个整数的补数。
@@ -613,6 +664,48 @@ var constructRectangle = function (area) {
     width--;
   }
   return [area / width, width];
+};
+```
+
+### leetcode 859. 亲密字符串
+
+给你两个字符串 `s` 和 `goal` ，只要我们可以通过交换 `s` 中的两个字母得到与 `goal` 相等的结果，就返回  true ；否则返回 false 。
+
+交换字母的定义是：取两个下标 `i` 和 `j` （下标从 0 开始）且满足 `i` != `j` ，接着交换 `s[i]` 和 `s[j]` 处的字符。
+
+例如，在 "abcd" 中交换下标 0 和下标 2 的元素可以生成 "cbad" 。
+
+**法一：统计** `2021.11.23`
+我们需要统计一些边界条件：
+
+- 若两字符串长度不一样，则不满足。
+- 统计两字符串出现的字母，并判断位置是否一致。若完全一致，则判断是否有相同的 2 个字母，有则满足题意；若不一致，则判断是否只有 2 个位置不同，有则满足题意。
+
+```js
+var buddyStrings = function (s, goal) {
+  let n = s.length;
+  let m = goal.length;
+  if (n !== m) return false;
+  let m1 = new Array(26).fill(0);
+  let m2 = new Array(26).fill(0);
+  let sum = 0; //记录不同的字母数
+  for (let i = 0; i < n; i++) {
+    let a = s.charCodeAt(i) - 97;
+    let b = goal.charCodeAt(i) - 97;
+    m1[a]++;
+    m2[b]++;
+    if (a != b) sum++;
+  }
+  let ok = true; // 字母都一样
+  let temp = false; // 完全相同时 是否有字母相同
+  for (let i = 0; i < 26; i++) {
+    if (m1[i] === m2[i]) {
+      if (m1[i] > 1) temp = true;
+      continue;
+    }
+    ok = false;
+  }
+  return ok && (sum === 2 || (sum === 0 && temp));
 };
 ```
 
