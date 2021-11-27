@@ -1,6 +1,6 @@
 ---
 title: 前端性能优化对策
-date: 2021-8-31
+date: 2021-11-27
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -15,7 +15,7 @@ tags:
 ```ts
 function throttle(fn: Function, interval: string | number) {
   let flag = true;
-  return function() {
+  return function () {
     if (!flag) return;
     flag = false;
     setTimeOut(() => {
@@ -42,7 +42,7 @@ function throttle(fn: Function, interval: string | number) {
 ```ts
 function throttle(fn: Function, interval: string | number) {
   let last = 0;
-  return function() {
+  return function () {
     let now = Date.now();
     if (now - last >= interval) {
       last = now;
@@ -54,11 +54,13 @@ function throttle(fn: Function, interval: string | number) {
 
 那么可不可以做一个两者兼具的版本呢？
 
+> 以下是错误实例，是我 8 月初写的一个 bug
+
 ```ts
 function throttle(fn: Function, interval: number) {
   let timer = null;
   let last = 0;
-  return function() {
+  return function () {
     let now = Date.now();
     let remain = interval - (now - last);
     if (remain <= interval) {
@@ -74,13 +76,15 @@ function throttle(fn: Function, interval: number) {
 }
 ```
 
+上述代码中，**始终**走第一个判断条件。修改我就不改在这里了，请读者自行思考吧~
+
 **防抖**: 通俗的来说，比如 LOL 里面的回城，无论你点多少次回城，回城时间的开始计算总是在最后一次点回城的时候。**关键是延时器的清除**
 
 ```typescript
 function debounce(fn: Function, interval: string | number) {
   let timer = null;
   let last = 0;
-  return function() {
+  return function () {
     if (timer) clearTimeOut(timer);
     timer = setTimeOut(() => {
       fn.apply(this, arguments);
