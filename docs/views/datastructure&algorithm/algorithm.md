@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-24
+date: 2021-11-27
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -627,6 +627,47 @@ var minMoves = function (nums) {
 };
 ```
 
+### leetcode 458. 可怜的小猪
+
+有 `buckets` 桶液体，其中 **正好** 有一桶含有毒药，其余装的都是水。它们从外观看起来都一样。为了弄清楚哪只水桶含有毒药，你可以喂一些猪喝，通过观察猪是否会死进行判断。不幸的是，你只有  `minutesToTest` 分钟时间来确定哪桶液体是有毒的。
+
+喂猪的规则如下：
+
+- 选择若干活猪进行喂养
+- 可以允许小猪同时饮用任意数量的桶中的水，并且该过程不需要时间。
+- 小猪喝完水后，必须有 `minutesToDie` 分钟的冷却时间。在这段时间里，你只能观察，而不允许继续喂猪。
+- 过了 `minutesToDie` 分钟后，所有喝到毒药的猪都会死去，其他所有猪都会活下来。
+- 重复这一过程，直到时间用完。
+
+给你桶的数目 `buckets` ，`minutesToDie` 和 `minutesToTest` ，返回在规定时间内判断哪个桶有毒所需的 最小 猪数。
+
+**法一：香农熵(信息熵)** `2021.11.27`
+
+首先我们来了解一下额外的知识。（这里只贴针对此题有用的知识）
+
+![](../imgs/algorithm/lc458-1.jpg)
+![](../imgs/algorithm/lc458-2.jpg)
+![](../imgs/algorithm/lc458-3.jpg)
+![](../imgs/algorithm/lc458-4.jpg)
+![](../imgs/algorithm/lc458-5.jpg)
+![](../imgs/algorithm/lc458-6.jpg)
+
+针对此题，我们作以下操作：
+
+- 事件 A：n 桶水有一通是有毒的，则香农熵为 $$-\sum P(x)log2P(x)=-log2 \frac{1}{n}$$
+- 事件 B：测试 k 轮，一只猪共有 k+1 种状态，则 n 只猪的每一种状态概率为 $${\frac{1}{k+1}}^{n}$$,则香农熵为$$-log2{\frac{1}{k+1}}^{n}$$
+
+要找出有毒的水，即事件 B 的信息熵大于事件 A 的信息熵，解个方程得：
+$$N>=log(k+1)n$$
+
+```js
+var poorPigs = function (buckets, minutesToDie, minutesToTest) {
+  const states = Math.floor(minutesToTest / minutesToDie) + 1;
+  const pigs = Math.ceil(Math.log(buckets) / Math.log(states));
+  return pigs;
+};
+```
+
 ### leetcode 492. 构造矩形
 
 作为一位 web 开发者， 懂得怎样去规划一个页面的尺寸是很重要的。 现给定一个具体的矩形页面面积，你的任务是设计一个长度为 L 和宽度为 W 且满足以下要求的矩形的页面。要求：
@@ -665,6 +706,79 @@ var constructRectangle = function (area) {
   }
   return [area / width, width];
 };
+```
+
+### leetcode 519. 随机翻转矩阵
+
+给你一个 `m x n` 的二元矩阵 `matrix` ，且所有值被初始化为 `0` 。请你设计一个算法，随机选取一个满足  `matrix[i][j] == 0` 的下标  `(i, j)` ，并将它的值变为 `1` 。所有满足 `matrix[i][j] == 0` 的下标 `(i, j)` 被选取的概率应当均等。
+
+尽量最少调用内置的随机函数，并且优化时间和空间复杂度。
+
+实现`Solution`类：
+
+- `Solution(int m, int n)` 使用二元矩阵的大小 m 和 n 初始化该对象
+- `int[] flip()` 返回一个满足  `matrix[i][j] == 0` 的随机下标 `[i, j]` ，并将其对应格子中的值变为 1
+- `void reset()` 将矩阵中所有的值重置为 0
+
+---
+
+首先这道题我们得需要知道我们不需要真的构造一个矩阵出来，我们只需要返回一个随机的下标，以及实现重置功能即可。为了减少复杂度，我们构造一个`index=i*n+j`来代表下标。
+
+**法一：双指针+Set** `2021.11.27`
+
+我们可以随机一个 idx 出来，然后利用双指针分别向左右两边寻找，寻找到第一个没有被反转为 1 的 idx，然后反转并使用 Set 记录下来。
+
+```js
+class Solution {
+  constructor(m, n) {
+    this.set = new Set();
+    this.total = m * n;
+    this.m = m;
+    this.n = n;
+  }
+  flip() {
+    let l = Math.floor(Math.random() * this.total);
+    let r = l;
+    while (l >= 0 && this.set.has(l)) l--;
+    while (r < this.total && this.set.has(r)) r++;
+    let idx = l >= 0 && !this.set.has(l) ? l : r;
+    this.set.add(idx);
+    return [Math.floor(idx / this.n), idx % this.n];
+  }
+  reset() {
+    this.set.clear();
+  }
+}
+```
+
+**法二：Map+映射**
+为了能在**连续区间内**随机一个 index，我们可以使用映射来实现。比如有一个数组`[1,2,3,4]`，第一次随机到下标`0`，则将数组最后的 4 跟 1 换一下位置，也就是映射`0->4`，下一次随机只在前 3 个数字中随机。
+
+```js
+class Solution {
+  constructor(m, n) {
+    this.map = new Map();
+    this.total = m * n;
+    this.m = m;
+    this.n = n;
+  }
+  flip() {
+    let r = Math.floor(Math.random() * this.total);
+    let idx = this.map.has(r) ? this.map.get(r) : r;
+    this.map.set(
+      r,
+      this.map.has(this.total - 1)
+        ? this.map.get(this.total - 1)
+        : this.total - 1
+    );
+    this.total--;
+    return [Math.floor(idx / this.n), idx % this.n];
+  }
+  reset() {
+    this.map.clear();
+    this.total = this.m * this.n;
+  }
+}
 ```
 
 ### leetcode 859. 亲密字符串
