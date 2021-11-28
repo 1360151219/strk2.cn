@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-27
+date: 2021-11-28
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -941,22 +941,42 @@ var maxCount = function (m, n, ops) {
 
 ## 数组
 
-### leetcode 217.存在重复元素
+### leetcode 1.两数之和
 
-给定一个整数数组，判断是否存在重复元素。如果存在一值在数组中出现至少两次，函数返回 true 。如果数组中每个元素都不相同，则返回 false 。
+给定一个整数数组 nums  和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那   两个   整数，并返回它们的数组下标。
 
-**法一：Set 类** `2021.7.12`
-::: tip
-思路：这种去重问题，可以用 ES6 新类 Set 来解决，因为 Set 本身就是不会将重复的元素添加进去，所以我们可以遍历数组将所以数据添加到 Set 中，再比较两者的长度
-:::
+你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。
+
+你可以按任意顺序返回答案。
+
+**法一：暴力解法** `2021.7.13`
+
+> 思路：没啥好说的，两个 for 遍历完事了。时间复杂度 O(n^2)
 
 ```js
-var containsDuplicate = function (nums) {
-  let list = new Set();
+var twoSum = function (nums, target) {
   for (let i = 0; i < nums.length; i++) {
-    list.add(nums[i]);
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] + nums[j] === target) return [i, j];
+    }
   }
-  return list.size !== nums.length;
+  return [];
+};
+```
+
+**法二：哈希表** `2021.7.13`
+
+> 思路：我们可以换一种想法，每次遍历用 target-nums[i]来求出另一个值，这样的话只要寻找到另一个值，则 OK；找不到则继续遍历。时间复杂度 O(n^2)
+
+```js
+var twoSum = function (nums, target) {
+  let hashMap = {};
+  for (let i = 0; i < nums.length; i++) {
+    let another = target - nums[i];
+    if (another in hashMap) return [i, hashMap[another]];
+    hashMap[nums[i]] = i;
+  }
+  return [];
 };
 ```
 
@@ -1021,45 +1041,6 @@ var maxSubArray = function (nums) {
 - `rSum` 表示 [l,r] 内以 r 为右端点的最大子段和。同理
 - `mSum` 表示 [l,r] 内的最大子段和。这个就有 3 种情况了：可能是左、右区间的 mSum，或者跨越了中间，即左区间的 rSum + 右区间的 lSum。
 - `iSum` 表示 [l,r] 的区间和。那么[l,r]的 iSum 就是左右两区间的 iSum 之和。
-
-### leetcode 1.两数之和
-
-给定一个整数数组 nums  和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那   两个   整数，并返回它们的数组下标。
-
-你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。
-
-你可以按任意顺序返回答案。
-
-**法一：暴力解法** `2021.7.13`
-
-> 思路：没啥好说的，两个 for 遍历完事了。时间复杂度 O(n^2)
-
-```js
-var twoSum = function (nums, target) {
-  for (let i = 0; i < nums.length; i++) {
-    for (let j = i + 1; j < nums.length; j++) {
-      if (nums[i] + nums[j] === target) return [i, j];
-    }
-  }
-  return [];
-};
-```
-
-**法二：哈希表** `2021.7.13`
-
-> 思路：我们可以换一种想法，每次遍历用 target-nums[i]来求出另一个值，这样的话只要寻找到另一个值，则 OK；找不到则继续遍历。时间复杂度 O(n^2)
-
-```js
-var twoSum = function (nums, target) {
-  let hashMap = {};
-  for (let i = 0; i < nums.length; i++) {
-    let another = target - nums[i];
-    if (another in hashMap) return [i, hashMap[another]];
-    hashMap[nums[i]] = i;
-  }
-  return [];
-};
-```
 
 ### leetcode 56. 合并区间
 
@@ -1133,6 +1114,57 @@ var merge = function(nums1, m, nums2, n) {
 }
 ```
 
+### leetcode 121. 买卖股票的最佳时机
+
+给定一个数组 prices ，它的第  i 个元素  prices[i] 表示一支给定股票第 i 天的价格。
+你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。
+返回你可以从这笔交易中获取的最大利润。如果你不能获取任何利润，返回 0 。
+
+_示例:_
+
+```js
+输入：[7,1,5,3,6,4]
+输出：5
+解释：在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格；同时，你不能在买入前卖出股票。
+```
+
+**法一：** `2021.7.14`
+
+> 思路：记录下最小值以及每天理论上可获取的最大利润。
+
+```js
+var maxProfit = function (prices) {
+  if (prices.length < 1) return 0;
+  let max = 0;
+  let min = prices[0];
+  for (let i = 1; i < prices.length; i++) {
+    max = Math.max(max, prices[i] - min);
+    min = Math.min(prices[i], min);
+  }
+  return max;
+};
+```
+
+### leetcode 217.存在重复元素
+
+给定一个整数数组，判断是否存在重复元素。如果存在一值在数组中出现至少两次，函数返回 true 。如果数组中每个元素都不相同，则返回 false 。
+
+**法一：Set 类** `2021.7.12`
+::: tip
+思路：这种去重问题，可以用 ES6 新类 Set 来解决，因为 Set 本身就是不会将重复的元素添加进去，所以我们可以遍历数组将所以数据添加到 Set 中，再比较两者的长度
+:::
+
+```js
+var containsDuplicate = function (nums) {
+  let list = new Set();
+  for (let i = 0; i < nums.length; i++) {
+    list.add(nums[i]);
+  }
+  return list.size !== nums.length;
+};
+```
+
 ### leetcode 350. 两个数组的交集 II
 
 给定两个数组，编写一个函数来计算它们的交集。输出结果中每个元素出现的次数，应与元素在两个数组中出现次数的最小值一致。我们可以不考虑输出结果的顺序。
@@ -1194,38 +1226,6 @@ var intersect = function (nums1, nums2) {
 };
 ```
 
-### leetcode 121. 买卖股票的最佳时机
-
-给定一个数组 prices ，它的第  i 个元素  prices[i] 表示一支给定股票第 i 天的价格。
-你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。
-返回你可以从这笔交易中获取的最大利润。如果你不能获取任何利润，返回 0 。
-
-_示例:_
-
-```js
-输入：[7,1,5,3,6,4]
-输出：5
-解释：在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
-     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格；同时，你不能在买入前卖出股票。
-```
-
-**法一：** `2021.7.14`
-
-> 思路：记录下最小值以及每天理论上可获取的最大利润。
-
-```js
-var maxProfit = function (prices) {
-  if (prices.length < 1) return 0;
-  let max = 0;
-  let min = prices[0];
-  for (let i = 1; i < prices.length; i++) {
-    max = Math.max(max, prices[i] - min);
-    min = Math.min(prices[i], min);
-  }
-  return max;
-};
-```
-
 ### leetcode 414. 第三大的数
 
 给你一个非空数组，返回此数组中 第三大的数 。如果不存在，则返回数组中最大的数。
@@ -1260,6 +1260,83 @@ var thirdMax = function (nums) {
     ? max
     : thirdmax;
 };
+```
+
+### leetcode 438. 找到字符串中所有字母异位词
+
+给定两个字符串  `s`  和 `p`，找到  `s`  中所有  `p`  的   异位词   的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+
+**异位词** 指由相同字母重排列形成的字符串（包括相同的字符串）。
+
+**法一：滑动窗口** `2021.11.28`
+
+首先统计 p 的词频，然后利用滑动窗口来检测 s 中子串是否满足题意。
+
+_第一版_
+
+```js
+var findAnagrams = function (s, p) {
+  let map = new Array(26).fill(0);
+  let n = p.length;
+  for (let ch of p) {
+    let idx = ch.charCodeAt() - "a".charCodeAt();
+    map[idx]++;
+  }
+  let res = [];
+  for (let l = 0; l < s.length; l++) {
+    let ok = true;
+    let clone = map.concat();
+    for (let r = l; r < l + n; r++) {
+      if (r == s.length) {
+        ok = false;
+        break;
+      }
+      let idx = s.charCodeAt(r) - 97;
+      if (clone[idx] === 0) {
+        ok = false;
+        break;
+      }
+      clone[idx]--;
+    }
+    if (ok) {
+      res.push(l);
+    }
+  }
+  return res;
+};
+```
+
+_第二版_
+上面的版本效率不高，主要是因为没有利用滑动窗口这个特性来减少重新更新数据的操作。上述代码每次找子串都得从零开始(即 clone 了一个 map)。因此我们改变思路，直接通过遍历数组来检测两数组是否相同来找到异位词。
+
+```js
+var findAnagrams = function (s, p) {
+  let m2 = new Array(26).fill(0);
+  let n = p.length;
+  for (let ch of p) {
+    let idx = ch.charCodeAt() - "a".charCodeAt();
+    m2[idx]++;
+  }
+  let res = [];
+  let l = 0;
+  let m1 = new Array(26).fill(0);
+  for (let r = l; r < s.length; r++) {
+    m1[s.charCodeAt(r) - 97]++;
+    if (r - l + 1 === n) {
+      if (check(m1, m2)) res.push(l);
+      m1[s.charCodeAt(l++) - 97]--;
+    }
+  }
+  return res;
+};
+function check(a1, a2) {
+  for (let i = 0; i < a1.length; i++) {
+    if (a1[i] !== a2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 ```
 
 ### leetcode 566. 重塑矩阵
