@@ -1,6 +1,6 @@
 ---
 title: 《ES6标准入门》阮一峰---读书笔记
-date: 2021-11-24
+date: 2021-11-29
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅
@@ -169,3 +169,76 @@ console.log(res);
 ### 异步编程
 
 这部分可以直接使用`async..await`了
+
+## 第十八章 async 函数
+
+其实`async..await`就是 Generator 的一个语法糖，其实现原理也就是将 Generator 函数和自动执行器包在一个函数内：
+
+```js
+// async function fn(args) {
+//      ...
+// }
+// 等同于
+
+function* gen() {
+  yield 1;
+  yield 2;
+}
+function fn(gen: () => Generator) {
+  return spawn(gen);
+}
+function spawn(gen: () => Generator) {
+  return new Promise((resolve, reject) => {
+    let g = gen();
+    function step(nextF: Function) {
+      let next;
+      try {
+        next = nextF(); // { value: 1, done: false }
+      } catch (error) {
+        return reject(error);
+      }
+      if (next.done) {
+        return resolve(next.value);
+      }
+      Promise.resolve(next.value)
+        .then((res) => {
+          step(() => g.next(res));
+        })
+        .catch((e) => {
+          step(() => g.throw(e));
+        });
+    }
+    step(() => g.next(undefined)); // 这里不能直接传g.next()因为有可能发生错误而无法捕获
+  });
+}
+
+fn(gen);
+```
+
+## 第 22 章 Module 的语法
+
+### 模块加载方案
+
+```js
+// commonJS
+let { stat, exists, readFile } = require("fs");
+//等同于
+let _fs = require("fs");
+let stat = _fs.stat;
+//...
+
+// ES6
+import { stat, exists, readFile } from "fs";
+```
+
+从上面的例子我们可以得知，commonJS 的加载方案，实质上会先生成一个对象再从其身上读取属性。这种方法叫做**运行时加载**，即只有当代码运行的时候才开始加载这个对象，因此也完全没办法进行编译时 “静态优化”。
+
+而 ES6 中的方法，可以实现只加载指定的 3 个方法，这种方法叫做**编译时加载**，即可以在编译的时候就完成加载。
+
+### export
+
+- `export`语句输出的接口和对应的值是动态绑定的，因此要是内部文件变量改变了，外部引用的值也会实时变化。
+
+> 这也和 commonJS 的不一样，commonJS 加载的是静态缓存，即不会实时变化。
+
+- `export`语句只能放在模块顶层，不能放在函数之中、块作用域之中...

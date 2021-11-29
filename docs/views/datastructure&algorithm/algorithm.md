@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-28
+date: 2021-11-29
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -5103,6 +5103,87 @@ var arrangeCoins = function (n) {
     }
   }
   return 1;
+};
+```
+
+### leetcode 786. 第 K 个最小的素数分数
+
+给你一个按递增顺序排序的数组 `arr` 和一个整数 `k` 。数组 `arr` 由 **1** 和若干 **素数**  组成，且其中所有整数互不相同。
+
+对于每对满足 0 < i < j < `arr.length` 的 `i` 和 `j` ，可以得到分数 `arr[i] / arr[j]` 。
+
+那么第  k  个最小的分数是多少呢?  以长度为 2 的整数数组返回你的答案, 这里  `answer[0] == arr[i]`  且  `answer[1] == arr[j]` 。
+
+**法一：暴力搜** `2021.11.29`
+
+首先看到这道题，直接的想法就是把所有的分数都列出来，然后排个序，然后返回对应的答案。
+
+```js
+var kthSmallestPrimeFraction = function (arr, k) {
+  let ans = new Map();
+  for (let i = 0; i < arr.length - 1; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      ans.set(arr[i] / arr[j], [arr[i], arr[j]]);
+    }
+  }
+  return ans.get([...ans.keys()].sort()[k - 1]);
+};
+```
+
+但是这种做法直接给我报错了。`terminate called after throwing an instance of 'std::bad_alloc'what(): std::bad_alloc`。我也没看懂，但经过测试大概意思是有很多无限循环小数导致空间不够了。因此我换了种思路，我直接用数组存，而且不计算具体的分数值。利用这个公式进行排序：
+$$\frac{x}{y}<\frac{m}{n}=>x*n<y*m$$
+
+```js
+var kthSmallestPrimeFraction = function (arr, k) {
+  let ans = [];
+  for (let i = 0; i < arr.length - 1; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      ans.push([arr[i], arr[j]]);
+    }
+  }
+  ans.sort((a, b) => a[0] * b[1] - b[0] * a[1]);
+  return ans[k - 1];
+};
+```
+
+**法二：二分查找** `2021.11.29`
+分数的范围就是`[0,1]`，我们可以在这区间里面使用二分，随便猜一个素数为`a`，则我们只需要统计小于`a`的分数一共有多少个即可。
+
+- 如果刚好为 k 个，则这些分数中的最大值就是结果；
+- 如果小于 k，则向右扩大区间。
+- 如果大于 k，则向左扩大区间。
+
+统计的时候同样使用两个循环进行遍历即可。
+
+```js
+var kthSmallestPrimeFraction = function (arr, k) {
+  const n = arr.length;
+  let l = 0.0;
+  let r = 1.0;
+  while (1) {
+    let mid = (l + r) / 2;
+    // 记录最大的分数
+    let x = 0;
+    let y = 1;
+    let count = 0;
+    for (let j = 1; j < n; j++) {
+      for (let i = 0; i < j; i++) {
+        if (arr[i] / arr[j] > mid) break;
+        if (arr[i] * y > arr[j] * x) {
+          x = arr[i];
+          y = arr[j];
+        }
+        count++;
+      }
+    }
+    if (count === k) {
+      return [x, y];
+    } else if (count < k) {
+      l = mid;
+    } else {
+      r = mid;
+    }
+  }
 };
 ```
 
