@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-11-29
+date: 2021-12-5
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -447,6 +447,72 @@ var isSelfCrossing = function (distance) {
 };
 ```
 
+### leetcode 372. 超级次方
+
+你的任务是计算 `ab` 对 `1337` 取模，`a` 是一个正整数，`b` 是一个非常大的正整数且会以数组形式给出。
+
+**快速幂运算** `2021.12.5`
+今天来学习一下快速幂。
+
+我们如果要计算 7 的十次方，为了快速我们应该这样去分解：
+$$7^{10}={7^{5}}^2$$
+$$7^{5}=7*7^4$$
+
+因此算法实现应该如下：
+
+```c
+long long qpow(long long a, long long n)
+{
+    if (n == 0)
+        return 1;
+    else if (n % 2 == 1)
+        return qpow(a, n - 1) * a % MOD;
+    else
+    {
+        long long temp = qpow(a, n / 2) % MOD;
+        return temp * temp % MOD;
+    }
+}
+```
+
+但是这种递归形式时间复杂度很高，因此我们可以变化一下，不采用递归（将指数写成二进制形式）：
+
+```c
+int qpow(int a, int n){
+    int ans = 1;
+    while(n){
+        if(n&1)        //如果n为奇数
+            ans *= a;  //ans乘上当前的a
+        a *= a;        //a自乘
+        n >>= 1;       //n往右移一位
+    }
+    return ans;
+}
+```
+
+代入这个题目中去：
+
+```js
+const MOD = 1337;
+var superPow = function (a, b) {
+  function qpow(a, b) {
+    let ans = 1;
+    while (b) {
+      if (1 & b) ans *= a % MOD;
+      a = (a * a) % MOD;
+      b >>= 1;
+    }
+    return ans;
+  }
+  function dfs(n) {
+    if (n < 0) return 1;
+    return (qpow(dfs(n - 1), 10) * qpow(a, b[n])) % MOD;
+  }
+  a %= MOD;
+  return dfs(b.length - 1);
+};
+```
+
 ### leetcode 384.打乱数组
 
 给你一个整数数组`nums` ，设计算法来打乱一个没有重复元素的数组。
@@ -492,6 +558,30 @@ class Solution {
     arr[j] = temp;
   }
 }
+```
+
+### leetcode 400. 第 N 位数字
+
+给你一个整数 `n` ，请你在无限的整数序列 `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, ...]` 中找出并返回第 `n` 位上的数字。
+
+**法一：数学** `2021.12.1`
+选计算 n 处于多少位数，然后利用数学推导来得出答案。
+
+```js
+var findNthDigit = function (n) {
+  let k = 0; // 处于几位数
+  let cnt = 0;
+  let last = 0;
+  while (cnt < n) {
+    last = (k + 1) * 9 * Math.pow(10, k++);
+    cnt += last;
+  }
+  let diff = n - (cnt - last); // 超出前一位数区域多少了
+  let start = 1 * Math.pow(10, k - 1) + Math.floor(diff / k) - 1;
+  let mod = diff % k;
+  let str = mod === 0 ? String(start) : String(start + 1);
+  return str.charAt(mod === 0 ? str.length - 1 : mod - 1);
+};
 ```
 
 ### 412. Fizz Buzz
@@ -3845,39 +3935,6 @@ class WordDictionary {
 
 ## 贪心算法
 
-### leetcode 455. 分发饼干 `2021.7.9`
-
-> 思路：要满足最大的条件，即需要将最小的饼干分给胃口最小的孩子，这样满足的孩子才能达到最大，即贪心算法。
-> 因此可以先把 2 个数组进行排序，再从小开始遍历。
-
-**代码实现：**
-
-```js
-/**
- * @param {number[]} g
- * @param {number[]} s
- * @return {number}
- */
-var findContentChildren = function (g, s) {
-  if (s.length === 0) return 0;
-  g.sort((i, j) => i - j);
-  s.sort((i, j) => i - j);
-  let count = 0;
-  for (let i = 0, j = 0; i < g.length && j < s.length; i++) {
-    while (g[i] > s[j] && j < s.length) {
-      j++;
-    }
-    /* 若j超出了界限 */
-    if (j >= s.length) return count;
-    /* 匹配成功 */
-    count++;
-    j++;
-  }
-  /* i超出了界限 */
-  return count;
-};
-```
-
 ### leetcode 55.跳跃游戏
 
 给定一个非负整数数组  nums ，你最初位于数组的 第一个下标 。
@@ -4010,6 +4067,73 @@ var findMinArrowShots = function (points) {
     }
   }
   return count;
+};
+```
+
+### leetcode 455. 分发饼干 `2021.7.9`
+
+> 思路：要满足最大的条件，即需要将最小的饼干分给胃口最小的孩子，这样满足的孩子才能达到最大，即贪心算法。
+> 因此可以先把 2 个数组进行排序，再从小开始遍历。
+
+**代码实现：**
+
+```js
+/**
+ * @param {number[]} g
+ * @param {number[]} s
+ * @return {number}
+ */
+var findContentChildren = function (g, s) {
+  if (s.length === 0) return 0;
+  g.sort((i, j) => i - j);
+  s.sort((i, j) => i - j);
+  let count = 0;
+  for (let i = 0, j = 0; i < g.length && j < s.length; i++) {
+    while (g[i] > s[j] && j < s.length) {
+      j++;
+    }
+    /* 若j超出了界限 */
+    if (j >= s.length) return count;
+    /* 匹配成功 */
+    count++;
+    j++;
+  }
+  /* i超出了界限 */
+  return count;
+};
+```
+
+### leetcode 1005. K 次取反后最大化的数组和
+
+给你一个整数数组 `nums` 和一个整数 `k` ，按以下方法修改该数组：
+
+选择某个下标 `i`  并将 `nums[i]` 替换为 `-nums[i]` 。
+重复这个过程恰好 `k` 次。可以多次选择同一个下标 `i` 。
+
+以这种方式修改数组后，返回数组 **可能的最大和** 。
+
+**法一：贪心+排序+模拟** `2021.12.3`
+要返回最大和，首先肯定想要把所有负数都变成正数了啦。然后得分情况考虑，当负数都变成正数后 k 是 2 的倍数，则相当于没有变化，则直接将所有正数相加即可；若是奇数，则只需要再将正数数组排序，取最小值取反即可。
+
+```js
+var largestSumAfterKNegations = function (nums, k) {
+  nums.sort((a, b) => a - b);
+  let sum = 0;
+  let ok = false;
+  for (let i of nums) {
+    if (k == 0) {
+      ok = true;
+      sum += i;
+    } else if (i < 0) {
+      sum += -i;
+      k--;
+    } else {
+      if (k % 2 === 0) ok = true;
+      sum += i;
+    }
+  }
+  nums.sort((a, b) => Math.abs(a) - Math.abs(b));
+  return ok ? sum : sum - Math.abs(nums[0] * 2);
 };
 ```
 

@@ -233,7 +233,7 @@ import { stat, exists, readFile } from "fs";
 
 从上面的例子我们可以得知，commonJS 的加载方案，实质上会先生成一个对象再从其身上读取属性。这种方法叫做**运行时加载**，即只有当代码运行的时候才开始加载这个对象，因此也完全没办法进行编译时 “静态优化”。
 
-而 ES6 中的方法，可以实现只加载指定的 3 个方法，这种方法叫做**编译时加载**，即可以在编译的时候就完成加载。
+而 ES6 中的方法，可以实现只加载指定的 3 个方法，这种方法叫做**编译时加载**，即可以在编译的时候就完成加载。因此`import`无法用在表达式或者条件语句中。
 
 ### export
 
@@ -242,3 +242,82 @@ import { stat, exists, readFile } from "fs";
 > 这也和 commonJS 的不一样，commonJS 加载的是静态缓存，即不会实时变化。
 
 - `export`语句只能放在模块顶层，不能放在函数之中、块作用域之中...
+
+### import
+
+基本语法：
+
+```js
+import { foo } from "my_module";
+import * as module from "my_module";
+```
+
+`import` 具有**声明提升**的特性。且如果多次重复执行同一句`import`，则只会**执行一次**。
+
+但在需要动态加载的场合下，那就得用到`import()`函数了。`import()`返回一个 Promise 对象。
+
+```js
+import(`./section_modules/${someVariable}.js`).then((module) => {
+  console.log(module);
+  // 这里的module还可以写成解构形式
+});
+```
+
+## 第 23 章 Module 的加载实现
+
+总所周知，异步加载 JavaScript 脚本有两种方法：`defer`和`async`
+
+- `defer`是异步加载完 js 文件后等页面渲染完成之后再去执行 js 代码
+- `async`则是异步加载完后立即中断渲染去执行 js 代码。
+
+浏览器在加载 ES6 模块的时候，需要加入`type="module"`属性，这个属性等同于带了`defer`属性一样。
+
+> 这里注意一下，模块顶层的 this 关键字返回 undefined，而不是指向 window
+
+## require 命令加载
+
+### 循环加载
+
+循环加载指的是 a 脚本执行依赖 b 脚本，b 脚本的执行也依赖 a 脚本。
+
+对于处理循环加载的情况，我们从 CommonJS 和 ES6 两种角度进行分析学习：
+
+**CommonJS 模块加载原理**是 require 命令第一次加载脚本的时候会全部执行，然后生成一个对象在内存中，以后再用到的话都是从**缓存**中去取值了。
+
+这里做了一个小 demo：
+
+```js
+// a.js
+exports.done = false;
+let b = require("./b.js");
+console.log(`in a.js，b.done=${b.done}`);
+exports.done = true;
+console.log("a finished");
+// b.js
+exports.done = false;
+let a = require("./a.js");
+console.log(`in b.js，a.done=${a.done}`);
+exports.done = true;
+console.log("b finished");
+// main.js
+let a = require("./a.js");
+let b = require("./b.js");
+console.log(`in main.js,a.done=${a.done},b.done=${b.done}`);
+
+/* 执行后 */
+// in b.js，a.done=false
+// b finished
+// in a.js，b.done=true
+// a finished
+// in main.js,a.done=true,b.done=true
+```
+
+由此可以看出，首先引用 a，然后 a 又引用了 b，在 b 执行的过程中引用 a 的时候会从缓存中取值，因此 a.done=false。
+
+commonJS 模块循环加载的时候返回的是**当前已经执行的部分**的值。
+
+因此我们引用模块的时候，为了避免值的准确性不要使用以下写法：
+
+```js
+let foo = require("a").foo;
+```
