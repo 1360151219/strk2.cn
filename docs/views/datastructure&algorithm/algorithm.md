@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-5
+date: 2021-12-7
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -4447,6 +4447,69 @@ class MapSum {
     return this.dfs(p);
   }
 }
+```
+
+### leetcode 1034. 边界着色
+
+给你一个大小为 `m x n` 的整数矩阵 `grid` ，表示一个网格。另给你三个整数  `row、col` 和 `color` 。网格中的每个值表示该位置处的网格块的颜色。
+
+两个网格块属于同一 **连通分量** 需满足下述全部条件：
+
+两个网格块颜色相同
+在上、下、左、右任意一个方向上相邻
+连通分量的边界 是指连通分量中满足下述条件之一的所有网格块：
+
+在上、下、左、右四个方向上与不属于同一连通分量的网格块相邻
+在网格的边界上（第一行/列或最后一行/列）
+请你使用指定颜色  `color` 为所有包含网格块  `grid[row][col]` 的 **连通分量的边界** 进行着色，并返回最终的网格  `grid` 。
+
+**法一：BFS** `2021.12.7`
+
+首先题目很白痴，简而言之就是从(row,col)开始，将所有连通分量(四个方向上且值相同)都遍历一遍，如果该处四个方向上不全是连通分量，则称为**边界**，即需要变色。
+
+```js
+var colorBorder = function (grid, row, col, color) {
+  let m = grid.length;
+  let n = grid[0].length;
+  let ans = new Array(m);
+  for (let i = 0; i < m; i++) {
+    ans[i] = new Array(n).fill(0);
+  }
+  let dir = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  let queue = [[row, col]];
+  while (queue.length > 0) {
+    let item = queue.pop();
+    let val = grid[item[0]][item[1]];
+    ans[item[0]][item[1]] = -1; //已经访问过了
+    let count = 0;
+    for (d of dir) {
+      const nr = item[0] + d[0];
+      const nc = item[1] + d[1];
+      if (nr < 0 || nr >= m || nc < 0 || nc >= n) continue;
+      let nval = grid[nr][nc];
+      if (nval === val) {
+        count++;
+        if (!ans[nr][nc]) queue.push([nr, nc]);
+      }
+    }
+    if (count < 4) {
+      ans[item[0]][item[1]] = 1; //需要变色
+    }
+  }
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (ans[i][j] === 1) {
+        grid[i][j] = color;
+      }
+    }
+  }
+  return grid;
+};
 ```
 
 ## 动态规划
