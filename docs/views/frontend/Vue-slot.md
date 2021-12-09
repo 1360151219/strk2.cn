@@ -1,5 +1,5 @@
 ---
-title: 关于Vue插槽的深入学习
+title: Vue之Slot的深入学习
 date: 2021-12-7
 categories:
   - frontend-article
@@ -107,4 +107,3 @@ console.log(this.$slots.loading)// 有东西
 ```html
 <template v-slot:[dynamicSlotName]> ... </template>
 ```
-

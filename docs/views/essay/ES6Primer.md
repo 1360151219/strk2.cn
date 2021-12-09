@@ -314,10 +314,50 @@ console.log(`in main.js,a.done=${a.done},b.done=${b.done}`);
 
 由此可以看出，首先引用 a，然后 a 又引用了 b，在 b 执行的过程中引用 a 的时候会从缓存中取值，因此 a.done=false。
 
-commonJS 模块循环加载的时候返回的是**当前已经执行的部分**的值。
+commonJS 模块循环加载的时候返回的是**当前已经执行的部分**的值。(缓存)
 
 因此我们引用模块的时候，为了避免值的准确性不要使用以下写法：
 
 ```js
 let foo = require("a").foo;
 ```
+
+**ES6** 的循环加载原理：因为 ES6 是动态引用的，所以通过`import`加载的变量是不会被缓存的，而是成为一个指向被加载模块的引用。
+
+这里举两个例子就很清楚了。
+
+```js
+//a.js
+import { bar } from "./b.js";
+console.log("a.js");
+console.log(bar);
+export let foo = "foo";
+// b.js
+import { foo } from "./a.js";
+console.log("b.js");
+console.log(foo);
+export let bar = "bar";
+```
+
+上述代码，首先加载 a.js，然后执行 b.js，而 b.js 的第一行又是加载 a.js，由于此时 a.js 已经开始执行所以不会重复执行，于是继续执行 b.js，打印`b.js`，但由于此时 a.js 还没执行完，还没暴露 foo 变量，因此报错。
+
+下面来看第二个例子吧。
+
+```js
+// a.js
+import { bar } from "./b.js";
+export function foo() {
+  console.log("foo");
+  bar();
+  console.log("finished A");
+}
+foo();
+// b.js
+import { foo } from "./a.js";
+export function bar() {
+  console.log("bar");
+  if (Math.random() > 0.5) foo();
+}
+```
+
+根据 Commonjs 规范，上述代码肯定无法执行，因为对于 b 来说 foo 变量为空。 但是在 ES6 就可以执行上述代码。**因为`bar`建立了一个 b.js 的一个引用。**
