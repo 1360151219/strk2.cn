@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2021-12-10
+date: 2021-12-12
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -55,6 +55,8 @@ tags:
 输出: 5
 解释: 不选第一件物品，选择第二件和第三件物品，可使价值最大。
 ```
+
+---
 
 **dp[N][c+1]**
 
@@ -136,4 +138,92 @@ function maxValue(N, C, v, w) {
   }
   return dp[C];
 }
+```
+
+## leetcode 416.分割等和子集
+
+给你一个 `只包含正整数` 的 `非空` 数组 `nums` 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的**元素和**相等。
+
+---
+
+> 通常「背包问题」相关的题，都是在考察我们的「建模」能力，也就是将问题转换为「背包问题」的能力。
+
+针对这道题，我们要想的是，要是两个子集和相同，也就是一个子集和为总和的一半，也就是需要我们判断能否将`Sum/2`的背包装满！
+
+数组的每一格元素的*价值*和*成本*都是其数值大小
+
+因此我们可以使用 01 背包问题的模型来做。
+
+![](./imgs/knapsack2.jpg)
+
+```js
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  let dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(cost + 1);
+  }
+  for (let i = 0; i <= cost; i++) {
+    dp[0][i] = i >= nums[0] ? nums[0] : 0;
+  }
+  // 初始化完毕
+  for (let i = 1; i < n; i++) {
+    for (let j = 0; j <= cost; j++) {
+      dp[i][j] = Math.max(
+        dp[i - 1][j],
+        j >= nums[i] ? dp[i - 1][j - nums[i]] + nums[i] : 0
+      );
+    }
+  }
+  return dp[n - 1][cost] === cost;
+};
+```
+
+**滚动数组优化方法一**
+
+将 n 行变成 2 行：
+
+```js
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  dp = new Array(cost + 1);
+  for (let i = 0; i <= cost; i++) {
+    dp[i] = i >= nums[0] ? nums[0] : 0;
+  }
+  // 初始化完毕
+  for (let i = 1; i < n; i++) {
+    for (let j = 0; j <= cost; j++) {
+      dp[i & 1][j] = Math.max(
+        dp[(i - 1) & 1][j],
+        j >= nums[i] ? dp[(i - 1) & 1][j - nums[i]] + nums[i] : 0
+      );
+    }
+  }
+  return dp[(n - 1) & 1][cost] === cost;
+};
+```
+
+**滚动数组优化方法二**
+
+变成一维数组
+
+```js
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  dp = new Array(cost + 1).fill(0);
+
+  // 初始化完毕
+  for (let i = 0; i < n; i++) {
+    for (let j = cost; j >= 0; j--) {
+      dp[j] = Math.max(dp[j], j >= nums[i] ? dp[j - nums[i]] + nums[i] : 0);
+    }
+  }
+  return dp[cost] === cost;
+};
 ```
