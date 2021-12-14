@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2021-12-12
+date: 2021-12-14
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -146,6 +146,8 @@ function maxValue(N, C, v, w) {
 
 ---
 
+### 间接求解
+
 > 通常「背包问题」相关的题，都是在考察我们的「建模」能力，也就是将问题转换为「背包问题」的能力。
 
 针对这道题，我们要想的是，要是两个子集和相同，也就是一个子集和为总和的一半，也就是需要我们判断能否将`Sum/2`的背包装满！
@@ -225,5 +227,93 @@ var canPartition = function (nums) {
     }
   }
   return dp[cost] === cost;
+};
+```
+
+### 直接求解
+
+上述做法我们在定义 dp[i][j]的时候，代表考虑前`i`个数值，其选择数字总和不超过`j`的最大价值。
+
+但是题目要求是：能否凑出最大价值。
+
+因此我们可以把定义改一改，变成：代表考虑前`i`个数值，其选择数字总和能否凑出`j`的最大价值。
+
+此时 dp 数组存储的就是 Boolean。
+
+相应的状态转移方程变成如下：即最大变成了求交集
+
+![](./imgs/knapsack3.jpg)
+
+其次，在初始化的过程中也有变化。
+
+我们要是初始化`dp[0][i] = false`的话，那么怎么也不会有 true 的状态出现。
+
+因此我们需要考虑一种情况，就是不考虑任何物品的情况下，即将 dp[0][i]定义为不考虑任何物品的情况。即哨兵！
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  let dp = new Array(n + 1);
+  for (let i = 0; i <= n; i++) {
+    dp[i] = new Array(cost + 1).fill(false);
+  }
+  dp[0][0] = true;
+  // 初始化完毕
+  for (let i = 1; i <= n; i++) {
+    for (let j = 0; j <= cost; j++) {
+      dp[i][j] =
+        dp[i - 1][j] || (j >= nums[i - 1] ? dp[i - 1][j - nums[i - 1]] : false);
+    }
+  }
+  return dp[n][cost];
+};
+```
+
+**滚动数组优化**
+
+```js
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  let dp = new Array(2);
+  for (let i = 0; i < 2; i++) {
+    dp[i] = new Array(cost + 1).fill(false);
+  }
+  dp[0][0] = true;
+  // 初始化完毕
+  for (let i = 1; i <= n; i++) {
+    for (let j = 0; j <= cost; j++) {
+      dp[i & 1][j] =
+        dp[(i - 1) & 1][j] ||
+        (j >= nums[i - 1] ? dp[(i - 1) & 1][j - nums[i - 1]] : false);
+    }
+  }
+  return dp[n & 1][cost];
+};
+```
+
+一维数组：
+
+```js
+var canPartition = function (nums) {
+  let n = nums.length;
+  let cost = Math.floor(nums.reduce((i, j) => i + j) / 2);
+  if (cost !== nums.reduce((i, j) => i + j) / 2) return false;
+  let dp = new Array(cost + 1).fill(false);
+  dp[0] = true;
+  // 初始化完毕
+  for (let i = 1; i <= n; i++) {
+    for (let j = cost; j >= 0; j--) {
+      dp[j] = dp[j] || (j >= nums[i - 1] ? dp[j - nums[i - 1]] : false);
+    }
+  }
+  return dp[cost];
 };
 ```

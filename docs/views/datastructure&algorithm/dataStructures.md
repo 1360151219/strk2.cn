@@ -1,6 +1,6 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
-date: 2021-6
+date: 2021-12-14
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1390,6 +1390,140 @@ class RBT {
 ```
 
 > 这里的代码有点 BUG。实在是写不出来了哈哈~
+
+## 最大(最小堆)
+
+最大(最小堆)，也是一颗**完全二叉树**，最大堆：父结点的键值总是大于或等于任何一个子节点的键值；最小堆：父结点的键值总是小于或等于任何一个子节点的键值。在最大堆中任意子堆都满足父结点的键值总是大于或等于任何一个子节点的键值这一性质。如下图即为一个最大堆。
+
+![](https://img-blog.csdnimg.cn/20190320112205536.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI1MzQzNTU3,size_16,color_FFFFFF,t_70)
+
+下面我使用数组来实现一个最大堆。
+
+假设当前索引为`i`，那么有三个公式非常重要：
+
+- 当前节点的父节点为 `i - 1 >> 1`
+- 当前节点的左子节点为 `(i << 1) + 1`
+- 当前节点的右子节点为 `(i << 1) + 2`
+
+因此可实现以上三个方法：
+
+```js
+function _parent(index) {
+  return (index - 1) >> 1;
+}
+function _child_left(index) {
+  return (index << 1) + 1;
+}
+function _child_right(index) {
+  return (index << 1) + 2;
+}
+```
+
+敲重点了：最重要的插入以及删除节点的两个方法：
+
+### siftUp 添加节点
+
+步骤：
+
+1. 往数组末尾添加节点
+2. 添加后不满足最大堆性质，则递归向父节点比较大小并交换。
+3. 直到当前节点已经是根节点为止或者已经满足最大堆性质
+
+```js
+  offer(value) {
+    this.data.push(value)
+    this._siftUp(this.size++)
+  }
+  _siftUp(index) {
+    // compare方法即 比较大小：这里最大堆是 (a,b)=>a>b
+    while (this._parent(index) >= 0
+        && this.compare(this.data[index], this.data[this._parent(index)])) {
+        this._swap(index, this._parent(index))
+        index = this._parent(index)
+    }
+  }
+```
+
+### siftDown 删除节点
+
+这里的删除节点是删除根节点。步骤是：
+
+1. 首先将根节点和末尾节点交换位置。
+2. 然后将现在的根节点递归地与其子节点中较大的那个比较大小且交换位置
+3. 直至到叶子节点或者已经满足最大堆性质
+
+```js
+ poll() {
+        this._swap(0, --this.size)
+        this._siftDown(0)
+        return this.data.pop()
+ }
+  _siftDown(index) {
+    while (this._child(index) < this.size
+        && this.compare(this.data[this._child(index)], this.data[index])
+    ) {
+        let child = this.data[this._child(index)] > this.data[this._child(index) + 1]
+            ? this._child(index) : this._child(index) + 1
+        this._swap(child, index)
+        index = child
+    }
+}
+```
+
+### 完整代码如下：
+
+```js
+class PriorityQueue {
+  constructor(compare = (a, b) => a > b) {
+    this.data = [];
+    this.size = 0;
+    this.compare = compare;
+  }
+  peek() {
+    return this.size > 0 ? this.data[0] : null;
+  }
+  offer(value) {
+    this.data.push(value);
+    this._siftUp(this.size++);
+  }
+  poll() {
+    this._swap(0, --this.size);
+    this._siftDown(0);
+    return this.data.pop();
+  }
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  _siftUp(index) {
+    while (
+      this._parent(index) >= 0 &&
+      this.compare(this.data[index], this.data[this._parent(index)])
+    ) {
+      this._swap(index, this._parent(index));
+      index = this._parent(index);
+    }
+  }
+  _siftDown(index) {
+    while (
+      this._child(index) < this.size &&
+      this.compare(this.data[this._child(index)], this.data[index])
+    ) {
+      let child =
+        this.data[this._child(index)] > this.data[this._child(index) + 1]
+          ? this._child(index)
+          : this._child(index) + 1;
+      this._swap(child, index);
+      index = child;
+    }
+  }
+  _swap(a, b) {
+    [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
+  }
+}
+```
 
 ## 图 Graph
 

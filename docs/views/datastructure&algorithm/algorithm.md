@@ -4103,6 +4103,107 @@ var findContentChildren = function (g, s) {
 };
 ```
 
+### leetcode 630. 课程表 III
+
+这里有 `n` 门不同的在线课程，按从 `1` 到 `n`  编号。给你一个数组 `courses` ，其中 `courses[i] = [durationi, lastDayi]` 表示第 `i` 门课将会 **持续** 上 `durationi` 天课，并且必须在不晚于 `lastDayi` 的时候完成。
+
+你的学期从第 `1` 天开始。且不能同时修读两门及两门以上的课程。
+
+返回你最多可以修读的课程数目。
+
+**贪心+最大堆** `2021.12.14`
+
+首先先按照*课程的结束时间*进行排序，因为课程结束早的早修读，才最有可能达到最多课程的目的。
+
+其次，对于 courses[i]而言，我们有两种情况：
+
+1. 修读完之后，满足最晚结束时间。
+2. 修读完之后，超出结束时间。此时应当在过往学习的课程中找出「持续时间」最长的课程进行「回退」操作（这个持续时长最长的课程有可能是当前课程）。
+
+```js
+var scheduleCourse = function (courses) {
+  courses.sort((a, b) => a[1] - b[1]);
+  let t = 0;
+  let pq = new PriorityQueue();
+  for (let i of courses) {
+    pq.offer(i[0]);
+    t += i[0];
+    if (t > i[1]) t -= pq.poll();
+  }
+  return pq.size;
+};
+class PriorityQueue {
+  constructor(compare = (a, b) => a > b) {
+    this.data = [];
+    this.size = 0;
+    this.compare = compare;
+  }
+  // 取队头 shift
+  peek() {
+    return this.size === 0 ? null : this.data[0];
+  }
+  // push
+  offer(val) {
+    this.data.push(val);
+    this._shifUp(this.size++);
+  }
+
+  poll() {
+    if (this.size === 0) {
+      return null;
+    }
+    this._swap(0, --this.size);
+    this._shifDown(0);
+    return this.data.pop(); // 返回最大值
+  }
+  // 父节点
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  // 左子节点
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  // 删除节点
+  // 开始进行siftDown操作：
+  // - 将当前节点（首次为根节点）与左右孩子中较大的节点进行比较；
+  //     - 如果当前节点为叶子节点，siftDown完成；
+  //     - 如果大于较大值，则已经符合最大堆的性质，siftDown完成；
+  //     - 如果小于较大值，则与较大值进行交换
+  // - 更新当前节点，再次进行siftDown操作。
+  _shifDown(index) {
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      if (
+        child + 1 < this.size &&
+        this.compare(this.data[child + 1], this.data[child])
+      ) {
+        child = child + 1;
+      }
+      if (this.compare(this.data[index], this.data[child])) {
+        break;
+      }
+      this._swap(index, child);
+      index = child;
+    }
+  }
+  // 插入的时候一直跟父节点比较大小并交换
+  _shifUp(index) {
+    while (
+      this._parent(index) >= 0 &&
+      this.compare(this.data[index], this.data[this._parent(index)])
+    ) {
+      this._swap(index, this._parent(index));
+      index = this._parent(index);
+    }
+  }
+
+  _swap(a, b) {
+    [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
+  }
+}
+```
+
 ### leetcode 1005. K 次取反后最大化的数组和
 
 给你一个整数数组 `nums` 和一个整数 `k` ，按以下方法修改该数组：
