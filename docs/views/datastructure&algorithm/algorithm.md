@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-7
+date: 2021-12-20
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -5392,6 +5392,83 @@ var arrangeCoins = function (n) {
   }
   return 1;
 };
+```
+
+### leetcode 475. 供暖器
+
+冬季已经来临。  你的任务是设计一个有固定加热半径的供暖器向所有房屋供暖。
+
+在加热器的加热半径范围内的每个房屋都可以获得供暖。
+
+现在，给出位于一条水平线上的房屋  `houses` 和供暖器  `heaters` 的位置，请你找出并返回可以覆盖所有房屋的**最小**加热半径。
+
+说明：**所有供暖器都遵循你的半径标准，加热的半径也一样。**
+
+**法一：排序+双指针** `2021.12.20`
+
+主要思想是，遍历所有的屋子，然后寻找每一个屋子距离最近的供暖期的最短距离。然后将所有的最短距离求个最大值，即是答案。
+
+为什么要排序呢？这里举个例子，比如房子是[1,4] 供暖器是[5,2]
+
+那么在遍历过第一个房子和供暖器后，第二个房子 4 显然应该去寻找第一个供暖器 5，但是现在肯定不能再回退遍历了。
+
+```js
+var findRadius = function (houses, heaters) {
+  let ans = 0;
+  houses.sort((a, b) => a - b);
+  heaters.sort((a, b) => a - b);
+  for (let i = (j = 0); i < houses.length; i++) {
+    let cur = Math.abs(houses[i] - heaters[j]); // 假设是左边（房子更大）
+    while (j < heaters.length && heaters[j] <= houses[i]) {
+      cur = houses[i] - heaters[j++];
+    }
+    // 若存在加热器更大
+    if (j < heaters.length) cur = Math.min(cur, heaters[j] - houses[i]);
+    ans = Math.max(ans, cur);
+    if (j > 0) j--;
+  }
+  return ans;
+};
+```
+
+**法二：二分查找+双指针**
+
+这是看了三叶姐题解的方法！
+
+要求最小可覆盖全部房屋的加热半径，这个答案具有二分性，即大于答案则一定满足条件，小于则不会满足。
+
+我们从数据范围入手，上界为 1e9，下界为 0
+
+考虑一下实现 check 函数：
+
+- 首先还是得排序
+- 寻找到每个房屋合适的供暖器，首先保证`houses[i]>heaters[j]+x` 即保证必然不会被覆盖，此时让 j++
+- 当找到一个会覆盖的供暖器后，判断是否符合`heater[j] - x <= houses[i]<= heaters[j] + x `
+
+```js
+var findRadius = function (houses, heaters) {
+  houses.sort((a, b) => a - b);
+  heaters.sort((a, b) => a - b);
+  let l = 0;
+  let r = 1e9;
+  while (l < r) {
+    let mid = (l + r) >> 1;
+    if (check(houses, heaters, mid)) r = mid;
+    else l = mid + 1;
+  }
+  return r;
+};
+function check(houses, heaters, x) {
+  let n = houses.length;
+  let m = heaters.length;
+  for (let i = 0, j = 0; i < n; i++) {
+    while (j < m && houses[i] > heaters[j] + x) j++;
+    if (j < m && heaters[j] - x <= houses[i] && heaters[j] + x >= houses[i])
+      continue;
+    return false;
+  }
+  return true;
+}
 ```
 
 ### leetcode 786. 第 K 个最小的素数分数
