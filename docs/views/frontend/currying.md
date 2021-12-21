@@ -8,7 +8,7 @@ tags:
   - JavaScript
 ---
 
-今天看博客，看到一道 3 年前的前端面试题 master，
+今天看博客，看到一道 3 年前的前端面试题，
 
 > 请实现一个 add 函数，并且满足以下功能
 
@@ -42,7 +42,7 @@ add(1,2,3) //6
 function fn(...args) {
   let i = 0;
   console.log(i++);
-  return function() {
+  return function () {
     console.log(args);
   };
 }
@@ -57,10 +57,10 @@ setInterval(fn(100, 200), 1000); //0 [ 100, 200 ] [ 100, 200 ] [ 100, 200 ]
 那么，我们可以自己手写一个 mybind()函数试试看。
 
 ```js
-(function() {
+(function () {
   function mybind(context = window, ...outer) {
     const _this = this; // fn(){}
-    return function(...inner) {
+    return function (...inner) {
       _this.call(context, ...outer.concat(inner));
     };
   }
@@ -82,14 +82,14 @@ document.body.onclick = fn.mybind(obj, 100, 200);
 function add() {
   // arguments是一个伪书数组，这句话是将arguments全部push到_args中。
   let _args = [].slice.call(arguments);
-  var adder = function() {
-    var _adder = function() {
+  var adder = function () {
+    var _adder = function () {
       _args.push(...arguments); // 第2~~~次开始传递的参数
       return _adder;
     };
     // 利用隐式转换的特性，当最后执行时隐式转换，并计算最终的值返回
-    _adder.toString = function() {
-      return _args.reduce(function(a, b) {
+    _adder.toString = function () {
+      return _args.reduce(function (a, b) {
         return a + b;
       });
     };
