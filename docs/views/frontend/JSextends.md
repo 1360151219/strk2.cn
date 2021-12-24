@@ -219,6 +219,8 @@ new Bus(); // [class Bus extends Vehicle]
 new Vehicle(); // [class Vehicle]  Error: Vehicle cannot be directly instantiated
 ```
 
+> 补充：ES5 中判断构造函数是否被 new 创建，在 vue 源码中是这样做的：`if(!this instanceof Vue) throw new Error('balabala')`
+
 或者还可以实现要求子类必须定义某个方法。
 
 ```js

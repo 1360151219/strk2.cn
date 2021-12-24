@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-20
+date: 2021-12-24
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -2731,6 +2731,47 @@ var middleNode = function (head) {
 
 ## 字符串
 
+### leetcode 28 strStr()
+
+即实现一个获取子串开始下标的函数。(也就是 JavaScript 中的 indexOf 函数)
+
+**KMP 算法** `2021.12.23`
+
+今天来学习一下![KMP 算法](https://mp.weixin.qq.com/s?__biz=MzU4NDE3MTEyMA==&mid=2247486317&idx=1&sn=9c2ff2fa5db427133cce9c875064e7a4&chksm=fd9ca072caeb29642bf1f5c151e4d5aaff4dc10ba408b23222ea1672cfc41204a584fede5c05&token=1782709324&lang=zh_CN#rd)
+
+核心思想是将匹配串的指针回溯的时候直接回溯到指针前的字符串中最长公共前后缀的位置。
+
+下面相当于是一个 KMP 算法的模板。
+
+```js
+/**
+ * @description:
+ * @param {string} pp
+ * @param {string} ss
+ * @return {number}
+ */
+function indexof(pp, ss) {
+  let m = pp.length;
+  let n = ss.length;
+  pp = (" " + pp).split("");
+  ss = (" " + ss).split(""); // 布置哨兵
+  let next = new Array(n + 1).fill(0);
+  // 处理next数组
+  for (let i = 2, j = 0; i <= n; i++) {
+    while (j > 0 && ss[i] !== ss[j + 1]) j = next[j];
+    if (ss[i] === ss[j + 1]) j++;
+    next[i] = j;
+  }
+  // 开始匹配
+  for (let i = 1, j = 0; i <= m; i++) {
+    while (j > 0 && pp[i] !== ss[j + 1]) j = next[j];
+    if (pp[i] === ss[j + 1]) j++;
+    if (j === n) return i - n;
+  }
+  return -1;
+}
+```
+
 ### leetcode 38. 外观数列
 
 给定一个正整数 `n` ，输出外观数列的第 `n` 项。
@@ -4236,6 +4277,113 @@ var largestSumAfterKNegations = function (nums, k) {
   nums.sort((a, b) => Math.abs(a) - Math.abs(b));
   return ok ? sum : sum - Math.abs(nums[0] * 2);
 };
+```
+
+### leetcode 1705. 吃苹果的最大数目
+
+有一棵特殊的苹果树，一连 `n` 天，每天都可以长出若干个苹果。在第 `i` 天，树上会长出 `apples[i]` 个苹果，这些苹果将会在 `days[i]` 天后（也就是说，第 `i + days[i]` 天时）腐烂，变得无法食用。也可能有那么几天，树上不会长出新的苹果，此时用 `apples[i] == 0 且 days[i] == 0` 表示。
+
+你打算每天 **最多** 吃一个苹果来保证营养均衡。注意，你可以在这 `n` 天之后继续吃苹果。
+
+给你两个长度为 `n` 的整数数组 `days` 和 `apples` ，返回你可以吃掉的苹果的最大数目。
+
+**优先队列+贪心** `2021.12.24`
+
+这道题核心的贪心思想：最早腐烂的最先吃，这样才有可能使能吃到的苹果数目最大化。为了效率肯定选择优先队列啦。
+
+为了能吃到当前天之前的苹果，并且改变其数量，我们将一个二元组`[腐烂时间，苹果数量]`存入优先队列中。这里记得要将苹果数量=0 的给排除掉
+
+```js
+// 先腐烂的先吃 用最小堆来存贮腐烂时间  腐烂时间必须>i+days[i]+1 不能相等
+var eatenApples = function (apples, days) {
+  let pq = new PriorityQueue();
+  let n = apples.length;
+  let ans = 0;
+  let i = 0;
+  while (pq.size > 0 || i < n) {
+    // 扔掉已经腐烂的
+    while (pq.size > 0 && pq.peek()[0] <= i + 1) {
+      pq.poll();
+    }
+    // 仍有苹果可以生成
+    if (i < n && apples[i] > 0) {
+      pq.offer([1 + i + days[i], apples[i]]);
+    }
+    if (pq.size > 0) {
+      let cur = pq.poll();
+      ans++;
+      if (--cur[1] > 0 && cur[0] > i + 1) {
+        pq.offer(cur);
+      }
+    }
+    i++;
+  }
+  return ans;
+};
+// 最小堆
+class PriorityQueue {
+  constructor(compare = (a, b) => a[0] < b[0]) {
+    this.data = [];
+    this.size = 0;
+    this.compare = compare;
+  }
+  // 取队头 shift
+  peek() {
+    return this.size === 0 ? null : this.data[0];
+  }
+  // push
+  offer(val) {
+    this.data.push(val);
+    this._shifUp(this.size++);
+  }
+
+  poll() {
+    if (this.size === 0) {
+      return null;
+    }
+    this._swap(0, --this.size);
+    this._shifDown(0);
+    return this.data.pop();
+  }
+  // 父节点
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  // 左子节点
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  _shifDown(index) {
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      if (
+        child + 1 < this.size &&
+        this.compare(this.data[child + 1], this.data[child])
+      ) {
+        child = child + 1;
+      }
+      if (this.compare(this.data[index], this.data[child])) {
+        break;
+      }
+      this._swap(index, child);
+      index = child;
+    }
+  }
+  // 插入的时候一直跟父节点比较大小并交换
+  _shifUp(index) {
+    while (
+      this._parent(index) >= 0 &&
+      this.compare(this.data[index], this.data[this._parent(index)])
+    ) {
+      this._swap(index, this._parent(index));
+      index = this._parent(index);
+    }
+  }
+
+  _swap(a, b) {
+    [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
+  }
+}
 ```
 
 ## dfs
