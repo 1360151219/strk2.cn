@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2021-12-14
+date: 2021-12-25
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -316,4 +316,59 @@ var canPartition = function (nums) {
   }
   return dp[cost];
 };
+```
+
+## 完全背包问题
+
+有 `N` 种物品和一个容量为 `C` 的背包，每种物品都有无限件。
+
+第 `i` 件物品的体积是 `v[i]`，价值是 `w[i]` 。
+
+求解将哪些物品装入背包可使这些物品的费用总和不超过背包容量，且价值总和最大。
+
+其实就是在 0-1 背包问题的基础上，增加了**每件物品可以选择多次**的特点（在容量允许的情况下）。
+
+_示例 1：_
+
+```
+输入: N = 2, C = 5, v = [1,2], w = [1,2]
+输出: 5
+解释: 选一件物品 1，再选两件物品 2，可使价值最大。
+```
+
+### 常规解法
+
+与前面一样，`dp[i][j]` 表示考虑前 i 件物品、背包容量为 j 的时候所能获得的最大价值。
+
+那么对于第 i 件物品来说：
+
+- 选择 k 件的价值：`dp[i - 1][j - k * v[i]] + k * v[i]`
+
+因此我们可以得出状态转移方程：
+
+![](./imgs/knapsack4.jpg)
+
+```js
+function maxValue(N, C, v, w) {
+  let dp = new Array(N);
+  for (let i = 0; i < N; i++) {
+    dp[i] = new Array(C + 1).fill(0);
+  }
+  // 预处理第一行
+  for (let i = 0; i < C + 1; i++) {
+    for (let k = 0; k * v[0] <= i; k++) {
+      dp[0][i] = k * w[0];
+    }
+  }
+  for (let i = 1; i < N; i++) {
+    for (let j = 0; j < C + 1; j++) {
+      for (let k = 1; k * v[i] <= j; k++) {
+        let no = dp[i - 1][j];
+        let yes = dp[i - 1][j - k * v[i]] + k * w[i];
+        dp[i][j] = Math.max(no, yes);
+      }
+    }
+  }
+  return dp[N - 1][C];
+}
 ```
