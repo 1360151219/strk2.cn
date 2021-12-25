@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-24
+date: 2021-12-25
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -3972,6 +3972,49 @@ class WordDictionary {
     return dfs(0, this.root);
   }
 }
+```
+
+### leetcode 1609. 奇偶树
+
+如果一棵二叉树满足下述几个条件，则可以称为 奇偶树 ：
+
+二叉树根节点所在层下标为 `0` ，根的子节点所在层下标为 `1` ，根的孙节点所在层下标为 `2` ，依此类推。
+
+- **偶数下标** 层上的所有节点的值都是 **奇** 整数，从左到右按顺序 **严格递增**
+- **奇数下标** 层上的所有节点的值都是 **偶** 整数，从左到右按顺序 **严格递减**
+  给你二叉树的根节点，如果二叉树为 **奇偶树** ，则返回 true ，否则返回 false 。
+
+**BFS** `2021.12.25`
+
+今天是圣诞节耶 于是官方也出了个跟圣诞树有关的问题- -
+
+```js
+var isEvenOddTree = function (root) {
+  let queue = [root];
+  let i = 0;
+  while (queue.length > 0) {
+    let prev;
+    let next = [];
+    while (queue.length > 0) {
+      let node = queue.shift();
+      if (prev) {
+        if ((i & 1) === 0) {
+          if (prev >= node.val) return false;
+        } else {
+          if (prev <= node.val) return false;
+        }
+      }
+      prev = node.val;
+      if ((i & 1) === 0 && (prev & 1) === 0) return false;
+      if ((i & 1) !== 0 && (prev & 1) !== 0) return false;
+      if (node.left) next.push(node.left);
+      if (node.right) next.push(node.right);
+    }
+    i++;
+    queue.push(...next);
+  }
+  return true;
+};
 ```
 
 ## 贪心算法

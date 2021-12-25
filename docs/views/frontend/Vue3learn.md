@@ -64,7 +64,7 @@ console.log("hello script setup");
 </script>
 ```
 
-> 里面的代码会被编译成组件 setup() 函数的内容。这意味着与普通的 <script> 只在组件被首次引入的时候执行一次不同，**<script setup> 中的代码会在每次组件实例被创建的时候执行。**
+> 里面的代码会被编译成组件 setup() 函数的内容。这意味着与普通的 `<script>` 只在组件被首次引入的时候执行一次不同，`<script setup>` 中的代码会在每次组件实例被创建的时候执行。
 
 使用这个`<script setup>`语法糖的时候，所有的 data、methods...，包括引用的方法，都可以直接用于模板中。这就类似 Vue 2 中类组件形式的写法了。我觉得这个非常方便简洁！！
 
@@ -108,7 +108,7 @@ import MyComponent from "./MyComponent.vue";
 
 **命名空间组件**
 
-引用 官方 的话：(我还没用过- -)
+引用 官方 的话：(我还没用过，不太懂官方的用法，希望能找到大神的例子- -)
 
 可以使用带点的组件标记，例如 <Foo.Bar> 来引用嵌套在对象属性中的组件。这在需要从单个文件中导入多个组件的时候非常有用：
 
@@ -201,3 +201,196 @@ onMounted(function () {
   </div>
 </template>
 ```
+
+#### 其他
+
+在使用`defineProps`以及`defineEmits`的时候，可以使用 Typescript 的语法：
+
+```ts
+const props = defineProps<{
+  foo: string;
+  bar?: number;
+}>();
+
+const emit = defineEmits<{
+  (e: "change", id: number): void;
+  (e: "update", value: string): void;
+}>();
+```
+
+这种方式有一个缺陷，不能提供默认值，为此 Vue 还提供了`withDefaults` API：
+
+```js
+interface Props {
+  msg?: string
+  labels?: string[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  msg: 'hello',
+  labels: () => ['one', 'two']
+})
+```
+
+**限制：不能使用 src 属性**
+
+## teleport 组件
+
+这个组件我觉得非常好用鸭，有的时候我们在封装组件的时候，组件内一些 dom 元素在技术角度上不应该放在该组件的内部。比如模态框！模态框出现的时候，为了使它的定位更方便更快速，肯定希望它能够直接放在 body 下面呀。但是逻辑层面它必须依赖于父组件。
+
+在这种情况下，teleport 就出现了。
+
+teleport 有一个 `to` 属性，可以传入 **css 选择器** 来声明该组件需要传送的目的父元素。而且还有一点非常好，引用下官方的话：
+
+> 请注意，这将移动实际的 DOM 节点，而不是被销毁和重新创建，并且它还将保持任何组件实例的活动状态。所有有状态的 HTML 元素 (即播放的视频) 都将保持其状态。
+
+下面放一下我试用的例子吧：
+
+```vue
+// 子组件
+<script setup lang="ts">
+import { ref } from "vue";
+let modalOpen = ref(false);
+</script>
+<template>
+  <button @click="modalOpen = true">
+    Open full screen modal! (With teleport!)
+  </button>
+  <teleport to="body">
+    <div v-if="modalOpen" class="modal">
+      <div>
+        I'm a teleported modal! (My parent is "body")
+        <button @click="modalOpen = false">Close</button>
+      </div>
+    </div>
+  </teleport>
+</template>
+<style scoped>
+.modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  width: 300px;
+  height: 300px;
+  padding: 5px;
+}
+</style>
+
+// 父组件
+<script setup lang="ts">
+import ModalButton from "@/components/Modal.vue";
+</script>
+<template>
+  <div class="about">
+    <modal-button></modal-button>
+  </div>
+</template>
+```
+
+## 片段
+
+现在在`template`中可以同时存在多个根节点了！
+
+## 组件自定义事件
+
+### v-model 参数
+
+关于自定义事件这部分，Vue 3 有一个让我觉得非常方便的一个改变。让子组件有 props 参数的时候，**默认情况下，组件上的 v-model 使用 modelValue 作为 prop 和 update:modelValue 作为事件。**
+
+也就是说再也不用自己去自定义一个监听事件以及回调函数才能去监听到一个 props 的变化了。。
+
+举一个最简单的监听输入框内容的例子：
+
+```vue
+// 子组件
+<script setup lang="ts">
+import { defineProps, defineEmits } from "vue";
+defineProps({
+  modelValue: String,
+});
+defineEmits(["update:modelValue"]);
+</script>
+<template>
+  <div>
+    <input
+      type="text"
+      :value="modelValue"
+      @input="$emit('update:modelValue', $event.target.value)"
+    />
+  </div>
+</template>
+
+// 父组件
+<script setup lang="ts">
+import InputVue from "@/components/Input.vue";
+import { ref } from "vue";
+let modelValue = ref("text here");
+</script>
+<template>
+  <div class="about">
+    <input-vue v-model:model-value="modelValue"></input-vue>
+    <div>This is input's value : {{ modelValue }}</div>
+  </div>
+</template>
+```
+
+可见上面的例子，我并没有使用`@update:modelValue`来定义监听回调函数，但它还是能够正常的双向绑定在一起噢！
+
+### 自定义修饰符
+
+这里直接引用官方的话：
+
+> 添加到组件 v-model 的修饰符将通过 modelModifiers prop 提供给组件。在下面的示例中，我们创建了一个组件，其中包含默认为空对象的 modelModifiers prop。
+
+> 请注意，当组件的 created 生命周期钩子触发时，modelModifiers prop 会包含 capitalize，且其值为 true——因为 capitalize 被设置在了写为 v-model.capitalize="myText" 的 v-model 绑定上。
+
+下面举一个我自己参考官方的例子： 将字符串首字母大写！
+
+```vue
+// 子组件
+<script setup lang="ts">
+import { defineProps, defineEmits, withDefaults } from "vue";
+import { Modifiers } from "@/models";
+interface Props {
+  modelValue: string;
+  modelValueModifiers: Modifiers;
+}
+const props = withDefaults(defineProps<Props>(), {
+  modelValueModifiers: () => ({}),
+});
+
+const emits = defineEmits(["update:modelValue"]);
+function emitValue(e) {
+  let value = e.target.value;
+  if (props.modelValueModifiers.capitalize) {
+    value = value.charAt(0).toUpperCase() + value.slice(1);
+  }
+  emits("update:modelValue", value);
+}
+</script>
+<template>
+  <div>
+    <input type="text" :value="modelValue" @input="emitValue" />
+  </div>
+</template>
+
+// 父组件
+<input-vue v-model:model-value.capitalize="modelValue"></input-vue>
+```
+
+**注意：这里的 Modifiers 默认值为` arg + "Modifiers"：`**
