@@ -202,6 +202,58 @@ onMounted(function () {
 </template>
 ```
 
+#### 自定义指令
+
+在 Vue 3 中，本地自定义指令可以直接用于模板中。注意！！ 这里必须满足一个条件:自定义指令名称为`vNameofDirective`的形式：
+
+```vue
+<script setup lang="ts">
+// 自定义指令
+const vRedColor = {
+  beforeMount(el: HTMLElement) {
+    el.style.color = "red";
+  },
+};
+</script>
+<template>
+  <div>
+    <div v-red-color>This is input's value : {{ modelValue }}</div>
+  </div>
+</template>
+```
+
+Vue 3 中指令的生命周期与 Vue 2 里面的不一样了！下面引用官方的话：
+
+```js
+import { createApp } from "vue";
+const app = createApp({});
+
+// 注册
+app.directive("my-directive", {
+  // 指令是具有一组生命周期的钩子：
+  // 在绑定元素的 attribute 或事件监听器被应用之前调用
+  created() {},
+  // 在绑定元素的父组件挂载之前调用
+  beforeMount() {},
+  // 绑定元素的父组件被挂载时调用
+  mounted() {},
+  // 在包含组件的 VNode 更新之前调用
+  beforeUpdate() {},
+  // 在包含组件的 VNode 及其子组件的 VNode 更新之后调用
+  updated() {},
+  // 在绑定元素的父组件卸载之前调用
+  beforeUnmount() {},
+  // 卸载绑定元素的父组件时调用
+  unmounted() {},
+});
+// 注册 (功能指令)
+app.directive("my-directive", () => {
+  // 这将被作为 `mounted` 和 `updated` 调用
+});
+// getter, 如果已注册，则返回指令定义
+const myDirective = app.directive("my-directive");
+```
+
 #### 其他
 
 在使用`defineProps`以及`defineEmits`的时候，可以使用 Typescript 的语法：
@@ -394,3 +446,151 @@ function emitValue(e) {
 ```
 
 **注意：这里的 Modifiers 默认值为` arg + "Modifiers"：`**
+
+## SFC 样式新特性
+
+### 子组件的根元素
+
+> 在带有 `scoped` 的时候，父组件的样式将不会泄露到子组件当中。不过，子组件的根节点会同时被父组件的作用域样式和子组件的作用域样式影响。这是有意为之的，这样父组件就可以设置子组件根节点的样式，以达到调整布局的目的。
+
+即父组件的 css 不会被应用到子组件中，只会应用到子组件根元素
+
+### 新选择器
+
+**深度选择器**
+
+现在若是想要做更深度的选择，即影响到子组件，可以使用 `:deep()` 选择器
+
+```vue
+<style scoped>
+.a :deep(.b) {
+  /* ... */
+}
+</style>
+```
+
+这将会编译成：
+
+```css
+.a[data-v-f3f3eg9] .b {
+  /* ... */
+}
+```
+
+**插槽选择器**
+
+> 默认情况下，作用域样式不会影响到 <slot/> 渲染出来的内容，因为它们被认为是父组件所持有并传递进来的。使用 :slotted 伪类以确切地将插槽内容作为选择器的目标：
+
+```vue
+<style scoped>
+:slotted(div) {
+  color: red;
+}
+</style>
+```
+
+**全局选择器**
+
+如果想要有应用到全局的样式，可以不用另起一个 sytle 直接使用`:global()`即可：
+
+```vue
+<style scoped>
+:global(.red) {
+  color: red;
+}
+</style>
+```
+
+> 尽量使用 class、id 选择器，不要直接使用元素标签选择器，因为浏览器渲染各种各样 CSS 选择器的方式，`p { color: red }` 结合作用域样式使用时会慢很多倍。
+
+### `<style module>`
+
+`<style module>`标签会编译为 CSS Modules，并且将生成的 css 类作为`$style`对象的 key 暴漏给组件。
+
+```vue
+<template>
+  <p :class="$style.red">This should be red</p>
+</template>
+
+<style module>
+.red {
+  color: red;
+}
+</style>
+```
+
+这样引用的 class 与 scope CSS 的效果一样。
+
+#### 自定义注入模块名称
+
+```vue
+<template>
+  <p :class="classes.red">red</p>
+</template>
+
+<style module="classes">
+.red {
+  color: red;
+}
+</style>
+```
+
+#### 用在组合式 API 中
+
+通过`useCssModule` API 来使用：
+
+```js
+// 默认, 返回 <style module> 中的类
+useCssModule();
+
+// 命名, 返回 <style module="classes"> 中的类
+useCssModule("classes");
+```
+
+#### 响应式动态 CSS
+
+SFC 中的`style`标签可以通过`v-bind`这个 CSS 函数来将 CSS 属性与响应式数据状态绑定在一起：
+
+```vue
+<template>
+  <div class="text">hello</div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      color: "red",
+    };
+  },
+};
+</script>
+
+<style>
+.text {
+  color: v-bind(color);
+}
+</style>
+```
+
+setup suger：
+
+```vue
+<script setup>
+const theme = {
+  color: "red",
+};
+</script>
+
+<template>
+  <p>hello</p>
+</template>
+
+<style scoped>
+p {
+  color: v-bind("theme.color"); // JavaScript表达式需要用引号包裹起来
+}
+</style>
+```
+
+这个自定义 property 会通过内联样式的方式应用到组件根元素中，并且会响应式更改!
