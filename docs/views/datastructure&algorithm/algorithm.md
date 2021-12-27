@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-25
+date: 2021-12-27
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1950,6 +1950,61 @@ var distributeCandies = function (candyType) {
 };
 ```
 
+### leetcode 825. 适龄的朋友
+在社交媒体网站上有 `n` 个用户。给你一个整数数组 `ages` ，其中 `ages[i]` 是第 i 个用户的年龄。
+
+如果下述任意一个条件为真，那么用户 `x` 将不会向用户 `y（x != y）`发送好友请求：
+
+- `age[y] <= 0.5 * age[x] + 7`
+- `age[y] > age[x]`
+- `age[y] > 100 && age[x] < 100`
+否则，`x` 将会向 `y` 发送一条好友请求。
+
+注意，如果 `x` 向 `y` 发送一条好友请求，`y` 不必也向 `x` 发送一条好友请求。另外，用户不会向自己发送好友请求。
+
+返回在该社交媒体网站上产生的好友请求总数。
+
+**排序＋双指针** `2021.12.27`
+首先从大到小排一下序，因为年龄小的用户不会给年龄大的用户发送好友请求。
+
+然后开始遍历，同时取左、右指针，右指针将满足第一个条件的用户数都算进来，左指针则将年龄相等的用户数且满足第一个条件的都算进来。
+
+```js
+var numFriendRequests = function (ages) {
+    ages.sort((a, b) => b - a)
+    let res = 0
+    for (let i = 0; i < ages.length; i++) {
+        let age = ages[i]
+        let temp = age * 0.5 + 7
+        let l = r = i
+        while (ages[l - 1] && ages[l - 1] === ages[i] && ages[l - 1] > temp) l--
+        while (ages[r + 1] && ages[r + 1] > temp) r++
+        res += r - l
+    }
+    return res
+};
+```
+
+**桶排序+前缀和**
+
+因为值域非常小，因此可以使用桶排序。然后我们发现在双指针的遍历阶段，其实可以使用前缀和来实现，因为要获取在一定区间内的年龄的数量，只需要用右区间的减去左区间的即可！
+
+```js
+var numFriendRequests = function (ages) {
+    let cnt=new Array(120).fill(0)
+    for(let i of ages){
+        cnt[i-1]++
+    }
+    for(let i=1;i<120;i++){
+        cnt[i]+=cnt[i-1]
+    }
+    let ans=0
+    for(let age of ages){
+        ans+=Math.max(0,cnt[age-1]-cnt[Math.floor((age)/2)+7-1]-1)
+    }
+    return ans
+};
+```
 ## 链表
 
 ### leetcode 2.两数相加 `2021.7.9`
