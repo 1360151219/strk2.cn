@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-27
+date: 2021-12-28
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1951,6 +1951,7 @@ var distributeCandies = function (candyType) {
 ```
 
 ### leetcode 825. 适龄的朋友
+
 在社交媒体网站上有 `n` 个用户。给你一个整数数组 `ages` ，其中 `ages[i]` 是第 i 个用户的年龄。
 
 如果下述任意一个条件为真，那么用户 `x` 将不会向用户 `y（x != y）`发送好友请求：
@@ -1958,7 +1959,7 @@ var distributeCandies = function (candyType) {
 - `age[y] <= 0.5 * age[x] + 7`
 - `age[y] > age[x]`
 - `age[y] > 100 && age[x] < 100`
-否则，`x` 将会向 `y` 发送一条好友请求。
+  否则，`x` 将会向 `y` 发送一条好友请求。
 
 注意，如果 `x` 向 `y` 发送一条好友请求，`y` 不必也向 `x` 发送一条好友请求。另外，用户不会向自己发送好友请求。
 
@@ -1971,17 +1972,17 @@ var distributeCandies = function (candyType) {
 
 ```js
 var numFriendRequests = function (ages) {
-    ages.sort((a, b) => b - a)
-    let res = 0
-    for (let i = 0; i < ages.length; i++) {
-        let age = ages[i]
-        let temp = age * 0.5 + 7
-        let l = r = i
-        while (ages[l - 1] && ages[l - 1] === ages[i] && ages[l - 1] > temp) l--
-        while (ages[r + 1] && ages[r + 1] > temp) r++
-        res += r - l
-    }
-    return res
+  ages.sort((a, b) => b - a);
+  let res = 0;
+  for (let i = 0; i < ages.length; i++) {
+    let age = ages[i];
+    let temp = age * 0.5 + 7;
+    let l = (r = i);
+    while (ages[l - 1] && ages[l - 1] === ages[i] && ages[l - 1] > temp) l--;
+    while (ages[r + 1] && ages[r + 1] > temp) r++;
+    res += r - l;
+  }
+  return res;
 };
 ```
 
@@ -1991,20 +1992,21 @@ var numFriendRequests = function (ages) {
 
 ```js
 var numFriendRequests = function (ages) {
-    let cnt=new Array(120).fill(0)
-    for(let i of ages){
-        cnt[i-1]++
-    }
-    for(let i=1;i<120;i++){
-        cnt[i]+=cnt[i-1]
-    }
-    let ans=0
-    for(let age of ages){
-        ans+=Math.max(0,cnt[age-1]-cnt[Math.floor((age)/2)+7-1]-1)
-    }
-    return ans
+  let cnt = new Array(120).fill(0);
+  for (let i of ages) {
+    cnt[i - 1]++;
+  }
+  for (let i = 1; i < 120; i++) {
+    cnt[i] += cnt[i - 1];
+  }
+  let ans = 0;
+  for (let age of ages) {
+    ans += Math.max(0, cnt[age - 1] - cnt[Math.floor(age / 2) + 7 - 1] - 1);
+  }
+  return ans;
 };
 ```
+
 ## 链表
 
 ### leetcode 2.两数相加 `2021.7.9`
@@ -4631,6 +4633,82 @@ var removeInvalidParentheses = function (s) {
     }
   }
 };
+```
+
+### leetcode 472. 连接词
+
+给你一个 **不含重复** 单词的字符串数组 `words` ，请你找出并返回 `words` 中的所有 连接词 。
+
+**连接词** 定义为：一个完全由给定数组中的至少两个较短单词组成的字符串。
+
+**字典树+dfs** `2021.12.28`
+
+我把较短的单词称为 **小连接词**
+
+因为连接词由较短的单词组成，因此先给数组按照单词长度从小排个序。
+
+因为不知道一个单词会由多少个小连接词来构成，所以必须要递归(第一个坑~)
+
+其次，一定要排序空字符串，否则会死循环:root.isEnd 会为 True，使得后面单词的判断一直在第一位死循环(第二个坑~)
+
+递归的起点是 root 噢，因为是要将每一个小连接词都分割开来分别取 search 它们是否存在~
+
+```js
+/**
+ * @param {string[]} words
+ * @return {string[]}
+ */
+var findAllConcatenatedWordsInADict = function (words) {
+  let trie = new Trie();
+  let ans = [];
+  words.sort((a, b) => a.length - b.length);
+  for (let w of words) {
+    if (w.length === 0) continue; // 如果不加，则使得root.isEnd为True，然后会一直死循环search(root,word.substring(0))
+    if (trie.search(trie.root, w)) {
+      ans.push(w);
+    } else {
+      trie.insert(w);
+    }
+  }
+  return ans;
+};
+class TrieNode {
+  constructor() {
+    this.isEnd = false;
+    this.ins = new Array(26);
+  }
+}
+class Trie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+  insert(word) {
+    let p = this.root;
+    for (let i = 0; i < word.length; i++) {
+      let u = word.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) {
+        p.ins[u] = new TrieNode();
+      }
+      p = p.ins[u];
+    }
+    p.isEnd = true;
+  }
+  search(node, word) {
+    let p = node;
+    for (let i = 0; i < word.length; i++) {
+      if (p.isEnd) {
+        // 因为不知道有多少个连接词所以直接使用递归
+        if (this.search(this.root, word.substring(i)))
+          // 根据后面分割出连接词重新find
+          return true;
+      }
+      let u = word.charAt(i).charCodeAt() - "a".charCodeAt();
+      if (!p.ins[u]) return false;
+      p = p.ins[u];
+    }
+    return p.isEnd;
+  }
+}
 ```
 
 ### leetcode 488. 祖玛游戏

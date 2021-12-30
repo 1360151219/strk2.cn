@@ -372,3 +372,32 @@ function maxValue(N, C, v, w) {
   return dp[N - 1][C];
 }
 ```
+
+### 优化为一维数组
+
+关于这部分，十分的重要！！
+
+直接上三叶姐的图：
+
+![](./imgs/knapsack5.jpg)
+
+**总而言之，dp[i][j] 依赖于 dp[i][j] - v[i] + w[i]**，因此要保证左边的数是更新后的数！
+因此我们需要改变遍历方向，**从小到大**
+
+```js
+function maxValue(N, C, v, w) {
+  let dp = new Array(C + 1).fill(0);
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < C + 1; j++) {
+      let no = dp[j];
+      let yes = j < v[i] ? 0 : dp[j - v[i]] + w[i];
+      dp[j] = Math.max(no, yes);
+    }
+  }
+  return dp[C];
+}
+```
+
+下面放一张图帮助更好的理解：
+
+![](./imgs/knapsack6.jpg)
