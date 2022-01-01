@@ -400,4 +400,4 @@ function maxValue(N, C, v, w) {
 
 下面放一张图帮助更好的理解：
 
-![](./imgs/knapsack6.jpg)
+![](./imgs/knapsack6.png)
