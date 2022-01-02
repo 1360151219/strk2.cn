@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2021-12-25
+date: 2022-1-2
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -401,3 +401,43 @@ function maxValue(N, C, v, w) {
 下面放一张图帮助更好的理解：
 
 ![](./imgs/knapsack6.png)
+
+## leetcode.279 完全平方数
+
+给定正整数  `n`，找到若干个完全平方数`（比如 1, 4, 9, 16, ...）`使得它们的和等于 `n`。你需要让组成和的完全平方数的个数最少。
+
+给你一个整数 `n` ，返回和为 `n` 的完全平方数的最少数量 。
+
+完全平方数是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如`1、4、9 和 16` 都是完全平方数，而 `3` 和 `11` 不是。
+
+**完全背包解法**
+
+完全平方数就那么多，先把`1~n`的完全平方数都找出来。
+
+然后再开始转换为完全背包问题。**记得要初始化第一列数据噢**
+
+![](./imgs/knapsack7.jpg)
+
+推导出公式后，即可开始写代码啦
+
+```js
+var numSquares = function (n) {
+  let i = 1;
+  let per = [];
+  while (i <= n) {
+    if (Math.floor(Math.sqrt(i)) === Math.sqrt(i)) per.push(i);
+    i++;
+  }
+  let dp = new Array(n + 1);
+  for (let j = 0; j < n + 1; j++) {
+    dp[j] = j;
+  }
+  for (let i = 1; i < per.length; i++) {
+    let t = per[i];
+    for (let j = t; j < n + 1; j++) {
+      dp[j] = Math.min(dp[j], dp[j - t] + 1);
+    }
+  }
+  return dp[n];
+};
+```
