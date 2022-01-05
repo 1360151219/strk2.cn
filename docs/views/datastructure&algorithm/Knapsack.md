@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2022-1-2
+date: 2022-1-5
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -439,5 +439,63 @@ var numSquares = function (n) {
     }
   }
   return dp[n];
+};
+```
+
+然而上面那种做法其实是并没有考虑最后到底有没有能够刚好凑齐 n 的。
+
+因此我们需要使用前面说到的**直接解法**，即设一开始的 dp[j]为不考虑任何物品的时候（哨兵）。
+
+```js
+var numSquares = function (n) {
+  let i = 1;
+  let per = [];
+  while (i <= n) {
+    if (Math.floor(Math.sqrt(i)) === Math.sqrt(i)) per.push(i);
+    i++;
+  }
+  let dp = new Array(n + 1);
+  for (let i = 1; i < n + 1; i++) {
+    dp[i] = Infinity;
+  }
+  dp[0] = 0;
+  for (let i = 0; i < per.length; i++) {
+    let t = per[i];
+    for (let j = t; j < n + 1; j++) {
+      dp[j] = Math.min(dp[j], dp[j - t] + 1);
+    }
+  }
+  return dp[n];
+};`
+```
+
+## leetcode 322. 零钱兑换
+
+这题其实跟上面那题是一样思路的。
+
+![](./imgs/knapsack8.jpg)
+
+```js
+/**
+ * @param {number[]} coins
+ * @param {number} amount
+ * @return {number}
+ */
+var coinChange = function (coins, amount) {
+  const n = coins.length;
+  const C = amount;
+  let dp = new Array(C + 1).fill(0);
+  for (let i = 1; i <= C; i++) {
+    dp[i] = Infinity;
+  }
+  dp[0] = 0;
+  // 哨兵设置好了
+  for (let i = 0; i < n; i++) {
+    t = coins[i];
+    for (let j = t; j <= C; j++) {
+      dp[j] = Math.min(dp[j], dp[j - t] + 1);
+    }
+  }
+  return dp[C] === Infinity ? -1 : dp[C];
 };
 ```

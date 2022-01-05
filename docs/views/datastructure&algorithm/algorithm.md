@@ -1,6 +1,6 @@
 ---
 title: leetcode----算法日记
-date: 2021-12-28
+date: 2022-1-5
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -4872,6 +4872,65 @@ class MapSum {
     return this.dfs(p);
   }
 }
+```
+
+### leetcode 913. 猫捉老鼠(困难)
+
+**dfs+记忆化搜索** `2022.1.5`
+
+![](./imgs/leetcode913.jpg)
+
+```js
+var catMouseGame = function (graph) {
+  let n = graph.length;
+  let dp = new Array(n * n + 1)
+    .fill(0)
+    .map(() => new Array(n + 1).fill(0).map(() => new Array(n + 1).fill(-1)));
+  return dfs(0, 1, 2);
+  function dfs(k, a, b) {
+    let ans = dp[k][a][b];
+    if (a === 0) {
+      ans = 1;
+    } else if (a === b) {
+      ans = 2;
+    } else if (k >= n * n) {
+      ans = 0;
+    } else if (ans == -1) {
+      if (!(k & 1)) {
+        // mouse
+        let win = false;
+        let draw = false;
+        for (let xa of graph[a]) {
+          let res = dfs(k + 1, xa, b);
+          if (res === 1) {
+            win = true;
+            break;
+          } else if (res === 0) draw = true;
+        }
+        if (win) ans = 1;
+        else if (draw) ans = 0;
+        else ans = 2;
+      } else {
+        // cat
+        let win = false;
+        let draw = false;
+        for (let xb of graph[b]) {
+          if (xb === 0) continue;
+          let res = dfs(k + 1, a, xb);
+          if (res === 2) {
+            win = true;
+            break;
+          } else if (res === 0) draw = true;
+        }
+        if (win) ans = 2;
+        else if (draw) ans = 0;
+        else ans = 1;
+      }
+    }
+    dp[k][a][b] = ans;
+    return ans;
+  }
+};
 ```
 
 ### leetcode 1034. 边界着色
