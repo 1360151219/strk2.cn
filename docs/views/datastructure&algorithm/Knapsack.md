@@ -1,6 +1,6 @@
 ---
 title: 算法系列之背包问题
-date: 2022-1-5
+date: 2022-1-6
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -497,5 +497,28 @@ var coinChange = function (coins, amount) {
     }
   }
   return dp[C] === Infinity ? -1 : dp[C];
+};
+```
+
+## leetcode 518.零钱兑换 Ⅱ
+
+不同于上题，现在要求的是能凑整的方案总和。因此我们需要修改一下 dp[C]的定义。
+
+![](./imgs/knapsack9.jpg)
+
+这里要注意的是，状态转移中，算的是方案的总和，不再是最大最小值了。
+
+```js
+var change = function (amount, coins) {
+  const C = amount;
+  const dp = new Array(C + 1).fill(0);
+  dp[0] = 1;
+  for (let i = 0; i < coins.length; i++) {
+    let val = coins[i];
+    for (let j = val; j <= C; j++) {
+      dp[j] += dp[j - val];
+    }
+  }
+  return dp[C];
 };
 ```
