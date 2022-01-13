@@ -1,6 +1,7 @@
 ---
-title: 柯里化函数编程思想---手写一个bind函数
+title: 柯里化函数编程思想--手写一个bind函数
 date: 2021-8-14
+lastUpdated: 2022-1-13
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -104,3 +105,96 @@ add(1, 2)(3, 4).toString(); // 10
 - 首先参数[1,2]传入`_args`中，然后进入到内层函数 `adder(1,2)`中。
 - 第二次再传递(3,4)参数，进入`_adder`参数中。并且将(3,4)`push`到了`_args`中，然后改写`toString`方法，让它可以返回全部参数之和，最后再返回`_adder`函数。
 - 以后继续调用的时候，就不断重复`_adder`函数。
+
+# JS 深入系列之函数柯里化思想
+
+> 以下内容灵感来自[冴羽博客](https://github.com/mqyqingfeng/Blog)
+
+了解了函数柯里化之后，我们要来实现一个很强大的 curry 函数。在此之前，先看一下以下例子：
+
+```js
+var person = [{ name: "kevin" }, { name: "daisy" }];
+// 如果我们要获取所有的 name 值，我们可以这样做：
+
+var name = person.map(function (item) {
+  return item.name;
+});
+// 不过如果我们有 curry 函数：
+
+var prop = curry(function (key, obj) {
+  return obj[key];
+});
+
+var name = person.map(prop("name"));
+```
+
+这个 prop 实际上是使用 curry 函数后返回的一个封装好的工具函数，能更好的对外使用。
+
+下面我们来实现一下吧。
+
+## 第一版
+
+> 注意，这里如果按照冴羽博客上的来实现将不能复现刚刚的需求，比如要在 prop 中传入对象 item
+
+```js
+function curry(fn) {
+  let args = [].slice.call(arguments, 1);
+  return function () {
+    let arg = args.concat([].slice.call(arguments));
+    return fn.apply(this, arg);
+  };
+}
+
+// *******************//
+var person = [{ name: "kevin" }, { name: "daisy" }];
+var prop = curry(function (key, obj) {
+  return obj[key];
+});
+
+var name = person.map((item) => prop("name", item));
+console.log(name); // [ 'kevin', 'daisy' ]
+
+const add = (a, b) => a + b;
+let a1 = curry(add, 1, 2);
+console.log(a1()); // 3
+let a2 = curry(add, 1);
+console.log(a2(6)); // 7
+let a3 = curry(add);
+console.log(a3(6, 6)); // 12
+```
+
+这个 curry 函数还没有达到最终的效果，下面我们来继续深入探讨。
+
+## 第二版
+
+```js
+function sub_curry(fn) {
+  let args = [].slice.call(arguments, 1);
+  return function () {
+    let arg = args.concat([].slice.call(arguments));
+    return fn.apply(this, arg);
+  };
+}
+function curry(fn, length) {
+  length = length || fn.length;
+  const slice = Array.prototype.slice;
+  return function () {
+    if (arguments.length < length) {
+      const args = [fn].concat(slice.call(arguments));
+      return curry(sub_curry.apply(this, args), length - arguments.length);
+    } else {
+      return fn.apply(this, slice.call(arguments));
+    }
+  };
+}
+//
+function foo(a, b, c) {
+  return [a, b, c];
+}
+const f = curry(foo);
+f(1)(2)(3); //[1,2,3]
+```
+
+这一版的比较难理解，我总结为以下一句话：
+
+**可以这么理解，在参数没有传够之前，参数都交给 sub_curry 保存并合并，等传够后再执行 sub_curry**

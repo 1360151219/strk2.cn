@@ -46,6 +46,7 @@ module.exports = {
   themeConfig: {
     type: "blog",
     authorAvatar: '/head.png', // 头像
+    lastUpdated: '上次更新',
     blogConfig: {
       category: {
         location: 2, // 在导航栏菜单中所占的位置，默认2

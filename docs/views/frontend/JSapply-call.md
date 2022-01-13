@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之call、apply和bind的模拟实现
 date: 2021-10-24
+lastUpdated: 2021-10-24
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
