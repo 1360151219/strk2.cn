@@ -1,7 +1,7 @@
 ---
 title: 柯里化函数编程思想--手写一个bind函数
 date: 2021-8-14
-lastUpdated: 2022-1-13
+lastUpdated: 2022-1-14
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -198,3 +198,104 @@ f(1)(2)(3); //[1,2,3]
 这一版的比较难理解，我总结为以下一句话：
 
 **可以这么理解，在参数没有传够之前，参数都交给 sub_curry 保存并合并，等传够后再执行 sub_curry**
+
+其实还有更**简单易懂**的实现方法，直接通过递归将参数都存起来，等到参数够了之后再执行 fn 函数：
+
+```js
+function curry(fn, args) {
+  args = args || [];
+  const length = fn.length;
+  return function () {
+    let _args = args.concat([].slice.call(arguments));
+    if (_args.length < length) return curry.call(this, fn, _args);
+    else return fn.apply(this, _args);
+  };
+}
+```
+
+## 第三版（占位符- -）
+
+这一版我就直接转载冴羽大佬的代码了，因为我不是很明白，而且感觉也有一点问题，也没有必要这样。主要的想法是不希望将参数从左到右的形式传入，而引入一个占位符。
+
+比如：
+
+```js
+var fn = curry(function (a, b, c) {
+  console.log([a, b, c]);
+});
+
+fn("a", _, "c")("b"); // ["a", "b", "c"]
+```
+
+实现代码如下（转载）：
+
+```js
+// 第三版
+function curry(fn, args, holes) {
+  length = fn.length;
+
+  args = args || [];
+
+  holes = holes || [];
+
+  return function () {
+    var _args = args.slice(0),
+      _holes = holes.slice(0),
+      argsLen = args.length,
+      holesLen = holes.length,
+      arg,
+      i,
+      index = 0;
+
+    for (i = 0; i < arguments.length; i++) {
+      arg = arguments[i];
+      // 处理类似 fn(1, _, _, 4)(_, 3) 这种情况，index 需要指向 holes 正确的下标
+      if (arg === _ && holesLen) {
+        index++;
+        if (index > holesLen) {
+          _args.push(arg);
+          _holes.push(argsLen - 1 + index - holesLen);
+        }
+      }
+      // 处理类似 fn(1)(_) 这种情况
+      else if (arg === _) {
+        _args.push(arg);
+        _holes.push(argsLen + i);
+      }
+      // 处理类似 fn(_, 2)(1) 这种情况
+      else if (holesLen) {
+        // fn(_, 2)(_, 3)
+        if (index >= holesLen) {
+          _args.push(arg);
+        }
+        // fn(_, 2)(1) 用参数 1 替换占位符
+        else {
+          _args.splice(_holes[index], 1, arg);
+          _holes.splice(index, 1);
+        }
+      } else {
+        _args.push(arg);
+      }
+    }
+    if (_holes.length || _args.length < length) {
+      return curry.call(this, fn, _args, _holes);
+    } else {
+      return fn.apply(this, _args);
+    }
+  };
+}
+
+var _ = {};
+
+var fn = curry(function (a, b, c, d, e) {
+  console.log([a, b, c, d, e]);
+});
+
+// 验证 输出全部都是 [1, 2, 3, 4, 5]
+fn(1, 2, 3, 4, 5);
+fn(_, 2, 3, 4, 5)(1);
+fn(1, _, 3, 4, 5)(2);
+fn(1, _, 3)(_, 4)(2)(5);
+fn(1, _, _, 4)(_, 3)(2)(5);
+fn(_, 2)(_, _, 4)(1)(3)(5);
+```
