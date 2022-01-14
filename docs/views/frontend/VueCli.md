@@ -1,6 +1,7 @@
 ---
 title: Vue Cli
 date: 2021-4
+lastUpdated: 2021-4
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

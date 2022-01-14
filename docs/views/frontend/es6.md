@@ -1,6 +1,7 @@
 ---
 title: 有关 ES6 的一些个人记录
 date: 2021-8-9
+lastUpdated: 2021-8-9
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -15,7 +16,7 @@ tags:
 ```js
 const name = "Herry";
 const sex = "man";
-tag = function(strings, name, sex) {
+tag = function (strings, name, sex) {
   return strings[0] + name + strings[1] + sex;
 };
 const res = tag`${name} is a ${sex}`;
@@ -29,7 +30,7 @@ console.log(res); // Herry is a man
 ```js
 const person = {
   name: "too",
-  sayHi: function() {
+  sayHi: function () {
     console.log(this);
   },
   [Math.random()]: 123,
@@ -40,10 +41,10 @@ const person = {
 
 ```js
 const handler = {
-  get: function(obj, prop) {
+  get: function (obj, prop) {
     return prop in obj ? obj[prop] : 37;
   },
-  set: function(obj, prop, value) {
+  set: function (obj, prop, value) {
     if (prop === "age") {
       if (!Number.isInteger(value)) {
         throw new TypeError("The age is not an integer");
@@ -141,11 +142,11 @@ es6 新增了一个可以基本遍历所有数据结构的方法： `for...of`
 ```js
 const obj = {
   store: ["foo", "bar", "baz"],
-  [Symbol.iterator]: function() {
+  [Symbol.iterator]: function () {
     let index = 0;
     const _this = this;
     return {
-      next: function() {
+      next: function () {
         const res = {
           value: _this.store[index],
           done: index >= _this.store.length,
@@ -167,7 +168,7 @@ for (let i of obj) {
 
 ```js
 let arr = [1, 2, 3];
-Array.prototype.method = function() {
+Array.prototype.method = function () {
   console.log(1);
 };
 
@@ -221,7 +222,7 @@ console.log(generator.next()); // 11 {value:undefined,done:true}
 const todos = {
   life: ["吃饭", "睡觉", "打豆豆"],
   learn: ["数学", "英语", "语文"],
-  [Symbol.iterator]: function*() {
+  [Symbol.iterator]: function* () {
     const all = [...this.life, ...this.learn];
     for (let i of all) {
       yield i;

@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之数组的扁平化
 date: 2021-12-12
+lastUpdated: 2021-12-12
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

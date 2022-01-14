@@ -1,6 +1,7 @@
 ---
 title: leetcode----算法日记
 date: 2022-1-5
+lastUpdated: 2022-1-5
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅

@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之new的模拟实现
 date: 2021-11-1
+lastUpdated: 2021-11-1
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

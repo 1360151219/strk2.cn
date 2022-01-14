@@ -1,6 +1,7 @@
 ---
 title: 算法系列之背包问题
 date: 2022-1-6
+lastUpdated: 2022-1-6
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅

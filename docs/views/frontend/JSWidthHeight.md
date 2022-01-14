@@ -1,6 +1,7 @@
 ---
 title: js深入系列之各种元素、视窗宽高
 date: 2022-1-6
+lastUpdated: 2022-1-6
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

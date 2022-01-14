@@ -18,7 +18,7 @@
         @click.stop="goTags(subItem)"
       >{{ subItem }}</span>
     </reco-icon>
-    <reco-icon v-if="pageInfo.frontmatter.lastUpdated" icon="reco-three" style="float:right;">
+    <reco-icon v-if="pageInfo.frontmatter.lastUpdated" icon="reco-suggestion" style="float:right;">
       <span>{{ formatDateValue(pageInfo.frontmatter.lastUpdated) }}</span>
     </reco-icon>
   </div>

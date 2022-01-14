@@ -1,6 +1,7 @@
 ---
 title: 近代浏览器原理---从输入URL到页面显示之间的过程
 date: 2021-9-28
+lastUpdated: 2021-9-28
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

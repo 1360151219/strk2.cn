@@ -1,7 +1,7 @@
 import { compareDate } from '@theme/helpers/utils'
 
 // 过滤博客数据
-export function filterPosts (posts, isTimeline) {
+export function filterPosts(posts, isTimeline) {
   posts = posts.filter((item, index) => {
     const { title, frontmatter: { home, date, publish } } = item
     // 过滤多个分类时产生的重复数据
@@ -19,7 +19,7 @@ export function filterPosts (posts, isTimeline) {
 }
 
 // 排序博客数据
-export function sortPostsByStickyAndDate (posts) {
+export function sortPostsByStickyAndDate(posts) {
   posts.sort((prev, next) => {
     const prevSticky = prev.frontmatter.sticky
     const nextSticky = next.frontmatter.sticky
@@ -33,8 +33,17 @@ export function sortPostsByStickyAndDate (posts) {
     return compareDate(prev, next)
   })
 }
-
-export function sortPostsByDate (posts) {
+export function sortPostsByLastUpdated(posts) {
+  posts.sort((prev, next) => {
+    const prevlastUpdated = new Date(prev.frontmatter.lastUpdated).getTime()
+    const nextlastUpdated = new Date(next.frontmatter.lastUpdated).getTime()
+    if (prevlastUpdated && nextlastUpdated) {
+      return prevlastUpdated == nextlastUpdated ? compareDate(prev, next) : (nextlastUpdated - prevlastUpdated)
+    }
+    return compareDate(prev, next)
+  })
+}
+export function sortPostsByDate(posts) {
   posts.sort((prev, next) => {
     return compareDate(prev, next)
   })

@@ -1,6 +1,7 @@
 ---
 title: CORS 详解记录
 date: 2021-9-9
+lastUpdated: 2021-9-9
 categories:
   - 网络协议
 author: 盐焗乳鸽还要砂锅

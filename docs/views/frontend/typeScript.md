@@ -1,6 +1,7 @@
 ---
 title: 有关typescript的一些个人记录
 date: 2021-8-9
+lastUpdated: 2021-8-9
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

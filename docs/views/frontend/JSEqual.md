@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之两变量相等
 date: 2022-1-1
+lastUpdated: 2022-1-1
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

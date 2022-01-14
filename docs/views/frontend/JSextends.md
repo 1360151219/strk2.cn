@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之各种继承方式
 date: 2021-11-11
+lastUpdated: 2021-11-11
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

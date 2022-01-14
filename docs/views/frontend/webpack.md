@@ -1,6 +1,7 @@
 ---
 title: Webpack入门学习
 date: 2021-11-6
+lastUpdated: 2021-11-6
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

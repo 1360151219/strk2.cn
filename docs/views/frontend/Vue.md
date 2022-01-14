@@ -1,6 +1,7 @@
 ---
 title: Vue
 date: 2021-4
+lastUpdated: 2021-4
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -680,7 +681,7 @@ Vue 中组件以及 vm 实例都有着它们自己的生命周期，一共有 8 
 // 注册一个全局自定义指令 `v-focus`
 Vue.directive("focus", {
   // 当被绑定的元素插入到 DOM 中时……
-  inserted: function(el) {
+  inserted: function (el) {
     // 聚焦元素
     el.focus();
   },
@@ -753,7 +754,7 @@ Vue 提供了一种很方便的过滤器写法 _(支持串联写法)_，可以�
 ###### 定义方式
 
 ```js
-Vue.filter("filter1", function(value) {
+Vue.filter("filter1", function (value) {
   // 过滤参数内的数据
 });
 ```

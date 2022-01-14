@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之类数组与arguments
 date: 2021-11-7
+lastUpdated: 2021-11-7
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

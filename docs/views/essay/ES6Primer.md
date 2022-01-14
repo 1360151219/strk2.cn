@@ -1,6 +1,7 @@
 ---
 title: 《ES6标准入门》阮一峰---读书笔记
 date: 2021-11-29
+lastUpdated: 2021-11-29
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅

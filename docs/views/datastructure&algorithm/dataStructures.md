@@ -1,6 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
 date: 2021-12-14
+lastUpdated: 2021-12-14
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅

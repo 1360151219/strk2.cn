@@ -1,6 +1,7 @@
 ---
 title: 关于Vue + TypeScript的类组件声明写法
 date: 2021-8-29
+lastUpdated: 2021-8-29
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

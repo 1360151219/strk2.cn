@@ -28,7 +28,6 @@ export default defineComponent({
 
   setup(props, ctx) {
     const instance = getCurrentInstance().proxy
-
     const { data } = toRefs(props)
     console.log(data);
     const currentPage = ref(1)

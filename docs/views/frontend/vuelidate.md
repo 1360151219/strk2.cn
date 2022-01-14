@@ -1,6 +1,7 @@
 ---
 title: 关于Vuelidate 表单认证插件
 date: 2021-7-22
+lastUpdated: 2021-7-22
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

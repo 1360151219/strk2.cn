@@ -1,6 +1,7 @@
 ---
 title: Event Loop 事件循环机制
 date: 2021-6
+lastUpdated: 2021-6
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -80,14 +81,14 @@ Node(服务器端)与浏览器面对的场景有着很大的差异：
 ```js
 setTimeout(() => {
   console.log("timer1");
-  Promise.resolve().then(function() {
+  Promise.resolve().then(function () {
     console.log("promise1");
   });
 });
 
 setTimeout(() => {
   console.log("timer2");
-  Promise.resolve().then(function() {
+  Promise.resolve().then(function () {
     console.log("promise2");
   });
 });

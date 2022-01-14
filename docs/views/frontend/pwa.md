@@ -1,6 +1,7 @@
 ---
 title: PWA 插件配置
 date: 2021-9-11
+lastUpdated: 2021-9-11
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

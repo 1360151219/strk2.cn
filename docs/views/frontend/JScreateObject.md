@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之创建对象的方式
 date: 2021-11-8
+lastUpdated: 2021-11-8
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

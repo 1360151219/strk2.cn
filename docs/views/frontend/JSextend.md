@@ -1,6 +1,7 @@
 ---
 title: JavaScript深入之extend的实现
 date: 2021-12-10
+lastUpdated: 2021-12-10
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

@@ -1,6 +1,7 @@
 ---
 title: 《Vuejs深入浅出》
 date: 2021-7-12
+lastUpdated: 2021-7-12
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅
@@ -24,11 +25,11 @@ function defineReactive(data, key, val) {
   Object.defineProperty(data, key, {
     configurable: true /* 可修改 */,
     enumerable: true /* 可遍历 */,
-    get: function() {
+    get: function () {
       dep.depend();
       return val;
     },
-    set: function(newVal) {
+    set: function (newVal) {
       if (val === newVal) return;
       dep.notify();
       val = newVal;
@@ -128,11 +129,11 @@ export default class Observer {
     Object.defineProperty(data, key, {
       configurable: true /* 可修改 */,
       enumerable: true /* 可遍历 */,
-      get: function() {
+      get: function () {
         Dep.target && dep.addSub(Dep.target);
         return val;
       },
-      set: function(newVal) {
+      set: function (newVal) {
         if (val === newVal) return;
         dep.notify();
         val = newVal;

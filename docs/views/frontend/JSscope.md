@@ -1,6 +1,7 @@
 ---
 title: js深入系列：静、动态作用域和上下文栈
 date: 2021-10-19
+lastUpdated: 2021-10-19
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

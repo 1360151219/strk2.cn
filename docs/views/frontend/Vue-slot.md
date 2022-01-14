@@ -1,6 +1,7 @@
 ---
 title: Vue之Slot的深入学习
 date: 2021-12-7
+lastUpdated: 2021-12-7
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

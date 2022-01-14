@@ -1,6 +1,7 @@
 ---
 title: ServiceWorker 学习
 date: 2021-10-11
+lastUpdated: 2021-10-11
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -31,11 +32,11 @@ tags:
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("/sw-test/sw.js", { scope: "/sw-test/" })
-    .then(function(reg) {
+    .then(function (reg) {
       // registration worked
       console.log("Registration succeeded. Scope is " + reg.scope);
     })
-    .catch(function(error) {
+    .catch(function (error) {
       // registration failed
       console.log("Registration failed with " + error);
     });
@@ -57,9 +58,9 @@ if ("serviceWorker" in navigator) {
 在 Service Worker 注册完毕后，`install`事件会被触发，`install`一般是用于填充我们的缓存的，这里有一个 Service Worker 的新 API `caches`，一个 Service Worker 上的全局对象，它可以让我们缓存网络相应回来的资源，并且根据他们的缓存生成 key。它会一直存在。
 
 ```js
-this.addEventListener("install", function(event) {
+this.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open("v1").then(function(cache) {
+    caches.open("v1").then(function (cache) {
       return cache.addAll([
         "/sw-test/",
         "/sw-test/index.html",
@@ -91,7 +92,7 @@ this.addEventListener("install", function(event) {
 你可以给 service worker 添加一个 `fetch` 的事件监听器，接着调用 event 上的 respondWith() 方法来劫持我们的 HTTP 响应，然后你用可以用自己的方法来更新他们。
 
 ```js
-this.addEventListener("fetch", function(event) {
+this.addEventListener("fetch", function (event) {
   event.respondWith(caches.match(event.request));
 });
 ```
@@ -116,7 +117,7 @@ caches.match("/back.html");
 当我们没有匹配到任何资源的话，promise 就会 reject，同时也会出现一个网络错误。这时候我们可以利用 promise 改善一下：
 
 ```js
-self.addEventListener("fetch", function(event) {
+self.addEventListener("fetch", function (event) {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
@@ -130,7 +131,7 @@ self.addEventListener("fetch", function(event) {
 我们还可以将服务器请求回来的资源，缓存下来，以便离线的时候使用。
 
 ```js
-self.addEventListener("fetch", function(event) {
+self.addEventListener("fetch", function (event) {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return (
@@ -154,7 +155,7 @@ self.addEventListener("fetch", function(event) {
 除此之外，我们可以给请求没有匹配到缓存中任何资源以及网络请求不可用的时候一个回退方案：
 
 ```js
-self.addEventListener("fetch", function(event) {
+self.addEventListener("fetch", function (event) {
   event.respondWith(
     caches
       .match(event.request)
@@ -207,7 +208,7 @@ self.addEventListener('install', function(event) {
 `activate`事件通常被用于破坏原有页面的事情。比如清除缓存。
 
 ```js
-self.addEventListener("activate", function(event) {
+self.addEventListener("activate", function (event) {
   var cacheWhitelist = ["v2"];
   /* 
     ** caches:{
@@ -215,9 +216,9 @@ self.addEventListener("activate", function(event) {
     **   }
      */
   event.waitUntil(
-    caches.keys().then(function(keyList) {
+    caches.keys().then(function (keyList) {
       return Promise.all(
-        keyList.map(function(key) {
+        keyList.map(function (key) {
           if (cacheWhitelist.indexOf(key) === -1) {
             return caches.delete(key);
           }
