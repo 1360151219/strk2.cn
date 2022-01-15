@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记
-date: 2022-1-5
-lastUpdated: 2022-1-5
+date: 2021-7
+lastUpdated: 2022-1-8
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -4487,7 +4487,7 @@ class PriorityQueue {
 }
 ```
 
-## dfs
+## dfs、bfs
 
 ### 剑指 Offer 12. 矩阵中的路径 ---- leetcode 72 单词搜索 （剑指 offer）
 
@@ -4994,6 +4994,53 @@ var colorBorder = function (grid, row, col, color) {
     }
   }
   return grid;
+};
+```
+
+### leetcode 1036. 逃离大迷宫
+
+**BFS** `2022.1.8`
+
+主要思路是怎么判断有没有被封了。我们可以利用双向 bfs 来确定，因为最大的封禁面积是结合边界一起围成一个(n\*n+1)/2 的三角形，因此只要从起点终点出发，能走超过这个 max 的步数，则没有被封
+
+```
+var isEscapePossible = function(blocked, source, target) {
+    // 只要走的步数超过了max，则证明没有被封
+    let n=blocked.length
+    const MAX=n*(n+1)/2
+    const DIR=[[0,1],[1,0],[-1,0],[0,-1]]
+    const ROW=1000000
+    let block=new Set()
+    for(let b of blocked){
+        block.add(b[0]*ROW+b[1])
+    }
+    return bfs(source,target)&&bfs(target,source)
+    function bfs(start,end){
+        let walked=new Set()
+        let queue=[start]
+        let i=0
+        const endIdx=end[0]*ROW+end[1]
+        while(queue.length>0&&i<MAX){
+            let cur=queue.shift()
+            for(let d of DIR){
+                const nx=cur[0]+d[0]
+                const ny=cur[1]+d[1]
+                const idx=nx*ROW+ny
+                if(nx<0||nx>=ROW||ny<0||ny>=ROW) {
+                    continue
+                }
+                if(block.has(idx)||walked.has(idx)){
+                    continue
+                }
+                if(idx===endIdx) return true
+                queue.push([nx,ny])
+                walked.add(idx)
+                i++
+            }
+        }
+        if(i<MAX) return false
+        else return true
+    }
 };
 ```
 

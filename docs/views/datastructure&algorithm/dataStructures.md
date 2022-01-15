@@ -1,7 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
-date: 2021-12-14
-lastUpdated: 2021-12-14
+date: 2021-6-28
+lastUpdated: 2021-12-15
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1920,3 +1920,53 @@ function quick(arr, left, right) {
 
 原理图如下：
 ![](../imgs/quickSort.jpg)
+
+## Manacher 算法
+
+Manacher 算法是专门用于解决回文子串问题的优质算法。一般对于求解一个字符串的最长回文子串问题，如果使用通常解法的话：
+
+**通常解法**一般是遍历字符串，从每一个字符向左右同时外扩，这样的时间复杂度一般在 O(n^2)，而且这种做法对偶数的回文子串没有作用。
+
+因此我们可以加一个占位符，这样的话就可以同时解决奇数偶数回文子串的问题。
+
+![](./imgs/Manacher1.jpg)
+
+有了上面思维作基础，我们就可以开始讲一下 Manacher 算法了：
+
+![](./imgs/Manacher2.jpg)
+
+```js
+function manacherStr(s) {
+  let n = s.length * 2 + 1;
+  let ans = new Array(n);
+  let index = 0;
+  for (let i = 0; i < n; i++) {
+    ans[i] = i & 1 ? s.charAt(index++) : "#";
+  }
+  return ans;
+}
+// console.log(manacherStr('123'));
+function manacher(str) {
+  if (!str || str.length === 0) return 0;
+  const s = manacherStr(str);
+  const n = s.length;
+  let PR = new Array(n); // 回文半径数组
+  let C = (R = -1); // 这里的R是有效范围有界+1
+  let max = -Infinity;
+  for (let i = 0; i < n; i++) {
+    PR[i] = R > i ? Math.min(PR[C * 2 - i], R - i) : 1; // 不用验证的初始半径
+    while (i - PR[i] >= 0 && i + PR[i] < n) {
+      if (s[i - PR[i]] === s[i + PR[i]]) {
+        PR[i]++;
+      } else break;
+    }
+
+    if (i + PR[i] > R) {
+      R = i + PR[i];
+      C = i;
+    }
+    max = Math.max(max, PR[i]);
+  }
+  return max - 1;
+}
+```
