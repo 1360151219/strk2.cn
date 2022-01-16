@@ -1,5 +1,5 @@
 ---
-title: leetcode----算法日记
+title: leetcode----算法日记（第一弹）
 date: 2021-7
 lastUpdated: 2022-1-8
 categories:
