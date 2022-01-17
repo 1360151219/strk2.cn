@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-16
+lastUpdated: 2022-1-17
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -71,5 +71,103 @@ Solution.prototype.getRandom = function () {
     t = t.next;
   }
   return ans;
+};
+```
+
+## 单调栈
+
+### leetcode 1856. 子数组最小乘积的最大值
+
+给你一个正整数数组  `nums` ，请你返回  `nums`  任意   非空子数组   的最小乘积   的   最大值  。由于答案可能很大，请你返回答案对   `109 + 7`  取余   的结果。
+
+**单调栈** `2022.1.17`
+
+主要思路是利用单调栈找出以每一个数字作为最小值的时候，最大长度的区间，然后求答案。
+
+注意这题一定要用 BigInt 不用 AC 不了
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var maxSumMinProduct = function (nums) {
+  let queue = new Stack();
+  let ans = BigInt(0);
+  let sum = new Array(nums.length + 1).fill(0);
+  for (let i = 1; i <= nums.length; i++) {
+    sum[i] = sum[i - 1] + nums[i - 1];
+  }
+  for (let i = 0; i < nums.length; i++) {
+    let cur = nums[i];
+    while (!queue.isEmpty() && nums[queue.peek()[0]] > cur) {
+      let maxList = queue.pop();
+      let l = queue.isEmpty() ? 0 : queue.peek()[queue.peek().length - 1] + 1;
+      let tep = BigInt(sum[i] - sum[l]) * BigInt(nums[maxList[0]]);
+      if (tep > ans) ans = tep;
+    }
+    if (!queue.isEmpty() && nums[queue.peek()[0]] === nums[i])
+      queue.peek().push(i);
+    else queue.push([i]);
+  }
+  while (!queue.isEmpty()) {
+    let maxList = queue.pop();
+    let l = queue.isEmpty() ? 0 : queue.peek()[queue.peek().length - 1] + 1;
+    let tep = BigInt(sum[nums.length] - sum[l]) * BigInt(nums[maxList[0]]);
+    if (tep > ans) ans = tep;
+  }
+  return ans % 1000000007n;
+};
+class Stack {
+  constructor() {
+    this.items = [];
+  }
+  push(el) {
+    this.items.push(el);
+  }
+  pop() {
+    return this.items.pop();
+  }
+  peek() {
+    if (this.items.length === 0) return null;
+    return this.items[this.items.length - 1];
+  }
+  isEmpty() {
+    return this.items.length === 0;
+  }
+  size() {
+    return this.items.length;
+  }
+}
+```
+
+## 动态规划
+
+### leetcode 1220. 统计元音字母序列的数目
+
+**dp** `2022.1.17`
+
+类似这种题想到的就是 dp，重点是定义状态数组，根据题意，可以定义 dp[i][j]是长度为 i，j 是结尾为第 j 个字符的序列数。
+
+```js
+var countVowelPermutation = function (n) {
+  //['a','e','i','o','u']  dp[i][j] i表示长度i j表示结尾是第j个字符
+  let dp = new Array(n + 1).fill(0).map(() => new Array(5).fill(0));
+  // 初始化
+  for (let i = 0; i < 5; i++) {
+    dp[1][i] = 1;
+  }
+  for (let i = 2; i <= n; i++) {
+    dp[i][0] = (dp[i - 1][4] + dp[i - 1][1] + dp[i - 1][2]) % 1000000007; // a=e+i+u
+    dp[i][1] = (dp[i - 1][0] + dp[i - 1][2]) % 1000000007; //e =a+i
+    dp[i][2] = (dp[i - 1][1] + dp[i - 1][3]) % 1000000007; // i= e+o
+    dp[i][3] = dp[i - 1][2] % 1000000007; // o=i
+    dp[i][4] = (dp[i - 1][2] + dp[i - 1][3]) % 1000000007; // u=i+o
+  }
+  let ans = 0;
+  for (let i = 0; i < 5; i++) {
+    ans += dp[n][i] % 1000000007;
+  }
+  return ans % 1000000007;
 };
 ```

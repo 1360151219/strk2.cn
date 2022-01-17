@@ -544,6 +544,13 @@ var change = function (amount, coins) {
 输出: 4
 
 解释: 选两件物品 1，再选一件物品 2，可使价值最大。
+
+示例 2：
+
+输入: N = 2, C = 8, v = [2,4], w = [100,100], s = [4,2]
+
+输出: 400
+
 ```
 
 按照之前的思路分析，我们可以列出以下状态转移方程：
@@ -591,3 +598,34 @@ function maxValue(N, C, v, w, s) {
 ```
 
 因此我们可以把多重背包看成特殊的 01 背包。但其实我们没必要把它扁平化，因为会增加它的时间复杂度
+
+### 多重背包的二进制优化
+
+所谓二进制优化，就是彻底将多重背包转化为 01 背包，同时降低其复杂度。
+
+在转化的过程中，将数量为 n 的物品可以展开为 logN 个物品，比如 7 = 1+2+4 ; 10=1+2+4+3
+
+```js
+function maxValue(N, C, v, w, s) {
+  let arr = []; // v,w
+  for (let i = 0; i < N; i++) {
+    let cnt = s[i];
+    for (let k = 1; k <= cnt; k *= 2) {
+      cnt -= k;
+      arr.push(k * v[i], k * w[i]);
+    }
+    if (cnt > 0) {
+      arr.push(cnt * v[i], cnt * w[i]);
+    }
+  }
+  let dp = new Array(C + 1).fill(0);
+  for (let i = 0; i < arr.length; i++) {
+    let iv = arr[i][0];
+    let iw = arr[i][1];
+    for (let j = C; j >= iv; j--) {
+      dp[j] = Math.max(dp[j], dp[j - iv] + iw);
+    }
+  }
+  return dp[C];
+}
+```

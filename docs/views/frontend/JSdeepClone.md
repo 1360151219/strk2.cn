@@ -85,19 +85,22 @@ console.log(obj, clone);
 
 这只是一个简单的深拷贝函数。但如果要实现一个较为完整的深拷贝函数，比如能拷贝`Date()`、`RegExp`,破解循环引用等问题。
 
-这里采用一位大佬的实现方法：
+这里借鉴一位大佬的实现方法：
 
 ```js
 function deepClone(obj, hash = new WeakMap()) {
+  if (typeof obj !== "object") return obj;
   if (obj === null) return null;
   if (obj instanceof Date) return new Date(obj);
   if (obj instanceof RegExp) return new RegExp(obj);
-  if (typeof obj !== "object") return obj;
   if (hash.has(obj)) return hash.get(obj);
-  let clone = obj instanceof Array ? [] : {};
-  Reflect.ownKeys(obj).forEach((key) => {
-    clone[key] = deepClone(obj[key]);
-  });
-  return clone;
+  hash.set(obj);
+  let res = Array.isArray(obj) ? [] : {};
+  const keys = Object.keys(obj);
+  for (let key of keys) {
+    const val = obj[key];
+    res[key] = deepClone(val, hash);
+  }
+  return res;
 }
 ```
