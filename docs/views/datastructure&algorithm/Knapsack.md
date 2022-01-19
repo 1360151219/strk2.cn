@@ -1,7 +1,7 @@
 ---
 title: 算法系列之背包问题
 date: 2022-1-6
-lastUpdated: 2022-1-15
+lastUpdated: 2022-1-19
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -628,4 +628,166 @@ function maxValue(N, C, v, w, s) {
   }
   return dp[C];
 }
+```
+
+## 混合背包
+
+混合背包顾名思义，就是将前面讲的 01 背包、完全背包以及多重背包混合在了一起。
+
+现在首先让我们先来回忆一下吧：
+
+- 01 背包：每种物品只能选择一次，遍历顺序从大到小
+- 完全背包：每种物品可以选择无限次，遍历顺序从小到大
+- 多重背包：每种物品可以选择有限次，遍历顺序从大到小（转化为 01 背包）
+
+有 `N` 种物品和一个容量为 `C` 的背包，每种物品都「数量有限」。
+
+第 `i` 件物品的体积是 `v[i]`，价值是 `w[i]` ，数量是`s[i]`。
+
+当 s[i]为 -1 代表是该物品只能用一次
+当 s[i] 为 0 代表该物品可以使用无限次
+当 s[i] 为任意正整数则代表可用 s[i] 次
+
+```js
+function maxValue(N, C, v, w, s) {
+  let dp = new Array(C + 1).fill(0);
+  let arr = [];
+  for (let i = 0; i < N; i++) {
+    let is = s[i];
+    let iv = v[i];
+    let iw = w[i];
+    if (is > 0) {
+      let k = 1;
+      while (k <= is) {
+        arr.push([k * iv, k * iw]);
+        is -= k;
+        k *= 2;
+      }
+      if (is > 0) {
+        arr.push([is * iv, is * iw]);
+      }
+    } else if (is === 0) {
+      arr.push([iv, -iw]);
+    } else {
+      arr.push([iv, iw]);
+    }
+  }
+  for (let i = 0; i < arr.length; i++) {
+    const iv = arr[i][0];
+    const iw = arr[i][1];
+    if (iw >= 0) {
+      for (let j = C; j >= iv; j--) {
+        dp[j] = Math.max(dp[j], dp[j - iv] + iw);
+      }
+    } else {
+      for (let j = iv; j <= C; j++) {
+        console.log(dp[j], dp[j - iv] - iw);
+        dp[j] = Math.max(dp[j], dp[j - iv] - iw);
+      }
+    }
+  }
+  return dp[C];
+}
+/* 混合背包 */
+console.log(maxValue(4, 5, [1, 2, 3, 4], [2, 4, 4, 5], [-1, 1, 0, 2])); // 8
+```
+
+## 分组背包
+
+给定 N 个物品组，和容量为 C 的背包。
+
+第 i 个物品组共有 s[i] 件物品，其中第 i 组的第 j 件物品的成本为 v[i][j]，价值为 w[i][j] 。
+
+每组有若干个物品，同一组内的物品最多只能选一个。
+
+求解将哪些物品装入背包可使这些物品的费用总和不超过背包容量，且价值总和最大。
+
+```
+示例：
+输入：N = 2, C = 9, S = [2, 3], v = [[1,2,-1],[1,2,3]], w = [[2,4,-1],[1,3,6]]
+
+输出：10
+```
+
+常规解法：
+
+```js
+function maxValue(N, C, s, v, w) {
+  let dp = new Array(N + 1).fill(0).map(() => new Array(C + 1).fill(0));
+  for (let i = 1; i <= N; i++) {
+    let iv = v[i - 1];
+    let iw = w[i - 1];
+    let is = s[i - 1];
+    for (let j = 0; j <= C; j++) {
+      for (let k = 0; k < is; k++) {
+        let vol = v[i - 1][k];
+        let wor = w[i - 1][k];
+        dp[i][j] = Math.max(
+          dp[i - 1][j],
+          j < vol ? 0 : dp[i - 1][j - vol] + wor
+        );
+      }
+    }
+  }
+  return dp[N][C];
+}
+```
+
+**一维空间优化**
+
+跟 01 背包同理，我们观察到下一行的状态依赖上一行状态的 j 较小数据，因此我们需要从大到小开始遍历。
+
+```js
+function maxValue(N, C, s, v, w) {
+  let dp = new Array(C + 1).fill(0);
+  for (let i = 1; i <= N; i++) {
+    let iv = v[i - 1];
+    let iw = w[i - 1];
+    let is = s[i - 1];
+    for (let j = C; j >= 0; j--) {
+      for (let k = 0; k < is; k++) {
+        let vol = iv[k];
+        let wor = iw[k];
+        dp[j] = Math.max(dp[j], j < vol ? 0 : dp[j - vol] + wor);
+      }
+    }
+  }
+  return dp[C];
+}
+```
+
+### leetcode 1155.掷骰子的 N 种方法
+
+这里有`d`个一样的骰子，每个骰子上都有`f`个面，分别标号为`1, 2, ..., f`。
+
+我们约定：掷骰子的得到总点数为各骰子面朝上的数字的总和。
+
+如果需要掷出的总点数为`target`，请你计算出有多少种不同的组合情况（所有的组合情况总共有 f^d 种），模`10^9 + 7`后返回。
+
+---
+
+可以转化为分组背包问题：即有 d 个物品组，每个物品组有 f 个物品，其 volune 和 worth 都是其标号。
+
+定义 dp[j]为此时背包剩余容量为 j 时候的最大方案数，因此 dp[j]=dp[j]+dp[j-f]（f 为当前物品的 volune）
+
+值得注意的是，由状态转移方程得知，下一行依赖上一行容量低的数据，因此 j 要从大到小遍历
+
+还有，因为 j 依赖上一行的数据，因此需要**先置零**
+
+```js
+var numRollsToTarget = function (n, k, target) {
+  let dp = new Array(target + 1).fill(0);
+  dp[0] = 1;
+  for (let i = 1; i <= n; i++) {
+    for (let j = target; j >= 0; j--) {
+      dp[j] = 0; //
+      for (let l = 1; l <= k; l++) {
+        if (j >= l) {
+          dp[j] = (dp[j] + dp[j - l]) % 1000000007;
+        }
+      }
+    }
+  }
+  return dp[target];
+};
 ```

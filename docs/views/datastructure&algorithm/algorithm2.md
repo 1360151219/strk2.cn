@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-17
+lastUpdated: 2022-1-19
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -74,6 +74,35 @@ Solution.prototype.getRandom = function () {
 };
 ```
 
+### 539. 最小时间差
+
+给定一个 24 小时制（小时:分钟 "HH:MM"）的时间列表，找出列表中任意两个时间的最小时间差并以分钟数表示。
+
+**简单模拟** `2022.1.18`
+
+主要思路是：将时间转化为分钟进行存储，从小到大排序后，考虑隔一天的情况，只需要将第一位也就是最小的分钟加一个 1440（即一天），存入数组中即可。然后就是简单遍历了。
+
+```js
+var findMinDifference = function (timePoints) {
+  const n = timePoints.length;
+  if (n > 1440) return 0;
+  let nums = new Array(n + 1);
+  let i = 0;
+  for (let t of timePoints) {
+    const time = t.split(":");
+    nums[i] = time[0] * 60 + time[1] * 1; // 隐式转换
+    i++;
+  }
+  nums.sort((a, b) => a - b);
+  nums[n] = nums[0] + 1440;
+  let ans = Infinity;
+  for (let i = 1; i < nums.length; i++) {
+    ans = Math.min(ans, nums[i] - nums[i - 1]);
+  }
+  return ans;
+};
+```
+
 ## 单调栈
 
 ### leetcode 1856. 子数组最小乘积的最大值
@@ -139,6 +168,31 @@ class Stack {
     return this.items.length;
   }
 }
+```
+
+## 滑动窗口
+
+### 219. 存在重复元素 II
+
+给你一个整数数组`nums` 和一个整数  `k` ，判断数组中是否存在两个 不同的索引  `i`  和  `j` ，满足 `nums[i] == nums[j]` 且 `abs(i - j) <= k` 。如果存在，返回 true ；否则，返回 false 。
+
+**2022.1.19**
+
+```js
+var containsNearbyDuplicate = function (nums, k) {
+  const n = nums.length;
+  let set = new Set();
+  for (let i = 0; i < n; i++) {
+    if (i > k) {
+      set.delete(nums[i - k - 1]);
+    }
+    if (set.has(nums[i])) {
+      return true;
+    }
+    set.add(nums[i]);
+  }
+  return false;
+};
 ```
 
 ## 动态规划
