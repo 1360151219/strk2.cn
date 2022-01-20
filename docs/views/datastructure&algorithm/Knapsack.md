@@ -1,7 +1,7 @@
 ---
 title: 算法系列之背包问题
 date: 2022-1-6
-lastUpdated: 2022-1-19
+lastUpdated: 2022-1-20
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -692,7 +692,7 @@ function maxValue(N, C, v, w, s) {
 console.log(maxValue(4, 5, [1, 2, 3, 4], [2, 4, 4, 5], [-1, 1, 0, 2])); // 8
 ```
 
-## 分组背包
+# 分组背包
 
 给定 N 个物品组，和容量为 C 的背包。
 
@@ -789,5 +789,91 @@ var numRollsToTarget = function (n, k, target) {
     }
   }
   return dp[target];
+};
+```
+
+# 多维背包
+
+下面直接来看一道题：
+
+## leetcode 474. 一和零
+
+给你一个二进制字符串数组 `strs` 和两个整数 `m` 和 `n` 。
+
+请你找出并返回 `strs` 的**最大子集**的长度，该子集中 最多 有 `m` 个 0 和 `n` 个 1 。
+
+如果 x 的所有元素也是 y 的元素，集合 x 是集合 y 的 子集 。
+
+**背包 dp**
+
+这一道题有两个限制，m 以及 n，可以看成背包容量有 2 种限制。
+
+每一个字符串的价值为 1，重量为 0 和 1 的数量
+
+定义 dp[k][i][j]为考虑前 k 个字符串，剩余 0 的容量为 i，剩余 1 的容量为 j 的最大长度。
+
+则状态转移方程为：
+
+dp[k][i][j]=Math(dp[k-1][i][j],dp[k-1][i-x][j-y]) （x、y 是当前字符串 0 和 1 的数量）
+
+```js
+var findMaxForm = function (strs, m, n) {
+  const len = strs.length;
+  let cnt = [];
+  for (let s of strs) {
+    let res = new Array(2).fill(0);
+    for (let i = 0; i < s.length; i++) {
+      if (s.charAt(i) === "0") res[0]++;
+      else res[1]++;
+    }
+    cnt.push(res);
+  }
+  let dp = new Array(len + 1)
+    .fill(0)
+    .map(() => new Array(m + 1).fill(0).map(() => new Array(n + 1).fill(0)));
+  for (let i = 1; i <= len; i++) {
+    const zero = cnt[i - 1][0];
+    const one = cnt[i - 1][1];
+    for (let j = 0; j <= m; j++) {
+      for (let k = 0; k <= n; k++) {
+        let no = dp[i - 1][j][k];
+        let yes = j >= zero && k >= one ? dp[i - 1][j - zero][k - one] + 1 : 0;
+        dp[i][j][k] = Math.max(no, yes);
+        // console.log(Math.max(no,yes))
+      }
+    }
+  }
+  return dp[len][m][n];
+};
+```
+
+这就是多维背包：即在 01 背包的基础上，多加了一种容量限制。因此要优化的话，也只需要根据 01 背包的思想进行优化即可。
+
+```js
+var findMaxForm = function (strs, m, n) {
+  const len = strs.length;
+  let cnt = [];
+  for (let s of strs) {
+    let res = new Array(2).fill(0);
+    for (let i = 0; i < s.length; i++) {
+      if (s.charAt(i) === "0") res[0]++;
+      else res[1]++;
+    }
+    cnt.push(res);
+  }
+  let dp = new Array(m + 1).fill(0).map(() => new Array(n + 1).fill(0));
+  for (let i = 0; i < len; i++) {
+    const zero = cnt[i][0];
+    const one = cnt[i][1];
+    for (let j = m; j >= zero; j--) {
+      for (let k = n; k >= one; k--) {
+        let no = dp[j][k];
+        let yes = dp[j - zero][k - one] + 1;
+        dp[j][k] = Math.max(no, yes);
+        // console.log(Math.max(no,yes))
+      }
+    }
+  }
+  return dp[m][n];
 };
 ```
