@@ -275,9 +275,9 @@ import(`./section_modules/${someVariable}.js`).then((module) => {
 
 > 这里注意一下，模块顶层的 this 关键字返回 undefined，而不是指向 window
 
-## require 命令加载
+### require 命令加载
 
-### 循环加载
+#### 循环加载
 
 循环加载指的是 a 脚本执行依赖 b 脚本，b 脚本的执行也依赖 a 脚本。
 

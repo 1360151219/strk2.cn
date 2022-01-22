@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-20
+lastUpdated: 2022-1-22
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -100,6 +100,30 @@ var findMinDifference = function (timePoints) {
     ans = Math.min(ans, nums[i] - nums[i - 1]);
   }
   return ans;
+};
+```
+
+### leetcode 1332. 删除回文子序列
+
+给你一个字符串  `s`，它仅由字母  `'a'` 和 `'b'`  组成。每一次删除操作都可以从 `s` 中删除一个回文 **子序列**。
+
+返回删除给定字符串中所有字符（字符串为空）的最小删除次数。
+
+**双指针模拟** `2022.1.22`
+
+因为这个字符串就只有 a、b 两个字母，因此最差也只需要删除 2 次。实际上就只需要判断 s 是不是一个回文串，是的话就直接删除，不是的话就返回 2。
+
+```js
+var removePalindromeSub = function (s) {
+  const n = s.length;
+  let i = 0;
+  let j = n - 1;
+  while (i < j) {
+    if (s.charAt(i) !== s.charAt(j)) return 2;
+    i++;
+    j--;
+  }
+  return 1;
 };
 ```
 
@@ -249,5 +273,75 @@ var countVowelPermutation = function (n) {
     ans += dp[n][i] % 1000000007;
   }
   return ans % 1000000007;
+};
+```
+
+## bfs&dfs
+
+### leetcode 1345. 跳跃游戏 IV
+
+给你一个整数数组`arr` ，你一开始在数组的第一个元素处（下标为 0）。
+
+每一步，你可以从下标  `i`  跳到下标：
+
+`i + 1`  满足：`i + 1 < arr.length`
+`i - 1`  满足：`i - 1 >= 0`
+`j`  满足：`arr[i] == arr[j] 且 i != j`
+请你返回到达数组最后一个元素的下标处所需的  **最少操作次数** 。
+
+注意：任何时候你都不能跳到数组外面。
+
+**BFS** `2022.1.21`
+
+这道题很容易想到 bfs，因此需要考虑几乎所有情况后的最佳情况。
+
+主要思路是：遍历一遍数组并将元素下标存入哈希表中，然后从 start 开始将其可以到达的 next push 进队列中。并且更新步数。
+
+但是这道题困难就难在该死的测试用例：TLS!!!
+
+因此我们要不断的优化：比如用一个 dp 数组存每一个下标的到达的步数。如果已经走过的话就不用再走了。
+
+最重要的是**过河拆桥**：即走过该格子后将其在哈希表内删除掉！
+
+```js
+var minJumps = function (arr) {
+  const n = arr.length;
+  if (n === 1) return 0;
+  let map = new Map();
+  for (let i = 0; i < n; i++) {
+    if (!map.has(arr[i])) map.set(arr[i], [i]);
+    else map.get(arr[i]).unshift(i);
+  }
+  let dp = new Array(n).fill(Infinity); // 存每个位置最小步数
+  dp[0] = 0;
+  let queue = [0]; // BFS
+  while (queue.length > 0) {
+    const i = queue.shift();
+    const idxs = map.get(arr[i]);
+    let step = dp[i];
+    if (idxs) {
+      for (let idx of idxs) {
+        if (idx === n - 1) return step + 1;
+        if (dp[idx] === Infinity) {
+          queue.push(idx);
+          dp[idx] = step + 1;
+        }
+      }
+    }
+
+    map.delete(arr[i]);
+    if (i - 1 >= 0 && dp[i - 1] === Infinity) {
+      queue.push(i - 1);
+      dp[i - 1] = step + 1;
+    }
+    if (i + 1 < n && dp[i + 1] === Infinity) {
+      if (i + 1 === n - 1) return step + 1;
+      if (dp[i + 1] === Infinity) {
+        queue.push(i + 1);
+        dp[i + 1] = step + 1;
+      }
+    }
+  }
+  return dp[n - 1];
 };
 ```
