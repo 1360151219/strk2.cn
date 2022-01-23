@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-22
+lastUpdated: 2022-1-23
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -216,6 +216,133 @@ class Stack {
   }
   size() {
     return this.items.length;
+  }
+}
+```
+
+## 优先队列（堆）
+
+### leetcode 2034. 股票价格波动
+
+给你一支股票价格的数据流。数据流中每一条记录包含一个 **时间戳**  和该时间点股票对应的 **价格** 。
+
+不巧的是，由于股票市场内在的波动性，股票价格记录可能不是按时间顺序到来的。某些情况下，有的记录可能是错的。如果两个有相同时间戳的记录出现在数据流中，前一条记录视为错误记录，后出现的记录 **更正**  前一条错误的记录。
+
+请你设计一个算法，实现：
+
+更新股票在某一时间戳的股票价格，如果有之前同一时间戳的价格，这一操作将更正之前的错误价格。
+找到当前记录里 **最新股票价格** 。最新股票价格定义为时间戳最晚的股票价格。
+找到当前记录里股票的 **最高价格** 。
+找到当前记录里股票的 **最低价格** 。
+请你实现  `StockPrice`  类：
+
+`StockPrice()`  初始化对象，当前无股票价格记录。
+`void update(int timestamp, int price)`  在时间点 timestamp  更新股票价格为 price 。
+`int current()`  返回股票 最新价格  。
+`int maximum()`  返回股票 最高价格  。
+`int minimum()`  返回股票 最低价格  。
+
+**优先队列** `2022.1.23`
+
+基本思路：设置一个哈希表（time：price），每次 update 都 set 一下。其次是返回最新价格，只需要每次 update 的时候维护一个最大时间戳即可
+
+主要是最大最小价格，一开始我采用遍历哈希表的方法，TLE 了- -
+
+那只能用优先队列了呀。用优先队列的话还要考虑一个问题，如何解决之前的错误价格呢？
+
+其实也很容易，只需要加时间和价格同时推进优先队列中即可，取出的时候判断一下是否跟哈希表内的时间和价格一致，不一致则说明是错误价格，继续取出即可。
+
+```js
+class StockPrice {
+  constructor() {
+    this.stock = new Map();
+    this.cur = 0;
+    this.maxQueue = new PriorityQueue((a, b) => a[0] > b[0]);
+    this.minQueue = new PriorityQueue((a, b) => a[0] < b[0]);
+  }
+  update(time, price) {
+    this.cur = Math.max(this.cur, time);
+    this.stock.set(time, price);
+    // 直接offer
+
+    this.maxQueue.offer([price, time]);
+    this.minQueue.offer([price, time]);
+  }
+  current() {
+    return this.stock.get(this.cur);
+  }
+  maximum() {
+    while (1) {
+      const cur = this.maxQueue.peek();
+      if (this.stock.get(cur[1]) === cur[0]) {
+        return cur[0];
+      }
+      this.maxQueue.poll();
+    }
+  }
+  minimum() {
+    while (1) {
+      const cur = this.minQueue.peek();
+      if (this.stock.get(cur[1]) === cur[0]) {
+        return cur[0];
+      }
+      this.minQueue.poll();
+    }
+  }
+}
+class PriorityQueue {
+  constructor(compare = (a, b) => a > b) {
+    this.data = [];
+    this.size = 0;
+    this.compare = compare;
+  }
+  peek() {
+    return this.size > 0 ? this.data[0] : null;
+  }
+  offer(value) {
+    this.data.push(value);
+    this._siftUp(this.size++);
+  }
+  poll() {
+    this._swap(0, --this.size);
+    this._siftDown(0);
+    return this.data.pop();
+  }
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  _siftUp(index) {
+    while (
+      this._parent(index) >= 0 &&
+      this.compare(this.data[index], this.data[this._parent(index)])
+    ) {
+      this._swap(index, this._parent(index));
+      index = this._parent(index);
+    }
+  }
+
+  _siftDown(index) {
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      if (
+        child + 1 < this.size &&
+        this.compare(this.data[child + 1], this.data[child])
+      ) {
+        child = child + 1;
+      }
+      if (this.compare(this.data[index], this.data[child])) {
+        break;
+      }
+      this._swap(index, child);
+      index = child;
+    }
+  }
+
+  _swap(a, b) {
+    [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
   }
 }
 ```

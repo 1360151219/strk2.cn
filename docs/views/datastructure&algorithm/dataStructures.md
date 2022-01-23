@@ -1,7 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
 date: 2021-6-28
-lastUpdated: 2021-12-15
+lastUpdated: 2022-1-23
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1459,6 +1459,30 @@ function _child_right(index) {
         this._siftDown(0)
         return this.data.pop()
  }
+_siftDown(index) {
+  while(this._child(index) < this.size) {
+    let child = this._child(index)
+    if(child + 1 < this.size
+      && this.compare(this.data[child + 1], this.data[child])) {
+        child = child + 1
+    }
+    if(this.compare(this.data[index], this.data[child])){
+      break
+    }
+    this._swap(index, child)
+    index = child
+  }
+}
+```
+
+> 订正：以下是之前的代码，这里有一个问题不知道有人能看出来吗？这里没有判断 \_child(index)+1 有没有超出 size
+
+```js
+ poll() {
+        this._swap(0, --this.size)
+        this._siftDown(0)
+        return this.data.pop()
+ }
   _siftDown(index) {
     while (this._child(index) < this.size
         && this.compare(this.data[this._child(index)], this.data[index])
@@ -1508,15 +1532,18 @@ class PriorityQueue {
     }
   }
   _siftDown(index) {
-    while (
-      this._child(index) < this.size &&
-      this.compare(this.data[this._child(index)], this.data[index])
-    ) {
-      let child =
-        this.data[this._child(index)] > this.data[this._child(index) + 1]
-          ? this._child(index)
-          : this._child(index) + 1;
-      this._swap(child, index);
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      if (
+        child + 1 < this.size &&
+        this.compare(this.data[child + 1], this.data[child])
+      ) {
+        child = child + 1;
+      }
+      if (this.compare(this.data[index], this.data[child])) {
+        break;
+      }
+      this._swap(index, child);
       index = child;
     }
   }

@@ -1,7 +1,7 @@
 ---
 title: 算法系列之背包问题
 date: 2022-1-6
-lastUpdated: 2022-1-20
+lastUpdated: 2022-1-23
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -875,5 +875,55 @@ var findMaxForm = function (strs, m, n) {
     }
   }
   return dp[m][n];
+};
+```
+
+## leetcode 879. 盈利计划
+
+集团里有 n 名员工，他们可以完成各种各样的工作创造利润。
+
+第  `i`  种工作会产生  `profit[i]`  的利润，它要求  `group[i]`  名成员共同参与。如果成员参与了其中一项工作，就不能参与另一项工作。
+
+工作的任何至少产生  `minProfit` 利润的**子集**称为盈利计划 。并且工作的成员总数最多为 n 。
+
+有多少种计划可以选择？因为答案很大，所以 返回结果模  **10^9 + 7**  的值。
+
+---
+
+这道题是一道特殊的多维背包题，因为它既不是刚好达到某价值也不是求最大价值（即不超过），而是求达到至少价值的总方案数。
+
+我们定义 dp[i][j][k]表示考虑前 i 个工作，使用人数剩余 j、利润为 k 的总方案数。
+
+初始化的时候，dp[0][x][0] = 1 表示不考虑工作式，使用任何人数获得的利润都为 0
+
+状态转移方程如下：
+
+![](./imgs/knapsack11.png)
+
+```js
+var profitableSchemes = function (n, minProfit, group, profit) {
+  const len = group.length;
+  let dp = new Array(len + 1)
+    .fill(0)
+    .map(() =>
+      new Array(n + 1).fill(0).map(() => new Array(minProfit + 1).fill(0))
+    );
+  for (let i = 0; i <= n; i++) {
+    dp[0][i][0] = 1;
+  }
+  for (let i = 1; i <= len; i++) {
+    const g = group[i - 1];
+    const p = profit[i - 1];
+    for (let j = 0; j <= n; j++) {
+      for (let k = 0; k <= minProfit; k++) {
+        dp[i][j][k] = dp[i - 1][j][k];
+        if (j >= g) {
+          dp[i][j][k] += dp[i - 1][j - g][Math.max(k - p, 0)];
+          dp[i][j][k] %= 1000000007;
+        }
+      }
+    }
+  }
+  return dp[len][n][minProfit];
 };
 ```
