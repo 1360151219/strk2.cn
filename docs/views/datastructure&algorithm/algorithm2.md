@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-23
+lastUpdated: 2022-1-25
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -127,6 +127,33 @@ var removePalindromeSub = function (s) {
 };
 ```
 
+### leetcode 1688. 比赛中的配对次数
+
+给你一个整数 n ，表示比赛中的队伍数。比赛遵循一种独特的赛制：
+
+- 如果当前队伍数是 **偶数** ，那么每支队伍都会与另一支队伍配对。总共进行 `n / 2` 场比赛，且产生 `n / 2` 支队伍进入下一轮。
+- 如果当前队伍数为 **奇数** ，那么将会随机轮空并晋级一支队伍，其余的队伍配对。总共进行 `(n - 1) / 2` 场比赛，且产生 `(n - 1) / 2 + 1` 支队伍进入下一轮。
+  返回在比赛中进行的配对次数，直到决出获胜队伍为止。
+
+**暴力** `2022.1.25`
+
+```js
+var numberOfMatches = function (n) {
+  let ans = 0;
+  while (n > 1) {
+    ans += n & 1 ? (n - 1) / 2 : n / 2;
+    n = n & 1 ? (n + 1) / 2 : n / 2;
+  }
+  return ans;
+};
+```
+
+**脑筋急转弯**
+
+最终决出获胜队伍，即有 n-1 个队伍需要配对，即直接 return n-1
+
+> 但我不知道为啥暴力的时间还更少- -
+
 ### leetcode 2029. 石子游戏 IX
 
 Alice 和 Bob 再次设计了一款新的石子游戏。现有一行 `n` 个石子，每个石子都有一个关联的数字表示它的价值。给你一个整数数组 `stones` ，其中 `stones[i]` 是第 `i` 个石子的价值。
@@ -150,6 +177,55 @@ var stoneGameIX = function (stones) {
     cnt[stones[i] % 3]++;
   }
   return cnt[0] % 2 === 0 ? cnt[1] && cnt[2] : Math.abs(cnt[1] - cnt[2]) >= 3;
+};
+```
+
+### leetcode 2151. 基于陈述统计最多好人数
+
+游戏中存在两种角色：
+
+好人：该角色只说真话。
+坏人：该角色可能说真话，也可能说假话。
+给你一个下标从 0 开始的二维整数数组 statements ，大小为 `n x n` ，表示 n 个玩家对彼此角色的陈述。具体来说，`statements[i][j]` 可以是下述值之一：
+
+- 0 表示 i 的陈述认为 j 是 坏人 。
+- 1 表示 i 的陈述认为 j 是 好人 。
+- 2 表示 i 没有对 j 作出陈述。
+  另外，玩家不会对自己进行陈述。形式上，对所有  `0 <= i < n` ，都有 `statements[i][i] = 2` 。
+
+根据这 n 个玩家的陈述，返回可以认为是 **好人** 的 **最大** 数目。
+
+**二进制枚举和状态压缩**
+
+这题的 n 最大只有 15，因此可以用暴力枚举的方法----二进制枚举。今天来学习一下[二进制枚举](https://blog.csdn.net/sugarbliss/article/details/81099340)
+
+因此这题总枚举数是`1 << n`，（最多 15 个人，每个人都可以当坏人或者好人，即 2^15）
+
+为了优化我们使用状态压缩的方法，即 i>>j 为第 i 种情况中是否为好人（1 则好人，0 则坏人），坏人说的话没有判断的价值
+
+此时继续枚举 k，然后判断 i（好人）说的话跟 statements 的有没有冲突，有的话则说明 i 的这种情况有问题。
+
+```js
+var maximumGood = function (statements) {
+  const n = statements.length;
+  let ans = 0;
+  for (let i = 0; i < 1 << n; i++) {
+    let cur = 0;
+    let flag = true;
+    for (let j = 0; j < n && flag; j++) {
+      if ((i >> j) & 1) {
+        cur += 1;
+        for (let k = 0; k < n && flag; k++) {
+          if (statements[j][k] === 2) continue;
+          if (statements[j][k] == 0 && ((i >> k) & 1) == 1) flag = false;
+          if (statements[j][k] == 1 && ((i >> k) & 1) == 0) flag = false;
+        }
+      }
+    }
+
+    if (flag) ans = Math.max(cur, ans);
+  }
+  return ans;
 };
 ```
 
