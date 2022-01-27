@@ -1,7 +1,7 @@
 ---
 title: 算法系列之背包问题
 date: 2022-1-6
-lastUpdated: 2022-1-23
+lastUpdated: 2022-1-26
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -927,3 +927,29 @@ var profitableSchemes = function (n, minProfit, group, profit) {
   return dp[len][n][minProfit];
 };
 ```
+
+# 树形背包
+
+有 N 个物品和一个容量为 C 的背包，物品编号为 0，1....N-1 。
+
+物品之间具有依赖关系，且依赖关系组成一棵树的形状。
+
+如下图所示：
+
+![](./imgs/knapsack11.jpg)
+
+如果选择一个物品，则必须选择它的父节点。
+
+第 i 件物品的体积为 v[i] ，价值为 w[i]，其父节点物品编号为 p[1]，其中根节点 p[i]=-1
+
+求解将哪些物品装入背包，可使这些物品的总体积不超过背包容量，且总价值最大。
+
+---
+
+树形背包和分组背包相似，但在树形背包问题中，每个物品的决策与其父节点存在依赖关系，因此我们将”线性“的状态定义调整为”树形“的：
+
+**dp[i][j] 表示以 i 为根的子树，背包容量不超过 j 的最大价值**
+
+首先根据题意，无论如何先把根节点选上。
+
+![](./imgs/knapsack12.png)

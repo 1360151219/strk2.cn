@@ -1,7 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
 date: 2021-6-28
-lastUpdated: 2022-1-23
+lastUpdated: 2022-1-27
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1995,5 +1995,53 @@ function manacher(str) {
     max = Math.max(max, PR[i]);
   }
   return max - 1;
+}
+```
+
+## KMP 算法
+
+KMP 算法用来解决寻找子串的问题的。（相当于 indexof）
+
+![](./imgs/kmp.png)
+
+```js
+/**
+ * @param {string} haystack
+ * @param {string} needle
+ * @return {number}
+ */
+function strStr(s, m) {
+  if (s === null || m === null || s.length < m.length) return -1;
+  if (m.length === 0) return 0;
+  let str1 = s.split("");
+  let str2 = m.split("");
+  let next = getNextArr(m);
+  let i1 = 0;
+  let i2 = 0;
+  while (i1 < str1.length && i2 < str2.length) {
+    if (str1[i1] === str2[i2]) {
+      i1++;
+      i2++;
+    } else if (next[i2] === -1) {
+      i1++;
+    } else {
+      i2 = next[i2];
+    }
+  }
+  return i2 === str2.length ? i1 - i2 : -1;
+}
+function getNextArr(str) {
+  if (str.length === 1) return [-1];
+  let next = new Array(str.length);
+  next[0] = -1;
+  next[1] = 0;
+  let i = 2;
+  let cn = 0;
+  while (i < next.length) {
+    if (str[cn] === str[i - 1]) next[i++] = ++cn;
+    else if (cn > 0) cn = next[cn];
+    else next[i++] = 0;
+  }
+  return next;
 }
 ```

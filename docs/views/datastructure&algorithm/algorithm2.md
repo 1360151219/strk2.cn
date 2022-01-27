@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-25
+lastUpdated: 2022-1-27
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -153,6 +153,67 @@ var numberOfMatches = function (n) {
 最终决出获胜队伍，即有 n-1 个队伍需要配对，即直接 return n-1
 
 > 但我不知道为啥暴力的时间还更少- -
+
+### leetcode 2013. 检测正方形
+
+给你一个在 X-Y 平面上的点构成的数据流。设计一个满足下述要求的算法：
+
+- 添加一个在数据流中的新点到某个数据结构中。可以添加 **重复** 的点，并会视作不同的点进行处理。
+- 给你一个查询点，请你从数据结构中选出三个点，使这三个点和查询点一同构成一个面积为正的轴对齐正方形 ，统计满足该要求的方案数目。
+
+> 轴对齐正方形是一个正方形，除四条边长度相同外，还满足每条边都与 x-轴 或 y-轴 平行或垂直。
+
+实现` DetectSquares` 类：
+
+`DetectSquares()` 使用空数据结构初始化对象
+`void add(int[] point)` 向数据结构添加一个新的点 `point = [x, y]`
+`int count(int[] point)` 统计按上述方式与点 `point = [x, y]` 共同构造 轴对齐正方形 的方案数。
+
+**哈希表** `2022.1.26`
+
+使用一维优化的方式记录 point。
+
+使用哈希表来记录每一个点的个数，再使用一个数组来记录每一个点的种类。
+
+在查询方法中，遍历数组获取所有不同的点，判断是否正方形面积为 0（即重叠）或不为轴对齐，然后判断组成正方形的剩余两个点的数量并相乘
+
+```js
+const N = 100;
+class DetectSquares {
+  constructor() {
+    this.cnt = new Map();
+    this.st = new Array(5005);
+    this.i = 0;
+  }
+  add(point) {
+    if (!this.cnt.has(point[0] * N + point[1])) {
+      this.st[this.i++] = point[0] * N + point[1];
+    }
+    const cur = this.cnt.get(point[0] * N + point[1]) || 0;
+    this.cnt.set(point[0] * N + point[1], cur + 1);
+  }
+  count(point) {
+    let ans = 0;
+    for (let i = 0; i < this.i; i++) {
+      let x = Math.floor(this.st[i] / N);
+      let y = this.st[i] % N;
+      if (
+        x === point[0] ||
+        y === point[1] ||
+        Math.abs(x - point[0]) != Math.abs(y - point[1])
+      )
+        continue;
+      if (this.cnt.has(point[0] * N + y) && this.cnt.has(x * N + point[1])) {
+        ans +=
+          this.cnt.get(point[0] * N + y) *
+          this.cnt.get(x * N + point[1]) *
+          this.cnt.get(this.st[i]);
+      }
+    }
+    return ans;
+  }
+}
+```
 
 ### leetcode 2029. 石子游戏 IX
 
@@ -546,5 +607,50 @@ var minJumps = function (arr) {
     }
   }
   return dp[n - 1];
+};
+```
+
+### leetcode 1971. 寻找图中是否存在路径
+
+有一个具有 `n`个顶点的 **双向** 图，其中每个顶点标记从 0 到 n - 1（包含 0 和 n - 1）。图中的边用一个二维整数数组 `edges` 表示，其中 `edges[i] = [ui, vi]` 表示顶点 ui 和顶点 vi 之间的双向边。 每个顶点对由最多一条边连接，并且没有顶点存在与自身相连的边。
+
+请你确定是否存在从顶点 start 开始，到顶点 end 结束的 有效路径 。
+
+给你数组 edges 和整数 n、start 和 end，如果从 start 到 end 存在 有效路径 ，则返回 true，否则返回 false 。
+
+**dfs** `2022.1.27`
+
+首先哈希表将双向边都记录下来。
+
+两个剪枝：过河拆桥以及走过的路不再走
+
+```js
+var validPath = function (n, edges, source, destination) {
+  const graph = new Map();
+  const set = new Set();
+  // 0->1,2
+  for (let i of edges) {
+    const h = i[0];
+    const t = i[1];
+    if (graph.has(h)) graph.get(h).push(t);
+    else graph.set(h, [t]);
+    if (graph.has(t)) graph.get(t).push(h);
+    else graph.set(t, [h]);
+  }
+  return dfs(source);
+  //
+  function dfs(start) {
+    if (start === destination) return true;
+    if (!graph.has(start)) return false;
+    const nxt = graph.get(start);
+    graph.delete(start);
+    for (let i of nxt) {
+      // [1,2]
+      if (set.has(i)) continue;
+      set.add(i);
+      if (dfs(i)) return true;
+    }
+    return false;
+  }
 };
 ```
