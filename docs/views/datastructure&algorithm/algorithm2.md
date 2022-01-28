@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-27
+lastUpdated: 2022-1-28
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -355,6 +355,69 @@ class Stack {
     return this.items.length;
   }
 }
+```
+
+### leetcode 1996. 游戏中弱角色的数量
+
+你正在参加一个多角色游戏，每个角色都有两个主要属性：**攻击** 和 **防御** 。给你一个二维整数数组 `properties` ，其中 `properties[i] = [attacki, defensei]` 表示游戏中第 i 个角色的属性。
+
+如果存在一个其他角色的攻击和防御等级 都严格高于 该角色的攻击和防御等级，则认为该角色为 **弱角色** 。更正式地，如果认为角色 i 弱于 存在的另一个角色 j ，那么 `attackj > attacki` 且 `defensej > defensei` 。
+
+返回 **弱角色** 的数量。
+
+**法一：排序** `2022.1.28`
+
+首先按照攻击力从大到小排序，在攻击力相同的每一段维护一个最大防御力，这样的话遍历到下一段的时候只要防御力没有上一段最大防御力高，则为弱角色
+
+```js
+var numberOfWeakCharacters = function (properties) {
+  // 攻击
+  properties.sort((a, b) => b[0] - a[0]);
+  let ans = 0;
+  let defenseMax = properties[0][1]; // 一段中最大值
+  for (let i = 0; i < properties.length; ) {
+    let j = i;
+    let cur = defenseMax;
+    // 处理攻击力相同段
+    while (j < properties.length && properties[i][0] === properties[j][0]) {
+      if (i !== 0 && properties[j][1] < defenseMax) {
+        ans++;
+      }
+      cur = Math.max(cur, properties[j++][1]);
+    }
+    defenseMax = cur;
+    i = j;
+  }
+  return ans;
+};
+```
+
+**法二：单调栈**
+
+对于找比自身大的值这种问题，单调栈是最好实现的了
+
+这就需要维护一个递减的单调栈。这样的话我们可以先按照攻击力从小到大排序，如果攻击力相同的话则防御力从大到小排序。**这里是为了让攻击力相同时单调栈一直 push 值**
+
+单调栈只需要维护防御力即可。
+
+```js
+var numberOfWeakCharacters = function (properties) {
+  properties.sort((a, b) => {
+    if (a[0] != b[0]) return a[0] - b[0];
+    else return b[1] - a[1];
+  });
+  let ans = 0;
+  let st = []; // defense递减的单调栈---找比自己大的
+  for (let p of properties) {
+    while (st.length > 0 && st[st.length - 1] < p[1]) {
+      st.pop();
+      ans++;
+    }
+    st.push(p[1]);
+  }
+
+  return ans;
+};
 ```
 
 ## 优先队列（堆）

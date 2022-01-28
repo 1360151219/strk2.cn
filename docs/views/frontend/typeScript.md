@@ -33,6 +33,12 @@ function add({ one, two }: { one: number, two: number }): number {
 
 > 类中的方法是定义的非常细节，但接口中的方法只定义类型
 
+#### 接口 interface 和 type 的区别
+
+- `interface`只能定义对象类型、而`type`可定义任何类型
+- `interface`可以声明两个接口合并，而`type`不行
+- `type`有类型推导
+
 #### 类与接口的约束
 
 **implements** 关键字，表示约束的意思，即 Teacher **类**必须满足 Person **接口**中定义的属性
@@ -150,7 +156,7 @@ let output = identity("myString"); // type of output will be 'string'
 
 > 数组中泛型的使用
 
-如果传递过来的值要求是数字，如何用泛型进行定义那?两种方法:
+如果传递过来的值要求是数字，如何用泛型进行定义那两种方法:
 
 - 第一种是直接使用[]。 `number[]`
 - 第二种是使用 **Array<泛型>**。形式不一样，其他的都一样。 `Array<number>` `Promise<void>`
@@ -187,6 +193,4 @@ let arr = new Persons([
     {name:'xiaohong'},
     {name:'xiaolan'}
 ])
-
-
 ```

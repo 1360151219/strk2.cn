@@ -9,6 +9,8 @@ tags:
   - JavaScript
 ---
 
+# JavaScript 深入之各种继承方式
+
 这篇文章依旧是参考[冴羽博客](https://github.com/mqyqingfeng/Blog)系列而出的，但是这是作者本人根据红宝书第 4 版第 8 章的内容做的一些总结笔记~。
 
 ## 原型链继承
