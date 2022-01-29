@@ -1,7 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
 date: 2021-6-28
-lastUpdated: 2022-1-27
+lastUpdated: 2022-1-29
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -11,11 +11,7 @@ tags:
 
 # javascript(ES6) 前端数据结构与算法
 
----
-
 ## Stack 栈结构
-
----
 
 ### 栈常见的操作
 
@@ -1948,6 +1944,51 @@ function quick(arr, left, right) {
 原理图如下：
 ![](../imgs/quickSort.jpg)
 
+### 基数排序
+
+![](./imgs/radixSort.gif)
+
+```js
+function maxBits(num) {
+  let ans = 0;
+  while (num > 0) {
+    num = Math.floor(num / 10);
+    ans++;
+  }
+  return ans;
+}
+function getDigit(num, d) {
+  return Math.floor(num / Math.pow(10, d - 1)) % 10;
+}
+// 下面的代码优化得与算法思路不一样：这里出桶相当于从后往前遍历原数组
+function sort(arr) {
+  const digit = maxBits(Math.max(...arr));
+  const n = arr.length;
+  let bucket = new Array(n);
+  for (let d = 1; d <= digit; d++) {
+    let cnt = new Array(10).fill(0);
+    // 计数并且改造成前缀和形式
+    for (let i = 0; i < n; i++) {
+      let j = getDigit(arr[i], d);
+      cnt[j]++;
+    }
+    for (let i = 1; i < 10; i++) {
+      cnt[i] = cnt[i - 1] + cnt[i];
+    }
+    for (let i = n - 1; i >= 0; i--) {
+      let j = getDigit(arr[i], d);
+      bucket[cnt[j]-- - 1] = arr[i];
+    }
+    for (let i = 0, j = 0; i < n; i++, j++) {
+      arr[i] = bucket[j];
+    }
+  }
+  return arr;
+}
+
+console.log(sort([1, 9, 8, 7, 5, 6]));
+```
+
 ## Manacher 算法
 
 Manacher 算法是专门用于解决回文子串问题的优质算法。一般对于求解一个字符串的最长回文子串问题，如果使用通常解法的话：
@@ -2024,9 +2065,7 @@ function strStr(s, m) {
       i2++;
     } else if (next[i2] === -1) {
       i1++;
-    } else {
-      i2 = next[i2];
-    }
+    } else i2 = next[i2];
   }
   return i2 === str2.length ? i1 - i2 : -1;
 }

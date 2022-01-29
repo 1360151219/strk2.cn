@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-28
+lastUpdated: 2022-1-29
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -670,6 +670,76 @@ var minJumps = function (arr) {
     }
   }
   return dp[n - 1];
+};
+```
+
+### leetcode 1765. 地图中的最高点
+
+给你一个大小为  `m x n`  的整数矩阵  `isWater` ，它代表了一个由 **陆地**  和 **水域**  单元格组成的地图。
+
+如果  `isWater[i][j] == 0` ，格子  (i, j)  是一个 陆地   格子。
+如果  `isWater[i][j] == 1` ，格子  (i, j)  是一个 水域   格子。
+你需要按照如下规则给每个单元格安排高度：
+
+每个格子的高度都必须是非负的。
+如果一个格子是是 **水域** ，那么它的高度必须为 **0** 。
+任意相邻的格子高度差 **至多**  为 1 。当两个格子在正东、南、西、北方向上相互紧挨着，就称它们为相邻的格子。（也就是说它们有一条公共边）
+找到一种安排高度的方案，使得矩阵中的最高高度值最大。
+
+请你返回一个大小为  `m x n`  的整数矩阵 `height` ，其中 `height[i][j]`  是格子 (i, j)  的高度。如果有多种解法，请返回任意一个。
+
+**BFS** `2022.1.29`
+
+这很容易想到，从每一处的水域开始出发，采用广度优先搜索来将高度递增即可。
+
+**这里需要注意的是，js 的 push 和 shift 方法很鸡肋会导致超时，这里我使用了一个辅助数组来代替队列操作**
+
+```js
+const DIR = [
+  [0, 1],
+  [1, 0],
+  [-1, 0],
+  [0, -1],
+];
+var highestPeak = function (isWater) {
+  // 从水源触发 bfs
+  const getIdx = (i, j) => i * n + j;
+  const parseIdx = (idx) => [Math.floor(idx / n), idx % n];
+  const m = isWater.length;
+  const n = isWater[0].length;
+  let height = new Array(m).fill(0).map(() => new Array(n));
+  let queue = [];
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (isWater[i][j] == 1) {
+        height[i][j] = 0;
+        queue.push(getIdx(i, j));
+      } else {
+        height[i][j] = -1;
+      }
+    }
+  }
+  while (queue.length > 0) {
+    let newQueue = [];
+    for (let idx of queue) {
+      const curIdx = parseIdx(idx);
+      const i = curIdx[0];
+      const j = curIdx[1];
+      const h = height[i][j];
+      for (let d of DIR) {
+        const ni = i + d[0];
+        const nj = j + d[1];
+        if (ni < 0 || nj < 0 || ni >= m || nj >= n) continue;
+        if (height[ni][nj] != -1) continue;
+        // if(height[ni][nj]===h+1) continue
+        // if(isWater[ni][nj]) continue
+        height[ni][nj] = h + 1;
+        newQueue.push(getIdx(ni, nj));
+      }
+    }
+    queue = newQueue;
+  }
+  return height;
 };
 ```
 
