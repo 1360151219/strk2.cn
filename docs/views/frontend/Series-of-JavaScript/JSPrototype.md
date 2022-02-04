@@ -13,7 +13,7 @@ tags:
 
 首先，深入了解过 JavaScript 的人都应该知道构造函数、原型以及实例之间的简单关系，如下图:
 
-![](../imgs/Prototype/prototype-1.png)
+![](../../imgs/Prototype/prototype-1.png)
 
 即：
 
@@ -49,7 +49,7 @@ console.log(person.name); // Kevin
 
 我们说过，这个实例的原型实质上就是一个对象,因此原型的原型指向 Object 构造函数的 prototype，所以我们可以再完善一下关系图：
 
-![](../imgs/Prototype/prototype-2.png)
+![](../../imgs/Prototype/prototype-2.png)
 
 ### 原型链
 
@@ -61,7 +61,7 @@ console.log(Object.prototype.__proto__ === null); // true
 
 我们得知，Object 的 prototype 没有原型，所以查找属性到这里就可以停止了。图中蓝色的线其实就是一条原型链啦。
 
-![](../imgs/Prototype/prototype-3.png)
+![](../../imgs/Prototype/prototype-3.png)
 
 ### 补充
 

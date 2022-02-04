@@ -109,7 +109,7 @@ function objectFactory() {
 
 > 这里如果用的是`let obj=Object.create(null)`的话，则后面通过 prototype 添加的方法则无法使用。
 
-![](../imgs/new/new-1.png)
+![](../../imgs/new/new-1.png)
 
 查看由两种方式生成的 person 对象，第一个是由 `Object.create`生成的，第二个是 new Object 生成的
 

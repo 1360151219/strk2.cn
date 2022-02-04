@@ -148,7 +148,7 @@ new _Promise(function (resolve, reject) {
 
 理由也很简单，因为 setTimeout 是宏任务，当执行完`executor`后，将 setTimeout 推入外部队列、then 推进内部队列后，就会执行 then（then 是微任务）。此时 state 还没被改变。简而言之就是 **then 发生在 resolve 之前**。
 
-![](../imgs/Promise1.jpg)
+![](../../imgs/Promise1.jpg)
 
 因此我们需要在状态改变完之后，再去执行 then 中的回调函数。因此这里我们可以使用发布-订阅模式：当执行 then 的时候 state 还没改变的时候，将回调函数都先保存下来，等到 state 变了，再把回调函数取出并执行。
 

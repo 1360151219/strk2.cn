@@ -131,6 +131,6 @@ console.timeEnd("eachWithCall");
 ```
 
 结果如下:
-![](../imgs/jQuery-each/each1.png)
+![](../../imgs/jQuery-each/each1.png)
 
 这才知道原来是 call 将性能变慢了。但是有了 call 才能让我们将 this 指向当前元素噢。
