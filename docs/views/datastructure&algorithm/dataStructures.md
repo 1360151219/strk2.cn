@@ -1,7 +1,7 @@
 ---
 title: javascript(ES6) 前端数据结构与算法
 date: 2021-6-28
-lastUpdated: 2022-1-29
+lastUpdated: 2022-2-2
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -931,7 +931,7 @@ class Node {
 
 > 二叉树一般由**链表**来存储，每个节点包含自身数据，以及左右子节点的引用。
 
-### 搜索二叉树 (binary search tree)
+### 搜索二叉树 (binary search tree) 及其遍历方式
 
 二叉搜索树（BST，Binary Search Tree），也称为二叉排序树和二叉查找树。
 
@@ -2083,4 +2083,206 @@ function getNextArr(str) {
   }
   return next;
 }
+```
+
+## Morris 遍历
+
+Morris 遍历是对二叉树的一种遍历方式。相比于传统的前中后序遍历而言，Morris 最大的特点就是空间复杂度可以达到 O(1)
+
+而传统遍历方式是利用递归函数栈的形式，空间复杂度无疑是 O(n)
+
+其遍历规则如下：
+
+- 假设当前节点为 cur
+- 若 cur 有左子树，则找到左子树中最右的节点 mostRight
+  - 如果 mostRight 右指针指向空，则让其指向 cur，cur 左移
+  - 如果 mostRight 右指针指向 cur，则让其指向空，cur 向右移动
+- 若 cur 没有左子树，则 cur 向右移动
+- 若 cur 为空，遍历结束
+
+![](https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg2020.cnblogs.com%2Fblog%2F1938187%2F202004%2F1938187-20200411161048071-1519225694.gif&refer=http%3A%2F%2Fimg2020.cnblogs.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1646539959&t=e7d4fae61f5495b01f0d10c4ddbf4719)
+
+代码实现如下：
+
+```js
+var Morris = function (root) {
+  if (root == null) return;
+  let cur = root;
+  let mostRight = null;
+  while (cur !== null) {
+    mostRight = cur.left;
+    if (mostRight !== null) {
+      // 有左子树
+      while (mostRight.right !== null && mostRight.right !== cur)
+        mostRight = mostRight.right;
+      if (mostRight.right == null) {
+        // 若mostRight的右指针指向空
+        mostRight.right = cur;
+        // console.log(cur.val);
+        cur = cur.left;
+        continue;
+      } else {
+        // 若mostRight的右指针指向cur
+        mostRight.right = null;
+      }
+    }
+    // console.log(cur.val);
+    // 没有左子树或者mostRight右指针指向cur
+    cur = cur.right;
+  }
+};
+```
+
+对于 Morris 遍历，由于使用的是叶子节点的右指针，因此空间复杂度为 O(1)，而因为在每个节点找 mostRight 的时候，遍历的节点是不相同的，因此时间复杂度最差的情况下也是 O(n)
+
+不难发现：**Morris 遍历中有左子树的节点会遍历 2 次，没有左子树的节点只会遍历一次**
+
+### Morris 遍历变成先序遍历
+
+关键在于**没有左子树的节点直接打印，有左子树的节点在遍历第一次时打印**
+
+```js
+var MorrisPre = function (root) {
+  if (root == null) return;
+  let cur = root;
+  let mostRight = null;
+  while (cur !== null) {
+    mostRight = cur.left;
+    if (mostRight !== null) {
+      while (mostRight.right !== null && mostRight.right !== cur)
+        mostRight = mostRight.right;
+      if (mostRight.right == null) {
+        mostRight.right = cur;
+        console.log(cur.val); // 有左子树遍历第一次的时候打印
+        cur = cur.left;
+        continue;
+      } else {
+        mostRight.right = null;
+      }
+    } else {
+      console.log(cur.val); // 没有左子树直接打印
+    }
+    cur = cur.right;
+  }
+};
+```
+
+### Morris 遍历变成中序遍历
+
+关键在于**没有左子树的节点直接打印，有左子树的节点在遍历第二次时打印**
+
+```js
+var MorrisIn = function (root) {
+  if (root == null) return;
+  let cur = root;
+  let mostRight = null;
+  while (cur !== null) {
+    mostRight = cur.left;
+    if (mostRight !== null) {
+      while (mostRight.right !== null && mostRight.right !== cur)
+        mostRight = mostRight.right;
+      if (mostRight.right == null) {
+        mostRight.right = cur;
+        cur = cur.left;
+        continue;
+      } else {
+        mostRight.right = null;
+      }
+    }
+    console.log(cur.val); // 没有左子树直接打印&有左子树遍历第二次的时候打印
+    cur = cur.right;
+  }
+};
+```
+
+### Morris 遍历变成后序遍历
+
+关键在于**有左子树的节点第二次遍历的时候打印其左子树的逆序右边界，再最后打印根节点的逆序右边界**
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var MorrisPost = function (root) {
+  if (root == null) return;
+  let cur = root;
+  let mostRight = null;
+  while (cur !== null) {
+    mostRight = cur.left;
+    if (mostRight !== null) {
+      while (mostRight.right !== null && mostRight.right !== cur)
+        mostRight = mostRight.right;
+      if (mostRight.right == null) {
+        mostRight.right = cur;
+        cur = cur.left;
+        continue;
+      } else {
+        mostRight.right = null;
+        printRightEgde(cur.left);
+      }
+    }
+    cur = cur.right;
+  }
+  printRightEgde(root);
+};
+function printRightEgde(node) {
+  let tail = reverse(node);
+  let cur = tail;
+  while (cur !== null) {
+    console.log(cur.val);
+    cur = cur.right;
+  }
+  reverse(tail);
+}
+function reverse(node) {
+  let pre = null;
+  let next = null;
+  while (node !== null) {
+    next = node.right;
+    node.right = pre;
+    pre = node;
+    node = next;
+  }
+  return pre;
+}
+```
+
+### leetcode 98.验证搜索二叉树
+
+**基本思路**：列出 Morris 版本的中序遍历，定义一个变量指向前一个数据，判断是否升序
+
+```js
+var isValidBST = function (root) {
+  if (root == null) return true;
+  let cur = root;
+  let preValue = -Infinity;
+  while (cur !== null) {
+    let mostRight = cur.left;
+    if (mostRight) {
+      while (mostRight.right !== null && mostRight.right !== cur)
+        mostRight = mostRight.right;
+      if (mostRight.right === null) {
+        mostRight.right = cur;
+        cur = cur.left;
+        continue;
+      } else {
+        mostRight.right = null;
+      }
+    }
+    // todo
+    if (cur.val <= preValue) return false;
+    preValue = cur.val;
+    cur = cur.right;
+  }
+  return true;
+};
 ```
