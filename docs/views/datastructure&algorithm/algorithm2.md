@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-1-29
+lastUpdated: 2022-2-6
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -103,6 +103,43 @@ var findMinDifference = function (timePoints) {
 };
 ```
 
+### leetcode 884. 两句话中的不常见单词
+
+句子是一串由空格分隔的单词。每个 **单词** 仅由小写字母组成。
+
+如果某个单词在其中一个句子中恰好出现一次，在另一个句子中却 **没有出现** ，那么这个单词就是 **不常见的** 。
+
+给你两个 句子 s1 和 s2 ，返回所有 **不常用单词** 的列表。返回列表中单词可以按 任意顺序 组织。
+
+---
+
+**哈希表** `2022.1.30`
+
+遍历两个句子，看看哪个单词只出现过一次
+
+```js
+var uncommonFromSentences = function (s1, s2) {
+  const map = new Map();
+  for (let s of s1.split(" ")) {
+    if (map.has(s)) {
+      let i = map.get(s);
+      map.set(s, i + 1);
+    } else map.set(s, 1);
+  }
+  for (let s of s2.split(" ")) {
+    if (map.has(s)) {
+      let i = map.get(s);
+      map.set(s, i + 1);
+    } else map.set(s, 1);
+  }
+  const ans = [];
+  for (let i of map.keys()) {
+    if (map.get(i) === 1) ans.push(i);
+  }
+  return ans;
+};
+```
+
 ### leetcode 1332. 删除回文子序列
 
 给你一个字符串  `s`，它仅由字母  `'a'` 和 `'b'`  组成。每一次删除操作都可以从 `s` 中删除一个回文 **子序列**。
@@ -124,6 +161,51 @@ var removePalindromeSub = function (s) {
     j--;
   }
   return 1;
+};
+```
+
+### leetcode 1342. 将数字变成 0 的操作次数
+
+给你一个非负整数 num ，请你返回将它变成 0 所需要的步数。 如果当前数字是偶数，你需要把它除以 2 ；否则，减去 1 。
+
+---
+
+```js
+var numberOfSteps = function (num) {
+  let ans = 0;
+  while (num > 0) {
+    ans++;
+    if ((num & 1) == 0) {
+      num = num >> 1;
+    } else {
+      num -= 1;
+    }
+  }
+  return ans;
+};
+```
+
+### leetcode 1414. 和为 K 的最少斐波那契数字数目
+
+给你数字 k ，请你返回和为 k 的斐波那契数字的最少数目，其中，每个斐波那契数字都可以被使用多次。
+
+---
+
+**递归** `2022.2.3`
+
+```js
+var findMinFibonacciNumbers = function (k) {
+  if (k === 0) return 0;
+  let a = 1;
+  let b = 1;
+  let c = 1;
+  while (a + b <= k) {
+    a = b;
+    b = c;
+    if (a + b > k) break;
+    c = a + b;
+  }
+  return findMinFibonacciNumbers(k - c) + 1;
 };
 ```
 
@@ -605,6 +687,64 @@ var countVowelPermutation = function (n) {
 
 ## bfs&dfs
 
+### leetcode 1219. 黄金矿工
+
+你要开发一座金矿，地质勘测学家已经探明了这座金矿中的资源分布，并用大小为  m \* n 的网格 grid 进行了标注。每个单元格中的整数就表示这一单元格中的黄金数量；如果该单元格是空的，那么就是 0。
+
+为了使收益最大化，矿工需要按以下规则来开采黄金：
+
+- 每当矿工进入一个单元，就会收集该单元格中的所有黄金。
+- 矿工每次可以从当前位置向上下左右四个方向走。
+- 每个单元格只能被开采（进入）一次。
+- 不得开采（进入）黄金数目为 0 的单元格。
+- 矿工可以从网格中 任意一个 有黄金的单元格出发或者是停止。
+
+---
+
+**dfs** `2022.2.5`
+
+```js
+const DIR = [
+  [0, 1],
+  [0, -1],
+  [1, 0],
+  [-1, 0],
+];
+
+var getMaximumGold = function (grid) {
+  const m = grid.length;
+  const n = grid[0].length;
+  let visited = new Array(m).fill(0).map(() => new Array(n).fill(false));
+  let ans = 0;
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (grid[i][j]) {
+        visited[i][j] = true;
+        ans = Math.max(ans, dfs(grid, i, j));
+        visited[i][j] = false;
+      }
+    }
+  }
+  return ans;
+
+  function dfs(grid, i, j) {
+    const m = grid.length;
+    const n = grid[0].length;
+    let ans = grid[i][j];
+    for (let d of DIR) {
+      let ni = i + d[0];
+      let nj = j + d[1];
+      if (ni < 0 || nj < 0 || ni >= m || nj >= n) continue;
+      if (visited[ni][nj] || grid[ni][nj] === 0) continue;
+      visited[ni][nj] = true;
+      ans = Math.max(ans, grid[i][j] + dfs(grid, ni, nj));
+      visited[ni][nj] = false;
+    }
+    return ans;
+  }
+};
+```
+
 ### leetcode 1345. 跳跃游戏 IV
 
 给你一个整数数组`arr` ，你一开始在数组的第一个元素处（下标为 0）。
@@ -785,5 +925,56 @@ var validPath = function (n, edges, source, destination) {
     }
     return false;
   }
+};
+```
+
+## 周赛题
+
+### leetcode 6003. 移除所有载有违禁货物车厢所需的最少时间
+
+给你一个下标从 0 开始的二进制字符串 s ，表示一个列车车厢序列。`s[i] = '0'` 表示第 i 节车厢 不 含违禁货物，而 `s[i] = '1'` 表示第 i 节车厢含违禁货物。
+
+作为列车长，你需要清理掉所有载有违禁货物的车厢。你可以不限次数执行下述三种操作中的任意一个：
+
+- 从列车 **左** 端移除一节车厢（即移除 `s[0]`），用去 1 单位时间。
+- 从列车 **右** 端移除一节车厢（即移除 `s[s.length - 1]`），用去 1 单位时间。
+- 从列车车厢序列的 **任意位置** 移除一节车厢，用去 2 单位时间。
+  返回移除所有载有违禁货物车厢所需要的 **最少** 单位时间数。
+
+注意，空的列车车厢序列视为没有车厢含违禁货物。
+
+---
+
+**前后缀动态规划** `2022.2.6`
+
+这道题可以先从左边或者右边入手，以左边为例子，对于`s[i]==0`来说，`dpl[i]=dpl[i-1]`代价维持不变；对于`s[i] == 1`来说，则有两种情况，即`min ( i+1 , dpl[i-1] + 2 )`
+
+右边也一样，最后再统计即可
+
+```js
+var minimumTime = function (s) {
+  const n = s.length;
+  let dpl = new Array(n + 1).fill(0);
+  let dpr = new Array(n + 1).fill(0);
+  dpl[0] = s.charAt(0) == 1 ? 1 : 0;
+  for (let i = n - 1; i >= 0; i--) {
+    if (s.charAt(i) == 1) {
+      dpr[i] = Math.min(dpr[i + 1] + 2, n - i);
+    } else {
+      dpr[i] = dpr[i + 1];
+    }
+  }
+  for (let i = 1; i <= n; i++) {
+    if (s.charAt(i) == 1) {
+      dpl[i] = Math.min(dpl[i - 1] + 2, i + 1);
+    } else {
+      dpl[i] = dpl[i - 1];
+    }
+  }
+  let ans = Infinity;
+  for (let i = 0; i < n; i++) {
+    ans = Math.min(ans, dpl[i] + dpr[i + 1]);
+  }
+  return ans;
 };
 ```
