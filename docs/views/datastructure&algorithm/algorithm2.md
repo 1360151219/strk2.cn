@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-2-6
+lastUpdated: 2022-2-8
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -138,6 +138,104 @@ var uncommonFromSentences = function (s1, s2) {
   }
   return ans;
 };
+```
+
+### leetcode 1001. 网格照明
+
+在大小为 n x n 的网格 grid 上，每个单元格都有一盏灯，最初灯都处于 关闭 状态。
+
+给你一个由灯的位置组成的二维数组  lamps ，其中 `lamps[i] = [rowi, coli]` 表示 打开 位于 `grid[rowi][coli]` 的灯。即便同一盏灯可能在 lamps 中多次列出，不会影响这盏灯处于 打开 状态。
+
+当一盏灯处于打开状态，它将会照亮 自身所在单元格 以及同一 行 、同一 列 和两条 对角线 上的 所有其他单元格 。
+
+另给你一个二维数组 queries ，其中 `queries[j] = [rowj, colj]` 。对于第 j 个查询，如果单元格 `[rowj, colj]` 是被照亮的，则查询结果为 1 ，否则为 0 。在第 j 次查询之后 `[按照查询的顺序]` ，关闭 位于单元格 `grid[rowj][colj]` 上及相邻 8 个方向上（与单元格 `grid[rowi][coli]` 共享角或边）的任何灯。
+
+返回一个整数数组 ans 作为答案， `ans[j]` 应等于第 j 次查询  `queries[j]`  的结果，1 表示照亮，0 表示未照亮。
+
+---
+
+**哈希表模拟** `2022.2.8`
+
+简单复述下题意：打开的灯会照亮别的灯，操作如下：先打开一些灯，然后查询指定灯有没有被照亮，返回结果，查询后需要关闭该灯四周九宫格范围内**已经打开**的灯
+
+为了节省时间，我们可以使用 4 个哈希表，分别记录行，列，正反对角线的亮灯的数目（数目更好，节省空间），以及打开灯的位置。
+
+然后模拟查询以及关闭灯即可
+
+```js
+var gridIllumination = function (n, lamps, queries) {
+  const DIR = [
+    [1, 0],
+    [-1, 0],
+    [1, 1],
+    [1, -1],
+    [0, 1],
+    [0, -1],
+    [-1, 1],
+    [-1, -1],
+  ];
+  let col = new Map();
+  let row = new Map();
+  let left = new Map(); // x+y 反向对角线
+  let right = new Map(); // x-y 正向对角线
+  let set = new Set(); // 放真正打开的灯
+  for (let l of lamps) {
+    let r = l[0];
+    let c = l[1];
+    let a = r + c;
+    let b = c - r;
+    if (set.has(r * n + c)) continue;
+    put(col, c);
+    put(row, r);
+    put(left, a);
+    put(right, b);
+    set.add(r * n + c);
+  }
+  let ans = [];
+  for (let q of queries) {
+    let r = q[0];
+    let c = q[1];
+    let a = r + c;
+    let b = c - r;
+    if (col.has(c) || row.has(r) || left.has(a) || right.has(b)) ans.push(1);
+    else ans.push(0);
+    if (set.has(r * n + c)) {
+      remove(col, c);
+      remove(row, r);
+      remove(left, a);
+      remove(right, b);
+      set.delete(r * n + c);
+    }
+    for (let dir of DIR) {
+      let nx = c + dir[0];
+      let ny = r + dir[1];
+      let na = nx + ny;
+      let nb = nx - ny;
+      if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue;
+      if (set.has(ny * n + nx)) {
+        remove(col, nx);
+        remove(row, ny);
+        remove(left, na);
+        remove(right, nb);
+        set.delete(ny * n + nx);
+      }
+    }
+  }
+  return ans;
+};
+function put(map, key) {
+  if (map.has(key)) {
+    let cur = map.get(key);
+    map.set(key, cur + 1);
+  } else {
+    map.set(key, 1);
+  }
+}
+function remove(map, key) {
+  let cur = map.get(key);
+  if (cur == 1) map.delete(key);
+  else map.set(key, cur - 1);
+}
 ```
 
 ### leetcode 1332. 删除回文子序列
@@ -926,6 +1024,116 @@ var validPath = function (n, edges, source, destination) {
     return false;
   }
 };
+```
+
+## 贪心算法
+
+### leetcode 1405. 最长快乐字符串
+
+如果字符串中不含有任何 `'aaa'`，`'bbb'` 或 `'ccc'` 这样的字符串作为子串，那么该字符串就是一个「快乐字符串」。
+
+给你三个整数 a，b ，c，请你返回 任意一个 满足下列全部条件的字符串 s：
+
+s 是一个尽可能长的快乐字符串。
+s 中最多有**a 个字母 'a'、b  个字母 'b'、c 个字母 'c'** 。
+s 中**只**含有 'a'、'b' 、'c' 三种字母。
+如果不存在这样的字符串 s ，请返回一个空字符串 ""。
+
+---
+
+**贪心：堆排序** `2022.2.7`
+
+看到这道题，首先想到的就是要让快乐字符串最长，就得必须保证 a、b、c 的个数都趋于相同，即优先用最多的字符
+
+因此可以利用最大堆，每次让个数最多的字符拼接上去，然后再连续个数到 2 个之后拼接次多者。
+
+```js
+/**
+ * @param {number} a
+ * @param {number} b
+ * @param {number} c
+ * @return {string}
+ */
+var longestDiverseString = function (a, b, c) {
+  // 主要思路：每次取最长的先构造，超过2个则插入别的字母
+  let queue = new PriorityQueue((a, b) => a[1] > b[1]);
+  if (a > 0) queue.offer([0, a]);
+  if (b > 0) queue.offer([1, b]);
+  if (c > 0) queue.offer([2, c]);
+  let ans = "";
+  while (queue.size > 0) {
+    let cur = queue.poll();
+    let n = ans.length;
+    if (
+      n >= 2 &&
+      ans.charAt(n - 2).charCodeAt() - "a".charCodeAt() == cur[0] &&
+      ans.charAt(n - 1).charCodeAt() - "a".charCodeAt() == cur[0]
+    ) {
+      if (queue.size == 0) break;
+      let next = queue.poll();
+      ans += String.fromCharCode(next[0] + "a".charCodeAt());
+      if (next[1] - 1 > 0) queue.offer([next[0], next[1] - 1]);
+      queue.offer([cur[0], cur[1]]);
+    } else {
+      ans += String.fromCharCode(cur[0] + "a".charCodeAt());
+      if (cur[1] - 1 > 0) queue.offer([cur[0], cur[1] - 1]);
+    }
+  }
+  return ans;
+};
+class PriorityQueue {
+  constructor(compare = (a, b) => a > b) {
+    this.data = [];
+    this.size = 0;
+    this.compare = compare;
+  }
+  peek() {
+    return this.size > 0 ? this.data[0] : null;
+  }
+  offer(value) {
+    this.data.push(value);
+    this._siftUp(this.size++);
+  }
+  poll() {
+    this._swap(0, --this.size);
+    this._siftDown(0);
+    return this.data.pop();
+  }
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  _siftUp(index) {
+    while (
+      this._parent(index) >= 0 &&
+      this.compare(this.data[index], this.data[this._parent(index)])
+    ) {
+      this._swap(index, this._parent(index));
+      index = this._parent(index);
+    }
+  }
+  _siftDown(index) {
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      if (
+        child + 1 < this.size &&
+        this.compare(this.data[child + 1], this.data[child])
+      ) {
+        child = child + 1;
+      }
+      if (this.compare(this.data[index], this.data[child])) {
+        break;
+      }
+      this._swap(index, child);
+      index = child;
+    }
+  }
+  _swap(a, b) {
+    [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
+  }
+}
 ```
 
 ## 周赛题
