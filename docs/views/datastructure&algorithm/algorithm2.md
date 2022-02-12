@@ -307,6 +307,33 @@ var findMinFibonacciNumbers = function (k) {
 };
 ```
 
+### leetcode 1447. 最简分数
+
+给你一个整数 n ，请你返回所有 0 到 1 之间（不包括 0 和 1）满足分母小于等于 n 的 最简 分数 。分数可以以 任意 顺序返回。
+
+---
+
+**gcd--欧几里得算法** `2022.2.10`
+
+今天来学习一下如何使用欧几里得算法来计算最大公约数
+
+不断的用除数除以余数，当余数为 0 的时候，该次的除数则是答案
+
+```js
+var simplifiedFractions = function (n) {
+  function gcd(a, b) {
+    return b == 0 ? a : gcd(b, a % b);
+  }
+  let ans = [];
+  for (let i = 2; i <= n; i++) {
+    for (let j = 1; j < i; j++) {
+      if (gcd(i, j) === 1) ans.push(j + "/" + i);
+    }
+  }
+  return ans;
+};
+```
+
 ### leetcode 1688. 比赛中的配对次数
 
 给你一个整数 n ，表示比赛中的队伍数。比赛遵循一种独特的赛制：
@@ -333,6 +360,37 @@ var numberOfMatches = function (n) {
 最终决出获胜队伍，即有 n-1 个队伍需要配对，即直接 return n-1
 
 > 但我不知道为啥暴力的时间还更少- -
+
+### leetcode 2006. 差的绝对值为 K 的数对数目
+
+给你一个整数数组  nums  和一个整数  k ，请你返回数对  `(i, j) `的数目，满足  `i < j`  且  `|nums[i] - nums[j]| == k` 。
+
+---
+
+**简单模拟：哈希表** `2022.02.09`
+
+先用哈希表记录数据出现次数，然后遍历数组，同时寻找相差 k 的较大较小数。
+
+```js
+var countKDifference = function (nums, k) {
+  let map = new Map();
+  for (let num of nums) {
+    if (map.has(num)) {
+      map.set(num, map.get(num) + 1);
+    } else {
+      map.set(num, 1);
+    }
+  }
+  let ans = 0;
+  for (let i of nums) {
+    let xi = i - k;
+    let yi = i + k;
+    if (map.has(xi)) ans += map.get(xi);
+    if (map.has(yi)) ans += map.get(yi);
+  }
+  return ans / 2;
+};
+```
 
 ### leetcode 2013. 检测正方形
 
@@ -752,6 +810,24 @@ var containsNearbyDuplicate = function (nums, k) {
 };
 ```
 
+### leetcode 1984. 学生分数的最小差值
+
+给你一个 **下标从 0 开始** 的整数数组 `nums` ，其中 `nums[i]` 表示第 `i` 名学生的分数。另给你一个整数 `k` 。
+
+从数组中选出任意 `k` 名学生的分数，使这 `k` 个分数间 **最高分** 和 **最低分** 的 **差值** 达到 **最小化** 。
+
+返回可能的 **最小差值** 。
+
+---
+
+**滑动窗口** `2022.2.11`
+
+先排个序，再用滑动窗口记录最左以及最右值的差值，统计出遍历过程中该差值的最小值
+
+``var minimumDifference = function(nums, k) { nums.sort((a,b)=>a-b) let ans=Infinity for(let i=k-1;i<nums.length;i++){ ans=Math.min(ans,nums[i]-nums[i-k+1]) } return ans };`js
+
+````
+
 ## 动态规划
 
 ### leetcode 1220. 统计元音字母序列的数目
@@ -781,9 +857,81 @@ var countVowelPermutation = function (n) {
   }
   return ans % 1000000007;
 };
-```
+````
 
 ## bfs&dfs
+
+### leetcode 1020. 飞地的数量
+
+给你一个大小为 `m x n` 的二进制矩阵 `grid` ，其中 0 表示一个海洋单元格、1 表示一个陆地单元格。
+
+一次 移动 是指从一个陆地单元格走到另一个相邻（上、下、左、右）的陆地单元格或跨过 grid 的边界。
+
+返回网格中 **无法** 在任意次数的移动中离开网格边界的陆地单元格的数量。
+
+---
+
+**多源 BFS** `2022.2.12`
+
+只需要以四周边界的所有陆地作为起点，BFS 遍历到的陆地都变为 0，最后统计剩下 1 的个数即可
+
+注意，这道题疯狂 TLE- -
+
+```js
+var numEnclaves = function (grid) {
+  const DIR = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+  ];
+  let ans = 0;
+  let id = 0;
+  const m = grid.length;
+  const n = grid[0].length;
+  let queue = [];
+  for (let i = 0; i < m; i++) {
+    if (grid[i][0] == 1) {
+      queue.push([i, 0]);
+      grid[i][0] = 0;
+    }
+    if (grid[i][n - 1] == 1) {
+      grid[i][n - 1] = 0;
+      queue.push([i, n - 1]);
+    }
+  }
+  for (let j = 0; j < n; j++) {
+    if (grid[0][j] == 1) {
+      queue.push([0, j]);
+      grid[0][j] = 0;
+    }
+    if (grid[m - 1][j] == 1) {
+      queue.push([m - 1, j]);
+      grid[m - 1][j] = 0;
+    }
+  }
+  while (id < queue.length) {
+    let cur = queue[id++];
+    for (let dir of DIR) {
+      let ni = cur[0] + dir[0];
+      let nj = cur[1] + dir[1];
+      if (ni < 0 || nj < 0 || ni >= m || nj >= n) {
+        continue;
+      }
+      if (grid[ni][nj] == 1) {
+        grid[ni][nj] = 0;
+        queue.push([ni, nj]);
+      }
+    }
+  }
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (grid[i][j] == 1) ans++;
+    }
+  }
+  return ans;
+};
+```
 
 ### leetcode 1219. 黄金矿工
 
