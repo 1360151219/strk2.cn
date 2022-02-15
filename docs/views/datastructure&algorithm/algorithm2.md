@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-2-8
+lastUpdated: 2022-2-15
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -14,6 +14,32 @@ tags:
 2022 新的一年继续努力积极向上 hhhh~
 
 ## 模拟
+
+### 击鼓传花
+
+有`num`个小孩儿，编号从`1-num`，围成一圈依此报数，1、2、3... 数到 `count` 的小孩儿退出这个圈， 然后下一个小孩 重新报数 1、2、3...，问最后剩下的那个小孩儿的编号是多少?
+
+---
+
+**队列** `2022.2.15`
+
+主要思路：将报过数的小孩，从队头拿出重新插入到队尾中。
+
+```js
+function foo(num, count) {
+  let queue = new Array(num);
+  for (let i = 0; i < num; i++) {
+    queue[i] = i + 1;
+  }
+  while (queue.length > 1) {
+    for (let i = 0; i < num - 1; i++) {
+      queue.push(queue.shift());
+    }
+    queue.shift();
+  }
+  return queue[0];
+}
+```
 
 ### leetcode 382. 链表随机节点
 
@@ -1282,6 +1308,44 @@ class PriorityQueue {
     [this.data[a], this.data[b]] = [this.data[b], this.data[a]];
   }
 }
+```
+
+## 二分算法
+
+### leetcode 540. 有序数组中的单一元素
+
+给你一个仅由整数组成的有序数组，其中每个元素都会出现两次，唯有一个数只会出现一次。
+
+请你找出并返回只出现一次的那个数。
+
+你设计的解决方案必须满足 `O(log n)` 时间复杂度和 `O(1)` 空间复杂度。
+
+---
+
+**二分** `2022.2.14`
+
+看到这个 O(log n) 时间复杂度需求，肯定想到的就是二分。但二分的话，需要找到左右两边的临界点。
+
+我们可以发现，在唯一数的左边，每种元素都是奇数索引为第二个数，偶数索引为第一个数，而在唯一数的右边，这个规则则反了。因此可以利用这点来找到临界点
+
+```js
+var singleNonDuplicate = function (nums) {
+  const n = nums.length;
+  let l = 0;
+  let r = n - 1;
+  while (l < r) {
+    mid = Math.floor((l + r) / 2);
+    if (
+      (mid % 2 === 0 && nums[mid + 1] == nums[mid]) ||
+      (mid % 2 === 1 && nums[mid + 1] != nums[mid])
+    ) {
+      l = mid + 1;
+    } else {
+      r = mid;
+    }
+  }
+  return nums[l];
+};
 ```
 
 ## 周赛题
