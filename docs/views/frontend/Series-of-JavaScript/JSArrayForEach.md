@@ -106,6 +106,8 @@ console.log("numCallbackRuns: ", numCallbackRuns);
 // numCallbackRuns: 3
 ```
 
+**[注]在读了下面的源码后发现，其实是因为将数组转化为对象后，索引 2 对应的值为 undefined**,因此在`2 in O`的时候返回的是 false
+
 而今天，又多了一个新特性，就是**forEach 不会对 Promise 进行处理**
 
 这里贴一下 forEach 的源码吧

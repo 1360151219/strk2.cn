@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-2-15
+lastUpdated: 2022-2-21
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -126,6 +126,93 @@ var findMinDifference = function (timePoints) {
     ans = Math.min(ans, nums[i] - nums[i - 1]);
   }
   return ans;
+};
+```
+
+### leetcode. 717. 1 比特与 2 比特字符
+
+有两种特殊字符：
+
+- 第一种字符可以用一比特  `0` 表示
+- 第二种字符可以用两比特`（10 或 11）`表示
+
+给你一个以 `0` 结尾的二进制数组  `bits` ，如果最后一个字符必须是一个一比特字符，则返回 `true` 。
+
+---
+
+**遍历模拟** `2022.2.20`
+
+从头开始遍历模拟即可
+
+```js
+var isOneBitCharacter = function (bits) {
+  const n = bits.length;
+  let i = 0;
+  while (i < n - 1) {
+    if (bits[i] == 0) i++;
+    else i += 2;
+  }
+  return i == n - 1 ? true : false;
+};
+```
+
+### leetcode. 838. 推多米诺
+
+`n` 张多米诺骨牌排成一行，将每张多米诺骨牌垂直竖立。在开始时，同时把一些多米诺骨牌向左或向右推。
+
+每过一秒，倒向左边的多米诺骨牌会推动其左侧相邻的多米诺骨牌。同样地，倒向右边的多米诺骨牌也会推动竖立在其右侧的相邻多米诺骨牌。
+
+如果一张垂直竖立的多米诺骨牌的两侧同时有多米诺骨牌倒下时，由于受力平衡， **该骨牌仍然保持不变**。
+
+就这个问题而言，我们会认为一张正在倒下的多米诺骨牌不会对其它正在倒下或已经倒下的多米诺骨牌施加额外的力。
+
+给你一个字符串 `dominoes` 表示这一行多米诺骨牌的初始状态，其中：
+
+- `dominoes[i] = 'L'`，表示第 i 张多米诺骨牌被推向左侧，
+- `dominoes[i] = 'R'`，表示第 i 张多米诺骨牌被推向右侧，
+- `dominoes[i] = '.'`，表示没有推动第 i 张多米诺骨牌。
+
+返回表示最终状态的字符串。
+
+---
+
+**哨兵+分情况模拟** `2022.2.21`
+
+我们可以分析出 4 种子情况：
+
+- `L....R` 的时候，中间的骨牌不变
+- `R....L` 的时候，中间的骨牌从左右两边开始变化，如果中间骨牌长度为奇数，则中间一个骨牌由于受力平衡而站立
+- `R...R`和`L...L` 中间骨牌全部变化
+
+为了防止首尾为`.`的情况，我们可以在前后加哨兵。
+
+```js
+// L...L 或 R...R
+// L...R ： ...
+// R...L ： RRR.LLL
+var pushDominoes = function (dominoes) {
+  // 加一个虚拟头尾部
+  dominoes = "L" + dominoes + "R";
+  const n = dominoes.length;
+  let l = 0;
+  let res = "";
+  for (let r = 1; r < n; r++) {
+    if (dominoes[r] == ".") continue;
+    let len = r - l - 1;
+    if (dominoes[l] == "L" && dominoes[r] == "L") {
+      res += "L".repeat(len);
+    } else if (dominoes[l] == "R" && dominoes[r] == "R") {
+      res += "R".repeat(len);
+    } else if (dominoes[l] == "L" && dominoes[r] == "R") {
+      res += ".".repeat(len);
+    } else {
+      let half = Math.floor(len / 2);
+      res += "R".repeat(half) + (len & 1 ? "." : "") + "L".repeat(half);
+    }
+    if (r != n - 1) res += dominoes[r]; // 不把尾部虚拟L加入进去
+    l = r;
+  }
+  return res;
 };
 ```
 
@@ -885,7 +972,64 @@ var countVowelPermutation = function (n) {
 };
 ````
 
-## bfs&dfs
+## 动规 dp&bfs&dfs
+
+### leetcode 688. 骑士在棋盘上的概率
+
+在一个  `n x n`  的国际象棋棋盘上，一个骑士从单元格 `(row, column)`  开始，并尝试进行 `k` 次移动。行和列是 从 `0` 开始 的，所以左上单元格是 `(0,0)` ，右下单元格是 `(n - 1, n - 1)` 。
+
+象棋骑士有 8 种可能的走法，如下图所示。每次移动在基本方向上是两个单元格，然后在正交方向上是一个单元格。
+
+每次骑士要移动时，它都会随机从 8 种可能的移动中选择一种(即使棋子会离开棋盘)，然后移动到那里。
+
+骑士继续移动，直到它走了 k 步或离开了棋盘。
+
+返回 **骑士在棋盘停止移动后仍留在棋盘上的概率** 。
+
+---
+
+**dfs 记忆化搜索** `2022.2.18`
+
+简单 dfs 即可。
+
+关键在于出界以后概率为 0，剩余步数 k=0 的时候仍在棋盘内内概率为 1，在 dfs 遍历过程中，需要加上 8 种 子情况的概率乘以 1/8
+
+```js
+const DIR = [
+  [2, 1],
+  [1, 2],
+  [-2, 1],
+  [-1, 2],
+  [-2, -1],
+  [-1, -2],
+  [1, -2],
+  [2, -1],
+];
+var knightProbability = function (n, k, row, column) {
+  let dp = new Array(n)
+    .fill(0)
+    .map(() => new Array(n).fill(0).map(() => new Array(k + 1).fill(-1)));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      dp[i][j][0] = 1;
+    }
+  }
+  return move(n, dp, k, row, column);
+};
+function move(n, dp, k, x, y) {
+  if (x < 0 || y < 0 || x >= n || y >= n) return 0;
+  if (k === 0) return 1;
+  if (dp[x][y][k] > -1) return dp[x][y][k];
+  let ans = 0;
+  for (let dir of DIR) {
+    let nx = x + dir[0];
+    let ny = y + dir[1];
+    ans += move(n, dp, k - 1, nx, ny) / 8;
+  }
+  dp[x][y][k] = ans;
+  return ans;
+}
+```
 
 ### leetcode 1020. 飞地的数量
 
@@ -1201,6 +1345,62 @@ var validPath = function (n, edges, source, destination) {
 ```
 
 ## 贪心算法
+
+### leetcode 969. 煎饼排序
+
+给你一个整数数组 `arr` ，请使用 煎饼翻转 完成对数组的排序。
+
+一次煎饼翻转的执行过程如下：
+
+- 选择一个整数 `k` ，`1 <= k <= arr.length`
+- 反转子数组 `arr[0...k-1]`（下标从 0 开始）
+
+例如，`arr = [3,2,1,4]` ，选择 `k = 3` 进行一次煎饼翻转，反转子数组 `[3,2,1]` ，得到 `arr = [1,2,3,4]` 。
+
+以数组形式返回能使 `arr` 有序的煎饼翻转操作所对应的 `k` 值序列。任何将数组排序且翻转次数在  `10 * arr.length` 范围内的有效答案都将被判断为正确。
+
+---
+
+**贪心** `2022.2.19`
+
+一开始看的时候，不太明白怎么做。但其实我们只需要从单个数字开始入手：
+
+如果 i 想要去正确的位置 k，则需要首先将其反转到索引 0，即然后再反转到索引 k。
+
+由于煎饼排序只会影响前缀的数字，因此我们可以从大到小开始，将大的数字先排好序即可。
+
+```js
+var pancakeSort = function (arr) {
+  const N = arr.length;
+  let idxs = new Array(N + 10);
+  let ans = [];
+  for (let i = 0; i < N; i++) {
+    idxs[arr[i]] = i;
+  }
+  // 寻找正确位置的数字
+  for (let i = N; i >= 1; i--) {
+    let idx = idxs[i];
+    if (idx === i - 1) continue;
+    if (idx !== 0) {
+      ans.push(idx + 1);
+      reverse(0, idx, arr, idxs);
+    }
+    ans.push(i);
+    reverse(0, i - 1, arr, idxs);
+  }
+  return ans;
+};
+function reverse(i, j, arr, idxs) {
+  while (i < j) {
+    //
+    idxs[arr[i]] = j;
+    idxs[arr[j]] = i;
+    let t = arr[j];
+    arr[j--] = arr[i];
+    arr[i++] = t;
+  }
+}
+```
 
 ### leetcode 1405. 最长快乐字符串
 
