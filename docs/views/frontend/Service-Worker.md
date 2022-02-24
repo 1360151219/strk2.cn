@@ -1,13 +1,15 @@
 ---
 title: ServiceWorker 学习
 date: 2021-10-11
-lastUpdated: 2021-10-11
+lastUpdated: 2022-2-24
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
 tags:
   - JavaScript
 ---
+
+# Service Worker
 
 今天要上课，闲的无聊于是想研究一下 sw。
 
@@ -79,8 +81,11 @@ this.addEventListener("install", function (event) {
 ```
 
 - `event.waitUntil()` 方法确保你的 ServiceWorker 不会在`waitUntil()`里面的代码执行完毕之前安装好。
+
 - `event.skipWaiting()`可以立即激活你的 ServiceWorker。
+
 - 在 `waitUntil()` 内，我们使用了 `caches.open()` 方法来创建了一个叫做 v1 的新的缓存，将会是我们的站点资源缓存的第一个版本。它返回了一个创建缓存的 promise，当它 resolved 的时候，我们接着会调用在创建的缓存示例上的一个方法 `addAll()`，**这个方法的参数是一个由一组相对于 `origin` 的 URL 组成的数组**，这些 URL 就是你想缓存的资源的列表。
+
 - 当安装成功完成之后， service worker 就会激活。在第一次你的 service worker 注册／激活时，这并不会有什么不同。但是当 service worker 更新 `(稍后查看 Updating your service worker 部分)` 的时候 ，就不太一样了。
 
 ### 自定义请求的响应
@@ -296,3 +301,45 @@ addEventListener("message", (event) => {
 ```
 
 > 前几天学长写了一个基于 serviceWorker 的一个系统通知功能。看了许久明白了主要逻辑：每 3 秒请求一次后端接口，接收返回的数据，然后进行比较，若有新的通知则创建一个系统通知。点击通知的时候，通过`client.postMessage()`来触发`navigator.serviceworker`的`messages`事件，然后再 push 到相应的页面。
+
+## 补充
+
+Service Worker 的出现，旨在可以创建有效的离线体验，拦截网络请求进行缓存控制以及推送通知等
+
+其特点如下：
+
+- 相对于主 JavaScript 线程，Service Worker 独占一个线程，因此不会因为样式计算、JavaScript 代码而被阻塞，性能更好
+
+- 但也因此，无法访问 DOM
+
+- 整个 Serive Worker 是完全异步的，因此无法使用同步 API（如`localStorage`、`XHR`等）
+
+- 只能运行于 HTTPS 中
+
+### 缓存策略
+
+> 提问：Service Worker 的缓存控制与浏览器缓存有什么区别？
+
+Service Worker 的缓存控制其实主要是应用于离线状态之中。
+
+但其实它也有它的一些缓存策略：
+
+- `staleWhileRevalidate`
+
+顾名思义，首先去看一下有没有对应的缓存，如果有则返回缓存，同时会发起网络请求去更新 sw 中的缓存。
+
+若没有对应的缓存，就会直接发起网络请求，获取新资源写入缓存并返回给客户端。
+
+- `networkFirst`
+
+优先发起网络请求，将请求的新资源返回给客户端同时写入缓存中。
+
+若网络请求失败，则使用缓存中的资源。
+
+- `cacheFirst`
+
+优先使用缓存。若没有缓存则发起网络请求，将请求的新资源返回给客户端同时写入缓存中
+
+- `cacheOnly`与`networkOnly`
+
+只能使用缓存和完全禁止缓存
