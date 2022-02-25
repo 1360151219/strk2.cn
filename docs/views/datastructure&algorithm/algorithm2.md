@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-2-21
+lastUpdated: 2022-2-25
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -99,6 +99,21 @@ Solution.prototype.getRandom = function () {
   return ans;
 };
 ```
+
+### leetcode 537. 复数乘法
+
+复数 可以用字符串表示，遵循 `"实部+虚部i"` 的形式，并满足下述条件：
+
+- 实部 是一个整数，取值范围是 `[-100, 100]`
+- 虚部 也是一个整数，取值范围是 `[-100, 100]`
+- i2 == -1
+  给你两个字符串表示的复数 `num1` 和 `num2` ，请你遵循复数表示形式，返回表示它们乘积的字符串。
+
+---
+
+**简单模拟** `2022.2.25`
+
+取出实部虚部的数组部分，进行数学操作，最后再将实部虚部部分拼起来即可。
 
 ### 539. 最小时间差
 
@@ -252,6 +267,20 @@ var uncommonFromSentences = function (s1, s2) {
   return ans;
 };
 ```
+
+### leetcode 917. 仅仅反转字母
+
+给你一个字符串 `s` ，根据下述规则反转字符串：
+
+- 所有非英文字母保留在原有位置。
+- 所有英文字母（小写或大写）位置反转。
+  返回反转后的 `s` 。
+
+---
+
+**简单模拟** `2022.2.23`
+
+双指针，从左到右向中间遍历，左右指针同时指向字母的时候，调换位置即可。
 
 ### leetcode 1001. 网格照明
 
@@ -473,6 +502,49 @@ var numberOfMatches = function (n) {
 最终决出获胜队伍，即有 n-1 个队伍需要配对，即直接 return n-1
 
 > 但我不知道为啥暴力的时间还更少- -
+
+### leetcode 1706. 球会落何处
+
+用一个大小为 `m x n` 的二维网格 `grid` 表示一个箱子。你有 `n` 颗球。箱子的顶部和底部都是开着的。
+
+箱子中的每个单元格都有一个对角线挡板，跨过单元格的两个角，可以将球导向左侧或者右侧。
+
+将球导向右侧的挡板跨过左上角和右下角，在网格中用 `1` 表示。
+将球导向左侧的挡板跨过右上角和左下角，在网格中用 `-1` 表示。
+在箱子每一列的顶端各放一颗球。每颗球都可能卡在箱子里或从底部掉出来。如果球恰好卡在两块挡板之间的 "V" 形图案，或者被一块挡导向到箱子的任意一侧边上，就会卡住。
+
+返回一个大小为 `n` 的数组 `answer` ，其中 `answer[i]` 是球放在顶部的第 `i` 列后从底部掉出来的那一列对应的下标，如果球卡在盒子里，则返回 `-1` 。
+
+---
+
+**简单模拟** `2022.2.24`
+
+根据图来模拟即可。注意卡死的条件即可。
+
+```js
+var findBall = function (grid) {
+  const m = grid.length;
+  const n = grid[0].length;
+  let ans = new Array(n);
+  for (let i = 0; i < n; i++) ans[i] = getCol(grid, m, n, i);
+  return ans;
+};
+//grid m 层数 n 总列数 st开始的列索引
+function getCol(grid, m, n, st) {
+  for (let i = 0; i < m; i++) {
+    let cur = grid[i][st];
+    if (cur == -1) {
+      if (st == 0 || grid[i][st - 1] == 1) return -1;
+      st--;
+    }
+    if (cur == 1) {
+      if (st == n - 1 || grid[i][st + 1] == -1) return -1;
+      st++;
+    }
+  }
+  return st;
+}
+```
 
 ### leetcode 2006. 差的绝对值为 K 的数对数目
 
@@ -1549,6 +1621,77 @@ var singleNonDuplicate = function (nums) {
 ```
 
 ## 周赛题
+
+### leetcode 1994. 好子集的数目
+
+给你一个整数数组  `nums` 。如果  `nums`  的一个子集中，所有元素的乘积可以表示为一个或多个 互不相同的质数 的乘积，那么我们称它为   好子集  。
+
+比方说，如果  `nums = [1, 2, 3, 4] ：`
+`[2, 3] ，[1, 2, 3] 和 [1, 3]`  是 好   子集，乘积分别为  `6 = 2*3` ，`6 = 2*3`  和  `3 = 3` 。
+`[1, 4]` 和  `[4]`  不是 **好**  子集，因为乘积分别为  `4 = 2*2` 和  `4 = 2*2` 。
+请你返回 `nums`  中不同的   好   子集的数目对  `109 + 7`  取余   的结果。
+
+nums  中的子集是通过删除 nums  中一些（可能一个都不删除，也可能全部都删除）元素后剩余元素组成的数组。如果两个子集删除的下标不同，那么它们被视为不同的子集。
+
+---
+
+**状态压缩+dp** `2022.2.22`
+
+从数据大小入手，因为 nums[i]<=30,因此在此范围内的质数就只有 10 个，因此可以使用二进制压缩来遍历所有情况，共 2^10 种情况。
+
+使用计数算法，将所有出现的数字的个数统计出来。
+
+从 2-30 入手，遍历所有质数，统计该数是否能够由不同的质数相乘而得到。这里注意：**好子集表示所有元素的乘积可以表示为一个或多个互不相同的质数 的乘积，那么单个元素也一样可以表示为不同质数之积**
+
+记录下此时情况 cur。
+
+状态转义方程略。。
+
+遍历所有情况的时候，必须从大到小遍历，因为由状态转移方程我们可以知道，较小的二进制数依靠较大的二进制数，这样才能保证新状态依赖旧状态。
+
+```js
+const MOD = 1e9 + 7;
+var numberOfGoodSubsets = function (nums) {
+  let p = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+  let cnt = new Array(31).fill(0);
+  for (let i of nums) {
+    cnt[i]++;
+  }
+  let mask = 1 << 10;
+  let dp = new Array(mask).fill(0);
+  dp[0] = 1;
+  // 先不考虑1
+  for (let i = 2; i <= 30; i++) {
+    if (cnt[i] == 0) continue;
+    let cur = 0;
+    let t = i;
+    let ok = true;
+    for (let j = 0; j < 10; j++) {
+      let pp = p[j];
+      let count = 0;
+      while (t % pp == 0) {
+        cur |= 1 << j;
+        t /= pp;
+        count++;
+      }
+      if (count > 1) {
+        // 相同质数
+        ok = false;
+        break;
+      }
+    }
+    if (!ok) continue;
+    for (let prev = mask - 1; prev >= 0; prev--) {
+      if ((prev & cur) != 0) continue;
+      dp[prev | cur] = (dp[prev | cur] + dp[prev] * cnt[i]) % MOD;
+    }
+  }
+  let ans = 0;
+  for (let i = 1; i < mask; i++) ans = (ans + dp[i]) % MOD;
+  for (let i = 0; i < cnt[1]; i++) ans = (ans * 2) % MOD;
+  return ans;
+};
+```
 
 ### leetcode 6003. 移除所有载有违禁货物车厢所需的最少时间
 
