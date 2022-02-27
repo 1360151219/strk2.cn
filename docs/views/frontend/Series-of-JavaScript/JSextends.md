@@ -165,6 +165,17 @@ function inheritPrototype(sub,super){
 }
 ```
 
+或者如下：
+
+```js
+function parent() {}
+function child() {
+  parent.call(this);
+}
+child.prototype = Object.create(parent.prototype);
+child.prototype.constructor = child;
+```
+
 ## ES6 Class 语法糖
 
 首先类表达式有一些特点：
