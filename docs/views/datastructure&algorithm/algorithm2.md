@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-2-25
+lastUpdated: 2022-3-8
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1046,6 +1046,57 @@ var countVowelPermutation = function (n) {
 
 ## 动规 dp&bfs&dfs
 
+### leetcode 60. 排列序列
+
+给出集合  `[1,2,3,...,n]`，其所有元素共有  `n!` 种排列。
+
+按大小顺序列出所有排列情况，并一一标记，当  `n = 3` 时, 所有排列如下：
+
+- `"123"`
+- `"132"`
+- `"213"`
+- `"231"`
+- `"312"`
+- `"321"`
+  给定  `n` 和  `k`，返回第  `k`  个排列。
+
+---
+
+**阶乘前缀和+dfs** `2022.3.8`
+
+主要优化思路：剩下数字有 i 个的话，就一共有`i!`种情况，要是 `k<i!`，则意味着目标排列处于以 该数字 为数列该位置的情况之中，此时 i-1，进入递归；如果`k>i!`，则意味着目标排列不在以 数字 为数列该位置的情况之中，此时数字++，k 减去这么多总情况，继续判断 数字 +1 的情况。
+
+```js
+var getPermutation = function (n, k) {
+  let pre = new Array(n + 1).fill(0);
+  pre[0] = 1;
+  for (let i = 1; i <= n; i++) {
+    pre[i] = pre[i - 1] * i;
+  }
+  // 0 1 2 6
+  let used = new Array(n + 1).fill(0);
+  let ans = "";
+  dfs(n, k, "");
+  return ans;
+  function dfs(i, kk, str) {
+    if (i == 0) {
+      ans = str;
+    }
+    for (let j = 1; j <= n; j++) {
+      if (used[j]) continue;
+      if (pre[i - 1] < kk) {
+        kk -= pre[i - 1];
+        continue;
+      }
+      // select
+      used[j] = 1;
+      dfs(i - 1, kk, str + j);
+    }
+    return;
+  }
+};
+```
+
 ### leetcode 688. 骑士在棋盘上的概率
 
 在一个  `n x n`  的国际象棋棋盘上，一个骑士从单元格 `(row, column)`  开始，并尝试进行 `k` 次移动。行和列是 从 `0` 开始 的，所以左上单元格是 `(0,0)` ，右下单元格是 `(n - 1, n - 1)` 。
@@ -1617,6 +1668,90 @@ var singleNonDuplicate = function (nums) {
     }
   }
   return nums[l];
+};
+```
+
+### leetcode 2055. 蜡烛之间的盘子
+
+给你一个长桌子，桌子上盘子和蜡烛排成一列。给你一个下标从 0  开始的字符串  s ，它只包含字符  `'*'` 和  `'|'` ，其中  `'*'`  表示一个 **盘子** ，`'|'`  表示一支  **蜡烛** 。
+
+同时给你一个下标从 0  开始的二维整数数组  `queries` ，其中  `queries[i] = [lefti, righti]`  表示 子字符串  `s[lefti...righti]` （包含左右端点的字符）。对于每个查询，你需要找到 **子字符串中**  在 **两支蜡烛之间**  的盘子的数目  。如果一个盘子在子字符串中左边和右边都至少有一支蜡烛，那么这个盘子满足在 两支蜡烛之间  。
+
+比方说，`s = "||**||**|*"` ，查询  `[3, 8]` ，表示的是子字符串  `"*||**|"` 。子字符串中在两支蜡烛之间的盘子数目为  `2` ，子字符串中右边两个盘子在它们左边和右边 **都** 至少有一支蜡烛。
+
+请你返回一个整数数组  answer ，其中  answer[i]  是第  i  个查询的答案。
+
+---
+
+**暴力 TLE** `2022.3.8`
+
+首先想到暴力法，遍历每次查询，从头到尾来记录下第一次出现蜡烛的位置，记录下当前盘子数目等..
+
+毫无悬念的 TLE 了
+
+```js
+var platesBetweenCandles = function (s, queries) {
+  const n = s.length;
+  let ans = [];
+  for (let query of queries) {
+    let l = query[0];
+    let r = query[1];
+    let res = 0;
+    let cnt = 0;
+    let ok = false; // 是否已经记录下第一次蜡烛
+    for (let i = l; i <= r; i++) {
+      if (s[i] == "|") {
+        if (l !== query[0] || ok) {
+          res = Math.max(res, i - l - 1 - cnt);
+          cnt++;
+        }
+        if (!ok) l = i;
+        ok = true;
+      }
+    }
+    ans.push(res);
+  }
+  return ans;
+};
+```
+
+**前缀和+预处理** `2022.3.8`
+
+主要优化：盘子数目可以使用前缀和来记录，预先处理每个位置处，左右两边离他最近的那个蜡烛位置
+
+```js
+var platesBetweenCandles = function (s, queries) {
+  const n = s.length;
+  let ans = [];
+  let preSum = new Array(n + 1).fill(0);
+  // [i,j]=> preSum[j+1]-perSum[i+1]
+  for (let i = 1; i <= n; i++) {
+    if (s[i - 1] == "*") preSum[i] = preSum[i - 1] + 1;
+    else preSum[i] = preSum[i - 1];
+  }
+  // left right
+  let left = new Array(n).fill(0);
+  let right = new Array(n).fill(0);
+  let leftIdx = 0;
+  let rightIdx = n - 1;
+  for (let i = 0; i < n; i++) {
+    if (s[i] == "|") leftIdx = i;
+    left[i] = leftIdx;
+  }
+  for (let i = n - 1; i >= 0; i--) {
+    if (s[i] == "|") rightIdx = i;
+    right[i] = rightIdx;
+  }
+  // console.log(preSum)
+  for (let query of queries) {
+    let l = query[0];
+    let r = query[1];
+    l = right[l];
+    r = left[r];
+    if (l < r) ans.push(preSum[r + 1] - preSum[l + 1]);
+    else ans.push(0);
+  }
+  return ans;
 };
 ```
 
