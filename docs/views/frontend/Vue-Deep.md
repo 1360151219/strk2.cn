@@ -1,7 +1,7 @@
 ---
-title: Vue 解读源码 持续更新~~！
+title: Vue 解读源码系列---Vue示例的创建(一)
 date: 2022-3-8
-lastUpdated: 2022-3-8
+lastUpdated: 2022-3-9
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -15,7 +15,7 @@ tags:
 
 这篇博客我想从`new Vue`开始入手，层层深入，利于理解。
 
-# new Vue 到底做了什么
+## new Vue 到底做了什么
 
 首先找到 Vue 源码目录。
 
@@ -144,7 +144,7 @@ export function renderMixin(Vue: Class<Component>) {
 
 那么接下来，我们来继续了解一下，从 `_init`方法开始吧。
 
-# \_init：在 beforeCreate 前 Vue 都干了啥
+## \_init：在 beforeCreate 前 Vue 都干了啥
 
 ```js
 let uid = 0; // 每一个Vue实例都有一个唯一标识
@@ -310,3 +310,298 @@ export function initRender(vm: Component) {
 **值得注意的是**，这里`data`属性还没被挂载上来，因为不可能访问`data`。那么在`beforeCreate`阶段可以干什么呢？
 
 像插件内部 `install` 方法通过 `Vue.use`安装的时候，一般就在此时进行。
+
+## Created 之前做了什么
+
+让我们继续看 `_init`中接下来干了什么吧。
+
+### `initInjections(vm)`：主要是初始化`inject`
+
+```js
+export function initInjections(vm: Component) {
+  const result = resolveInject(vm.$options.inject, vm); //获取vm.$options.inject
+  if (result) {
+    toggleObserving(false);
+    Object.keys(result).forEach((key) => {
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV !== "production") {
+        defineReactive(vm, key, result[key], () => {
+          warn(
+            `Avoid mutating an injected value directly since the changes will be ` +
+              `overwritten whenever the provided component re-renders. ` +
+              `injection being mutated: "${key}"`,
+            vm
+          );
+        });
+      } else {
+        defineReactive(vm, key, result[key]);
+      }
+    });
+    toggleObserving(true);
+  }
+}
+```
+
+`vm.$options.inject` 是经过合并后的 $options 中的 inject，然后通过一个 `resolveInject`方法来找到我们想要的结果，然后通过`defineReactive`挂载在 Vue 实例上）。值得注意的是，这里有一个 `toggleObserving(false)`，这也意味着 **inject 并不是一个响应式数据**。
+
+然后我们来看一下`resolveInject`方法是如何找到 result 的。
+
+```js
+export function resolveInject(inject: any, vm: Component): ?Object {
+  if (inject) {
+    // inject is :any because flow is not smart enough to figure out cached
+    const result = Object.create(null);
+    const keys = hasSymbol ? Reflect.ownKeys(inject) : Object.keys(inject);
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      // #6574 in case the inject object is observed...
+      if (key === "__ob__") continue;
+      const provideKey = inject[key].from;
+      let source = vm;
+      // 向上循环查找父组件是否有提供该依赖。即寻找 provide！！
+      while (source) {
+        if (source._provided && hasOwn(source._provided, provideKey)) {
+          result[key] = source._provided[provideKey];
+          break;
+        }
+        source = source.$parent;
+      }
+
+      // ...默认相关逻辑
+      if (!source) {
+        if ("default" in inject[key]) {
+          const provideDefault = inject[key].default;
+          result[key] =
+            typeof provideDefault === "function"
+              ? provideDefault.call(vm)
+              : provideDefault;
+        } else if (process.env.NODE_ENV !== "production") {
+          warn(`Injection "${key}" not found`, vm);
+        }
+      }
+    }
+    return result;
+  }
+}
+```
+
+这个`resolveInject`方法主要逻辑是判断当前 inject 中是否有父组件注入。（递归查找父组件）`source`一开始表示当前组件实例，而`source._provided`表示当前 provide 提供的属性，首先在当前实例查找，然后通过 source.parent 来向上查找
+
+这里可能会很疑惑：inject 不是一个数组嘛，它为什么可以使用 Object.key？它为什么子项有 `from`属性？
+
+这是因为在前面提到的`mergeOptions`中，会对 inject 作一个处理：
+
+```
+定义时：
+{
+  inject: ['app']
+}
+
+格式化后：
+{
+  inject: {
+    app: {
+      from: 'app'
+    }
+  }
+}
+```
+
+### `initState`
+
+```js
+export function initState(vm: Component) {
+  vm._watchers = [];
+  const opts = vm.$options;
+  if (opts.props) initProps(vm, opts.props);
+  if (opts.methods) initMethods(vm, opts.methods);
+  if (opts.data) {
+    initData(vm);
+  } else {
+    observe((vm._data = {}), true /* asRootData */);
+  }
+  if (opts.computed) initComputed(vm, opts.computed);
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch);
+  }
+}
+```
+
+`initState`顾名思义，是初始化重要状态属性的函数。它也的确是初始化很重要的属性：`data`、`props`、`methods`、`computed`、`watch`
+
+- **initProps**
+
+```js
+// propsOptions 接收参数的规则
+function initProps(vm: Component, propsOptions: Object) {
+  const propsData = vm.$options.propsData || {};
+  const props = (vm._props = {});
+  // cache prop keys so that future props updates can iterate using Array
+  // instead of dynamic object key enumeration.
+  const keys = (vm.$options._propKeys = []);
+  const isRoot = !vm.$parent;
+  // root instance props should be converted
+  // 如果它不是根组件，那么props就不设置响应式
+  if (!isRoot) {
+    toggleObserving(false);
+  }
+  for (const key in propsOptions) {
+    keys.push(key);
+    const value = validateProp(key, propsOptions, propsData, vm);
+    /* istanbul ignore else */
+
+    defineReactive(props, key, value);
+  }
+  // props 的挂载
+  if (!(key in vm)) {
+    proxy(vm, `_props`, key);
+  }
+  toggleObserving(true);
+}
+```
+
+`propsOptions` 是当前实例，也就是子组件的接收参数的规则。
+
+这里同样的通过合并 options 后，props 以对象的格式放在了 vm.$options.propsData 内，那么下面定义的 vm.\_props 是为了将符合规则的值存起来。
+
+isRoot 如果它不是根组件，那么 props 就不设置响应式
+
+最后遍历格式化后的 props 验证规则 propOptions，通过 validateProp 方法验证规则并得到相应的值，将得到的值挂载到 vm.\_props 下。这个时候就可以通过 this.\_props 访问到 props 内定义的值了：
+
+那么最后的 proxy 是干嘛的呢？
+
+我们在使用 props 中的属性的时候，都是直接用`this.xxx`来访问的，但是现在我们的 props 实际上并不在 Vue 实例上，而是在 vm.\_props 中，因此需要劫持代理。
+
+```js
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop,
+};
+export function proxy(target: Object, sourceKey: string, key: string) {
+  sharedPropertyDefinition.get = function proxyGetter() {
+    return this[sourceKey][key];
+  };
+  sharedPropertyDefinition.set = function proxySetter(val) {
+    this[sourceKey][key] = val;
+  };
+  Object.defineProperty(target, key, sharedPropertyDefinition);
+}
+```
+
+- **initMethods(vm,method)**
+
+```js
+function initMethods(vm: Component, methods: Object) {
+  const props = vm.$options.props;
+  for (const key in methods) {
+    // 一系列过滤警告
+    if (process.env.NODE_ENV !== "production") {
+      if (typeof methods[key] !== "function") {
+        warn(
+          `Method "${key}" has type "${typeof methods[
+            key
+          ]}" in the component definition. ` +
+            `Did you reference the function correctly?`,
+          vm
+        );
+      }
+      if (props && hasOwn(props, key)) {
+        warn(`Method "${key}" has already been defined as a prop.`, vm);
+      }
+      if (key in vm && isReserved(key)) {
+        warn(
+          `Method "${key}" conflicts with an existing Vue instance method. ` +
+            `Avoid defining component methods that start with _ or $.`
+        );
+      }
+    }
+    // 这里bind 相当于 vm[key].bind(vm)
+    vm[key] =
+      typeof methods[key] !== "function" ? noop : bind(methods[key], vm);
+  }
+}
+```
+
+initMethods 就简单多了，主要逻辑就是通过 bind 来将 this 指向当前实例。
+
+- **initData**
+
+注意噢，添加 data 响应式也是在这里添加的！
+
+```js
+function initData(vm: Component) {
+  let data = vm.$options.data;
+  data = vm._data = typeof data === "function" ? getData(data, vm) : data || {};
+  // 为什么data不能够是一个对象，这里就看得很清楚了。如果是对象，直接引用。
+  // 这样的话，在多次引用同一个Vue组件的时候，他们的data会共享
+  if (!isPlainObject(data)) {
+    data = {};
+    process.env.NODE_ENV !== "production" &&
+      warn(
+        "data functions should return an object:\n" +
+          "https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function",
+        vm
+      );
+  }
+  // proxy data on instance
+  const keys = Object.keys(data);
+  const props = vm.$options.props;
+  const methods = vm.$options.methods;
+  let i = keys.length;
+  while (i--) {
+    const key = keys[i];
+    if (process.env.NODE_ENV !== "production") {
+      if (methods && hasOwn(methods, key)) {
+        warn(
+          `Method "${key}" has already been defined as a data property.`,
+          vm
+        );
+      }
+    }
+    if (props && hasOwn(props, key)) {
+      process.env.NODE_ENV !== "production" &&
+        warn(
+          `The data property "${key}" is already declared as a prop. ` +
+            `Use prop default value instead.`,
+          vm
+        );
+    } else if (!isReserved(key)) {
+      proxy(vm, `_data`, key);
+    }
+  }
+  // observe data
+  observe(data, true /* asRootData */);
+}
+```
+
+> 为什么 data 不能够是一个对象，这里就看得很清楚了。
+
+`data = vm._data = typeof data === "function" ? getData(data, vm) : data || {};`
+
+如果是对象，直接复用 data。这样的话，在多次引用同一个 Vue 组件的时候，他们的 data 会共享。
+
+获取到 data 对象之后，同时要获取 props 和 methods，用于判断 data 中键值的变量名是否符合规范是否重名。若符合则通过 proxy 将 data 内属性挂载在 Vue 实例上。
+
+最后，`observe(data,true)` 添加响应式咯~~。
+
+### `initProvide`
+
+```js
+export function initProvide(vm: Component) {
+  const provide = vm.$options.provide;
+  if (provide) {
+    vm._provided = typeof provide === "function" ? provide.call(vm) : provide;
+  }
+}
+```
+
+获取用户定义 provide 并挂载到 \_provided 上，为了之后子组件访问作准备。
+
+最后 `callHook(vm, 'created')`: 执行用户定义的 created 钩子函数，有 mixin 混入的也一并执行。
+
+> 最后问一个问题，请问 methods 内的方法可以使用箭头函数么，会造成什么样的结果？
+
+答案就是，不行，在 initMethods 内部是通过 bind 将 methods 内所有方法的上下文绑定为当前实例。如果用了箭头函数，那么 methods 内上下文就不是 Vue 实例了，就不可以通过 this.xxx 访问任何变量了。

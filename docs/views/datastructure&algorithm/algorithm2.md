@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-3-8
+lastUpdated: 2022-3-9
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1750,6 +1750,54 @@ var platesBetweenCandles = function (s, queries) {
     r = left[r];
     if (l < r) ans.push(preSum[r + 1] - preSum[l + 1]);
     else ans.push(0);
+  }
+  return ans;
+};
+```
+
+## 前缀和 & 差分
+
+### leetcode 1109. 航班预订统计
+
+这里有  `n`  个航班，它们分别从 `1` 到 `n` 进行编号。
+
+有一份航班预订表  `bookings` ，表中第  `i`  条预订记录  `bookings[i] = [firsti, lasti, seatsi]`  意味着在从 `firsti`  到 `lasti` （包含 firsti 和 lasti ）的 **每个航班** 上预订了 `seatsi`  个座位。
+
+请你返回一个长度为 `n` 的数组  `answer`，里面的元素是每个航班预定的座位总数。
+
+---
+
+**前缀和 + 差分**
+
+> 当涉及到区间修改，单点查询的题目的时候，就可以使用差分
+
+我们先来介绍一些差分数组的性质：
+
+1）对于原始数组`arr[a, b, c, d]`，其差分数组为：`diff[a, b-a, c-b, d-c]`
+
+2）差分数组的前缀和数组 == 原始数组，即：求差分数组的前缀和数组，即可还原回去。`[a, a + b-a, a+b-a + c-b, ...]`
+
+3）对原始数组的区间增加，可以转化为对其差分数组的两点增加（ O(n) -> O(1) ）：
+假设对`arr[i ... j]`区间每个元素全部增加 delta，则等价于：`diff[i] += delta`，`diff[j+1] -= delta`
+
+最后只需要将前缀和数组加上差分数组的变化，则得到的原数组的变化量
+
+```js
+// 差分思想：对[l,r]的区间做修改，比如增加i，则将l以后的所有数增加i，将r以后所有数减去i
+// 后缀和的逆向
+var corpFlightBookings = function (bookings, n) {
+  let cnt = new Array(n + 1).fill(0);
+  for (let bo of bookings) {
+    let l = bo[0] - 1;
+    let r = bo[1] - 1;
+    let v = bo[2];
+    cnt[l] += v;
+    cnt[r + 1] -= v;
+  }
+  let ans = new Array(n);
+  ans[0] = cnt[0];
+  for (let i = 1; i < n; i++) {
+    ans[i] = ans[i - 1] + cnt[i];
   }
   return ans;
 };
