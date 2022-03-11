@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-3-9
+lastUpdated: 2022-3-11
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -714,6 +714,38 @@ var maximumGood = function (statements) {
 ```
 
 ## 单调栈
+
+### leetcode 503. 下一个更大元素 II
+
+给定一个循环数组  `nums` （ `nums[nums.length - 1]`  的下一个元素是  `nums[0]` ），返回  `nums`  中每个元素的 **下一个更大元素** 。
+
+数字 x  的 下一个更大的元素 是按数组遍历顺序，这个数字之后的第一个比它更大的数，这意味着你应该循环地搜索它的下一个更大的数。如果不存在，则输出 `-1`
+
+---
+
+**单调栈** `2022.3.11`
+
+主要思路：使用单调栈找到每一个元素右边第一个更大元素，这里要注意因为是循环数组，则我们假装在原数组后面再加一次原数组即可。最后把没有找到更大元素的元素输出-1
+
+```js
+var nextGreaterElements = function (nums) {
+  const n = nums.length;
+  let stack = []; // 递减
+  let ans = new Array(n);
+  for (let i = 0; i < 2 * n; i++) {
+    let idx = i >= n ? i - n : i;
+    while (stack.length > 0 && nums[idx] > nums[stack[stack.length - 1]]) {
+      let cur = stack.pop();
+      ans[cur] = nums[idx];
+    }
+    stack.push(idx);
+  }
+  for (let i = 0; i < n; i++) {
+    if (ans[i] == undefined) ans[i] = -1;
+  }
+  return ans;
+};
+```
 
 ### leetcode 1856. 子数组最小乘积的最大值
 
@@ -1468,6 +1500,70 @@ var validPath = function (n, edges, source, destination) {
 ```
 
 ## 贪心算法
+
+### leetcode 15. 三数之和
+
+给你一个包含 `n` 个整数的数组  `nums`，判断  `nums`  中是否存在三个元素 `a，b，c` ，使得  `a + b + c = 0` ？请你找出所有和为 `0` 且不重复的三元组。
+
+注意：答案中不可以包含**重复**的三元组。
+
+---
+
+**贪心排序+双指针** `2022.3.10`
+
+这道题，我们如果按照 两数之和 的想法来做的话，很容易会变成这样：
+
+```js
+var threeSum = function (nums) {
+  let map = new Map();
+  const n = nums.length;
+  let ans = [];
+  for (let i = 0; i < n; i++) {
+    let fir = nums[i];
+    for (let j = i + 1; j < n; j++) {
+      let sec = 0 - nums[j] - fir;
+      if (map.has(sec)) {
+        ans.push([fir, nums[j], sec]);
+      } else map.set(nums[j], true);
+    }
+    map.clear();
+  }
+  return ans;
+};
+```
+
+但这肯定是错误的。因为它无法做到去重。这道题其实难就难在如何去去重。
+
+为了能够实现去重，我们可以先做一个升序排序。首先肯定是要先确定一个数字的。升序排序的目的就是为了第一个数字不重复。因此确定后也要对第一个数字进行去重。其次，做了排序之后我们可以使用双指针来对剩下两个数字进行选取，同样的，选取途中也要进行去重。
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+var threeSum = function (nums) {
+  nums.sort((a, b) => a - b);
+  const n = nums.length;
+  let ans = [];
+  for (let i = 0; nums[i] <= 0; i++) {
+    if (i > 0 && nums[i] == nums[i - 1]) continue; //去重
+    let fir = nums[i];
+    let j = i + 1;
+    let end = n - 1;
+    while (j < end) {
+      if (fir + nums[j] + nums[end] == 0) {
+        ans.push([fir, nums[j], nums[end]]);
+        while (j < end && nums[j] == nums[j + 1]) j++; //去重
+        while (j < end && nums[end] == nums[end - 1]) end--; // 去重
+        end--;
+        j++;
+      } else if (fir + nums[j] + nums[end] > 0) end--;
+      else j++;
+    }
+  }
+  return ans;
+};
+```
 
 ### leetcode 969. 煎饼排序
 
