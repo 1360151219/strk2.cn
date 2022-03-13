@@ -228,7 +228,20 @@ console.log(bar.prototype.value); // 1
 因此我们可以做最后的修改，用一个空对象来过渡。
 
 ```js
-function fNon() {}
-fNon.prototype = _this.prototype;
-fBound.prototype = new fNon();
+Function.prototype._bind = function (context) {
+  var self = this;
+  var args = Array.prototype.slice.call(arguments, 1);
+  // 注意 ：作构造函数使用的时候，this绑定在构造函数身上而不是context
+  var fBound = function () {
+    var bindArgs = Array.prototype.slice.call(arguments);
+    return self.apply(
+      this instanceof fNOP ? this : context,
+      args.concat(bindArgs)
+    );
+  };
+  var fNOP = function () {};
+  fNOP.prototype = this.prototype;
+  fBound.prototype = new fNOP();
+  return fBound;
+};
 ```

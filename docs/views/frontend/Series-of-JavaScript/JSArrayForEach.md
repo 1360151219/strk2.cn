@@ -178,3 +178,13 @@ if (!Array.prototype.forEach) {
 ```js
 await callback.call(T, kValue, k, O);
 ```
+
+> 上述代码也说明了为什么我们在回调函数中使用 `break` 或者 `return` 不生效
+
+- break 无效
+
+break 只能用来跳出循环，但是我们使用 forEach 时通常是把代码写在回调函数里，break 用于跳出回调函数时会报错，所以无法跳出外层的 forEach 循环
+
+- return 无效
+
+return 可以跳出函数，但是只能跳出当前函数，所以在 forEach 中**return 只能跳出当前这一次的回调函数，仍然在 for 循环中，而无法跳出 forEach 函数**，所以回调函数外的 for 循环会继续执行下去。

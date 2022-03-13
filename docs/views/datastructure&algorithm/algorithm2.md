@@ -1129,6 +1129,89 @@ var getPermutation = function (n, k) {
 };
 ```
 
+### leetcode 264 / 剑指 Offer 49. 丑数
+
+我们把只包含质因子 2、3 和 5 的数称作丑数（Ugly Number）。求按从小到大的顺序的第 n 个丑数。
+
+---
+
+**暴力 TLE** `2022.3.13`
+
+看到这道题 我首先想到的就是如何判断是否是丑数，这个只需要用一个循环，判断其是否是 2、3、5 的倍数并且一直向下作除法即可。然后从 1 开始遍历向上查找丑数。
+
+```js
+var nthUglyNumber = function (n) {
+  for (let i = 1; ; i++) {
+    if (isUgly(i)) n--;
+    if (n == 0) return i;
+  }
+};
+function isUgly(num) {
+  while (num % 2 == 0 || num % 3 == 0 || num % 5 == 0) {
+    if (num % 2 == 0) num /= 2;
+    else if (num % 3 == 0) num /= 3;
+    else num /= 5;
+  }
+  return num == 1 ? true : false;
+}
+```
+
+啊，毫不意外的超时了。于是我想到用动态规划，从 1 开始，一直向上乘个 2、3、5 不也一样可以嘛
+
+**动规**
+
+```js
+var nthUglyNumber = function (n) {
+  if (n == 1) return 1;
+  let set = new Set();
+  let queue = [1];
+  let ans = [];
+  let cnt = 0;
+  while (cnt < 10 * n) {
+    // 更小的数字其实在后头
+    let cur = queue.shift();
+    if (set.has(cur)) continue;
+    queue.push(cur * 2);
+    queue.push(cur * 3);
+    queue.push(cur * 5);
+    ans.push(cur);
+    set.add(cur);
+    cnt++;
+  }
+  ans.sort((a, b) => a - b);
+  return ans[n - 1];
+};
+```
+
+这个方式虽然过了，但是效率也很低，后来去评论区一看，不需要这么麻烦，定义 3 个指针，每次只取其最小值不就好了吗，还不用排序了。
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var nthUglyNumber = function (n) {
+  if (n == 1) return 1;
+  let dp = new Array(n);
+  dp[0] = 1;
+  let a = 0;
+  let b = 0;
+  let c = 0;
+  for (let i = 1; i < n; i++) {
+    let n1 = dp[a] * 2;
+    let n2 = dp[b] * 3;
+    let n3 = dp[c] * 5;
+    let cur = Math.min(Math.min(n1, n2), n3);
+    dp[i] = cur;
+    // 去重
+    if (cur == n1) a++;
+    if (cur == n2) b++;
+    if (cur == n3) c++;
+  }
+  return dp[n - 1];
+};
+```
+
 ### leetcode 688. 骑士在棋盘上的概率
 
 在一个  `n x n`  的国际象棋棋盘上，一个骑士从单元格 `(row, column)`  开始，并尝试进行 `k` 次移动。行和列是 从 `0` 开始 的，所以左上单元格是 `(0,0)` ，右下单元格是 `(n - 1, n - 1)` 。
