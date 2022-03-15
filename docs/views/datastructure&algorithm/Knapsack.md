@@ -430,6 +430,7 @@ var numSquares = function (n) {
     i++;
   }
   let dp = new Array(n + 1);
+  // 考虑1的时候
   for (let j = 0; j < n + 1; j++) {
     dp[j] = j;
   }

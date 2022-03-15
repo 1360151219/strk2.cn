@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-3-11
+lastUpdated: 2022-3-15
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1582,6 +1582,39 @@ var validPath = function (n, edges, source, destination) {
 };
 ```
 
+### leetcode 2044. 统计按位或能得到最大值的子集数目
+
+给你一个整数数组 nums ，请你找出 nums 子集 按位或 可能得到的 最大值 ，并返回按位或能得到最大值的 不同非空子集的数目 。
+
+---
+
+**dfs** `2022.3.15`
+
+我们首先要知道，数字之间**按位或**得出的答案必然不小于这两个数字。因此该数组按位或最大值就是将数组中全部数组按位或一遍。
+
+找到最大值之后，再进行 dfs 即可。
+
+```js
+var countMaxOrSubsets = function (nums) {
+  const n = nums.length;
+  let max = 0;
+  for (let i = 0; i < n; i++) {
+    max |= nums[i];
+  }
+  return dfs(nums, n, max, 0, 0);
+};
+function dfs(nums, n, max, cur, step) {
+  if (step == n) {
+    if (cur == max) return 1;
+    return 0;
+  }
+  let ans = 0;
+  ans += dfs(nums, n, max, cur | nums[step], step + 1);
+  ans += dfs(nums, n, max, cur, step + 1);
+  return ans;
+}
+```
+
 ## 贪心算法
 
 ### leetcode 15. 三数之和
@@ -1813,6 +1846,63 @@ class PriorityQueue {
 ```
 
 ## 二分算法
+
+### leetcode 33. 搜索旋转排序数组
+
+整数数组 `nums` 按升序排列，数组中的值 **互不相同** 。
+
+在传递给函数之前，`nums` 在预先未知的某个下标 `k（0 <= k < nums.length）`上进行了 **旋转**，使数组变为 `[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]`（下标 从 0 开始 计数）。例如， `[0,1,2,4,5,6,7]` 在下标 3 处经旋转后可能变为  `[4,5,6,7,0,1,2]` 。
+
+给你 **旋转后** 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的下标，否则返回  -1 。
+
+---
+
+**二分算法** `2022.3.14`
+
+这道题如果不考虑时间复杂度，直接 indexOf 即可。但若要考虑时间复杂度的话，最好的方法还是二分。
+
+我们可以试想一个例子：`456789123`，我们可以将这个数组分为左、右两半，左半边任何数字都会比右半边大。因此我的想法如下：
+
+- 首先先去判断 target 在左半边还是在右半边
+- 判断当前遍历到的 mid 是在左半边还是在右半边
+- 最后去判断 mid 和 target 的位置关系
+
+```js
+var search = function (nums, target) {
+  const n = nums.length;
+  let left = 0;
+  let right = n - 1;
+  let rightest = nums[right];
+  if (target == rightest) return right;
+  while (left < right) {
+    let mid = Math.floor((left + right) / 2);
+    if (nums[mid] == target) return mid;
+    // target 在右边
+    if (target < rightest) {
+      // mid 在右边
+      if (nums[mid] < rightest) {
+        // target 在mid右边
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid;
+        // mid 在左边
+      } else if (nums[mid] > rightest) {
+        left = mid + 1;
+      } else {
+        right = mid;
+      }
+      // target 在左边
+    } else {
+      // mid 在左边 ，mid在左半数组中
+      if (nums[mid] < target && nums[mid] > rightest) left = mid + 1;
+      else if (nums[mid] > target && nums[mid] > rightest) right = mid;
+      else {
+        right = mid;
+      }
+    }
+  }
+  return -1;
+};
+```
 
 ### leetcode 540. 有序数组中的单一元素
 
