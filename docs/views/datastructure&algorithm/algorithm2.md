@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-3-15
+lastUpdated: 2022-3-20
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1078,6 +1078,44 @@ var countVowelPermutation = function (n) {
 
 ## 动规 dp&bfs&dfs
 
+### leetcode 5. 最长回文子串
+
+给你一个字符串 `s` 找出其最长回文子串
+
+---
+
+**dp 动规** `2022.3.16`
+
+主要思路：判断是否是回文子串，只需对一个中心点向左右两边扩散判断即可。用 dp 的话，dp[l][r]表示子串(l,r)是否是回文子串，转移方程就是当 `s.charAt(l)==s.charAt(r)` 时，`dp[l][r]=dp[l+1][r-1]?true:false`
+
+```js
+var longestPalindrome = function (s) {
+  const n = s.length;
+  let dp = new Array(n).fill(0).map(() => new Array(n).fill(false));
+  // dp[l][r] 表示在(l,r)范围内的字符串是否是回文字符串
+  // 初始化
+  for (let i = 0; i < n; i++) {
+    dp[i][i] = true;
+  }
+  let mLen = 1;
+  let ml = 0;
+  let mr = 0;
+  for (let r = 1; r < n; r++) {
+    for (let l = 0; l < r; l++) {
+      if (s.charAt(l) == s.charAt(r) && (r - l + 1 <= 2 || dp[l + 1][r - 1])) {
+        dp[l][r] = true;
+        if (r - l + 1 > mLen) {
+          mLen = r - l + 1;
+          ml = l;
+          mr = r;
+        }
+      }
+    }
+  }
+  return s.substring(ml, mr + 1);
+};
+```
+
 ### leetcode 60. 排列序列
 
 给出集合  `[1,2,3,...,n]`，其所有元素共有  `n!` 种排列。
@@ -1847,6 +1885,121 @@ class PriorityQueue {
 
 ## 二分算法
 
+### 剑指 Offer 40. 最小的 k 个数
+
+输入整数数组 `arr` ，找出其中最小的 `k` 个数。例如，输入`4、5、1、6、2、7、3、8`这 8 个数字，则最小的 4 个数字是`1、2、3、4`。
+
+---
+
+**排序** `2022.3.17`
+这个就不说了。
+
+**最小堆**
+
+自己又手写了一下堆，回忆了一下细节。
+
+```js
+/**
+ * @param {number[]} arr
+ * @param {number} k
+ * @return {number[]}
+ */
+var getLeastNumbers = function (arr, k) {
+  let heap = new Heap((a, b) => a < b);
+  for (let i = 0; i < arr.length; i++) {
+    heap.offer(arr[i]);
+  }
+
+  let ans = [];
+  for (let i = 0; i < k; i++) {
+    ans.push(heap.poll());
+  }
+
+  return ans;
+};
+
+class Heap {
+  constructor(compare = (a, b) => a > b) {
+    this.compare = compare;
+    this.size = 0;
+    this.data = [];
+  }
+  // 左子节点
+  _child(index) {
+    return (index << 1) + 1;
+  }
+  _parent(index) {
+    return (index - 1) >> 1;
+  }
+  // 删除
+  poll() {
+    this._swap(0, --this.size);
+    this._siftDown(0);
+    return this.data.pop();
+  }
+  _siftDown(index) {
+    while (this._child(index) < this.size) {
+      let child = this._child(index);
+      let rightChild = child + 1;
+      if (
+        rightChild < this.size &&
+        this.compare(this.data[rightChild], this.data[child])
+      ) {
+        child = rightChild;
+      }
+      if (this.compare(this.data[index], this.data[child])) break;
+      this._swap(index, child);
+      index = child;
+    }
+  }
+  // 加入
+  offer(value) {
+    this.data.push(value);
+    this._siftUp(this.size++);
+  }
+  _siftUp(index) {
+    let parent = this._parent(index);
+    while (parent >= 0 && this.compare(this.data[index], this.data[parent])) {
+      this._swap(index, parent);
+      index = parent;
+      parent = this._parent(index);
+    }
+  }
+  _swap(a, b) {
+    let t = this.data[a];
+    this.data[a] = this.data[b];
+    this.data[b] = t;
+  }
+}
+```
+
+**快排思想**
+
+在快排的思想上，只处理一半即可。因为快排会将所有比 pivot 小的数都放在一边。
+
+```js
+var getLeastNumbers = function (nums, k) {
+  if (k == 0) return [];
+  const n = nums.length;
+  return quick(nums, 0, n - 1, k);
+  function quick(arr, left, right, k) {
+    let l = left;
+    let r = right;
+    let pivot = arr[left];
+    while (left < right) {
+      while (left < right && arr[right] > pivot) right--;
+      arr[left] = arr[right];
+      while (left < right && arr[left] <= pivot) left++;
+      arr[right] = arr[left];
+    }
+    arr[left] = pivot;
+    if (left + 1 < k) return quick(arr, left + 1, r, k);
+    else if (left + 1 > k) return quick(arr, l, left - 1, k);
+    else return arr.slice(0, left + 1);
+  }
+};
+```
+
 ### leetcode 33. 搜索旋转排序数组
 
 整数数组 `nums` 按升序排列，数组中的值 **互不相同** 。
@@ -2145,6 +2298,48 @@ var numberOfGoodSubsets = function (nums) {
 };
 ```
 
+### leetcode 2202. K 次操作后最大化顶端元素
+
+给你一个下标从 `0`  开始的整数数组  `nums` ，它表示一个 **栈** ，其中 `nums[0]`  是栈顶的元素。
+
+每一次操作中，你可以执行以下操作之一  ：
+
+- 如果栈非空，那么 **删除**  栈顶端的元素。
+- 如果存在 1 个或者多个被删除的元素，你可以从它们中选择任何一个，**添加**  回栈顶，这个元素成为新的栈顶元素。
+
+同时给你一个整数  k ，它表示你总共需要执行操作的次数。
+
+请你返回 **恰好**  执行 k  次操作以后，栈顶元素的最大值  。如果执行完 `k`  次操作以后，栈一定为空，请你返回 `-1` 。
+
+---
+
+**脑筋急转弯**
+
+如果 n 为 1 的话，特殊情况考虑，k 为偶数的时候返回-1，否则返回 `nums[0]`
+其余情况如下：
+
+- 若 k 次全部删除元素，则返回 `nums[k]`
+- 若少出栈一次，则可以再添加 `nums[0]~nums[k-2]`中最大的元素
+- 若少出栈 x 次，则可以添加 `nums[0]~nums[k-x-1]`中最大的元素
+
+```js
+var maximumTop = function (nums, k) {
+  const n = nums.length;
+  if (n == 1) {
+    if (k & 1) return -1;
+    else return nums[0];
+  }
+  // 注意第k个元素即idx=k-1永远不可能返回
+  let max = 0;
+  // 0~k-2
+  for (let i = 0; i < n && i + 1 < k; i++) {
+    max = Math.max(max, nums[i]);
+  }
+  if (k < n) max = Math.max(max, nums[k]);
+  return max;
+};
+```
+
 ### leetcode 2195. 向数组中追加 k 个正数
 
 给你一个整数数组 `nums` 和一个整数 `k` 。请你向 `nums` 中追加 `k` 个 **未** 出现在 `nums` 中的、**互不相同**的正整数，并使结果数组的元素和 **最小** 。
@@ -2222,6 +2417,43 @@ var minimumTime = function (s) {
   let ans = Infinity;
   for (let i = 0; i < n; i++) {
     ans = Math.min(ans, dpl[i] + dpr[i + 1]);
+  }
+  return ans;
+};
+```
+
+### 6028. 统计道路上的碰撞次数
+
+在一条无限长的公路上有 `n` 辆汽车正在行驶。汽车按从左到右的顺序按从 `0` 到 `n - 1` 编号，每辆车都在一个 **独特的** 位置。
+
+给你一个下标从 `0` 开始的字符串 `directions` ，长度为 `n` 。`directions[i]` 可以是 `'L'`、`'R'` 或 `'S'` 分别表示第 `i` 辆车是向 _左_ 、向 _右_ 或者 _停留_ 在当前位置。每辆车移动时 **速度相同** 。
+
+碰撞次数可以按下述方式计算：
+
+- 当两辆移动方向   相反   的车相撞时，碰撞次数加 2 。
+- 当一辆移动的车和一辆静止的车相撞时，碰撞次数加 1 。
+
+碰撞发生后，涉及的车辆将无法继续移动并停留在碰撞位置。除此之外，汽车不能改变它们的状态或移动方向。
+
+返回在这条道路上发生的 碰撞总次数 。
+
+---
+
+**脑筋急转弯** `2022.3.20`
+
+感觉智商还是不够啦。实际上，最终所有移动的汽车都会被碰撞导致停止，除了原本停止的汽车，以及左右两边不会碰撞的汽车之外。
+
+```js
+var countCollisions = function (directions) {
+  const n = directions.length;
+  let i = 0;
+  let j = n - 1;
+  // 去除前后缀
+  while (i < n && directions[i] == "L") i++;
+  while (j >= 0 && directions[j] == "R") j--;
+  let ans = 0;
+  for (let k = i; k <= j; k++) {
+    if (directions[k] == "L" || directions[k] == "R") ans++;
   }
   return ans;
 };
