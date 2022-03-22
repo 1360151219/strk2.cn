@@ -1,7 +1,7 @@
 ---
 title: leetcode----算法日记（第二弹）
 date: 2022-1-16
-lastUpdated: 2022-3-20
+lastUpdated: 2022-3-21
 categories:
   - datastructure&algorithm
 author: 盐焗乳鸽还要砂锅
@@ -1077,6 +1077,28 @@ var countVowelPermutation = function (n) {
 ````
 
 ## 动规 dp&bfs&dfs
+
+### 求括号字符串中最长有效括号子串的长度
+
+dp[i]:记录索引为 i 的时候该字符作为结尾的时候有效字串的最大长度。
+
+```js
+function maxLength(str) {
+  const n = str.length;
+  let dp = new Array(n).fill(0);
+  let ans = 0;
+  for (let i = 1; i < n; i++) {
+    if (str.charAt(i) == ")") {
+      let pre = i - dp[i - 1] - 1;
+      if (pre >= 0 && str.charAt(pre) == "(") {
+        dp[i] = 2 + dp[i - 1] + (pre > 0 ? dp[pre - 1] : 0);
+        ans = Math.max(ans, dp[i]);
+      }
+    }
+  }
+  return ans;
+}
+```
 
 ### leetcode 5. 最长回文子串
 
@@ -2296,6 +2318,47 @@ var numberOfGoodSubsets = function (nums) {
   for (let i = 0; i < cnt[1]; i++) ans = (ans * 2) % MOD;
   return ans;
 };
+```
+
+### leetcode 2197. 替换数组中的非互质数
+
+**栈**
+
+用栈就可以很好的实现元素的合并。
+
+这里主要是学习一下最大公约数和最小公倍数。
+
+最大公约数 gcd：两数相除，然后递归的对其除数和余数进行相除，直至余数为 0，此时除数就是答案。
+
+最小公倍数：用其中一个数除以他们的 gcd，然后再乘以另外一个数即可。
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var replaceNonCoprimes = function (nums) {
+  let ans = [];
+  let index = -1;
+  const n = nums.length;
+  for (let i = 0; i < n; i++) {
+    let num = nums[i];
+    while (index != -1) {
+      let g = gcd(num, ans[index]);
+      if (g == 1) break;
+      num = (num / g) * ans[index];
+      ans.splice(index, 1);
+      index--;
+    }
+    ans.push(num);
+    index++;
+  }
+  return ans;
+};
+function gcd(a, b) {
+  if (b) return gcd(b, a % b);
+  else return a;
+}
 ```
 
 ### leetcode 2202. K 次操作后最大化顶端元素

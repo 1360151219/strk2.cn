@@ -1091,6 +1091,30 @@ var maxSubArray = function (nums) {
 };
 ```
 
+> 如果要求返回对应子数组位置的话，我们只需要在状态改变的时候去更新start和end即可。`2022.3.21`
+
+```js
+var maxSubArray = function(nums) {
+    const n=nums.length
+    let max=nums[0]
+    let cur=nums[0]
+    let start=0;
+    let end=0;
+    for(let i=1;i<n;i++){
+        if(nums[i]>cur+nums[i]){
+            start=i
+        }
+        cur=Math.max(nums[i],cur+nums[i])
+        if(cur>max){
+            end=i
+        }
+        max=Math.max(max,cur) 
+    }
+    console.log(start,end)
+    return max
+};
+
+```
 **法二：分治** `2021.7.12`
 
 ```js
