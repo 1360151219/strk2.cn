@@ -380,3 +380,15 @@ export default function Invoices() {
 - `useSearchParams`现在返回一个带有`filter`的`URLSearchParams`对象。
 - 我们将 input 中的值设置到了 url search param 中
 - 我们对 Invoices 列表基于 filter 进行了过滤。
+
+## 自定义行为
+
+如果你进行了过滤之后点击某个 Link，你会发现原本处于过滤状态的列表和 url 都会复原。现在我想要保持这个过滤状态，应该怎么做呢？
+
+我们可以在点击 Link 的时候保持这个查询字符串通过将它加入 Link href 中。我们将通过组合`NavLink`和`useLocation`到一个新组件`QueryNavLink`中。
+
+`useLocation()`可以获取一个 url location 对象
+
+```js
+
+```
