@@ -74,7 +74,7 @@ console.log(this.$slots.loading)// 有东西
 
 正常来说上面写法是不生效的，因为在父组件中没有`user`
 
-为了让 user 在父级的插槽内容中可用，我们可以将 user 作为 <slot> 元素的一个 attribute 绑定上去，同时在父级作用域中，我们可以使用带值的 v-slot 来定义我们提供的插槽 prop 的名字：
+为了让 user 在父级的插槽内容中可用，我们可以将 user 作为 `<slot>` 元素的一个 attribute 绑定上去，同时在父级作用域中，我们可以使用带值的 v-slot 来定义我们提供的插槽 prop 的名字：
 
 ```html
 // 子组件
