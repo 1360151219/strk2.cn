@@ -6,10 +6,15 @@ categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
 tags:
-  - JavaScript
+  - 工程化
 ---
 
 之前其实我也了解并且使用过 webpack，但毕竟没有系统地去完整学习一遍，所以了解的不够清楚仔细。接下来让我们来入门一波 Webpack 吧。_参考：[webpack 中文文档](https://www.webpackjs.com/)_
+
+> **更多知识**
+>
+> - [webpack 常用基本配置](https://juejin.cn/post/6870388131741302798#heading-3)
+> - [webpack 5 tutorial](https://www.robinwieruch.de/webpack-setup-tutorial/)
 
 ## 起步
 
@@ -314,9 +319,3 @@ if (module.hot) {
 在生产环境中，我们使用的工具是`source-map`而不是`inline-source-map`。
 
 官方上说：**避免在生产中使用 `inline-...` 和 `eval-...`**，因为它们会增加 bundle 体积大小，并降低整体性能。
-
-## 更多知识
-
-除了官方文档以外，我还看到了许多有用的 webpack 博客：
-
-- [webpack 常用基本配置](https://juejin.cn/post/6870388131741302798#heading-3)
