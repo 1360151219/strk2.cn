@@ -3,7 +3,7 @@ const nav = require("./config/nav");
 const sidebar = require("./config/sidebar");
 module.exports = {
   title: "茶余趣谈",
-  description: "开心快乐每一天",
+  description: "愿世界上每一个人都可以找到自己所爱、所喜欢、所向往、所值得付出的人与物！",
   dest: "public",
   head: [
     ["link", { rel: "icon", href: "/favicon.ico" }],
@@ -30,15 +30,6 @@ module.exports = {
         type: "text/css",
         src:
           "https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css",
-      },
-    ],
-    [
-      "script",
-      {
-        language: "javascript",
-        type: "text/javascript",
-        src:
-          "https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js",
       },
     ],
   ],
@@ -108,7 +99,7 @@ module.exports = {
         body: [
           {
             type: "title",
-            content: "欢迎进入我的博客 🎉🎉🎉",
+            content: "欢迎进入我的博客 🎉🎉🎉 我是盐焗乳鸽还要香锅，目前大三在读武汉985非科班专业，自学前端ing，22年收割字节跳动、蚂蚁等offer，希望在这里的每一位读者都有所获的！",
             style: "text-aligin: center;",
           },
           /* {
@@ -165,40 +156,6 @@ module.exports = {
         tip: {
           content: "复制成功!",
         },
-      },
-    ],
-    [
-      "@vuepress-reco/vuepress-plugin-bgm-player",
-      {
-        audios: [
-          // 网络文件示例
-          {
-            name: "你瞒我瞒",
-            artist: "周柏宇",
-            url: "http://47.106.198.203/music/nimanwoman.mp3",
-            cover: "https://assets.smallsunnyfox.com/music/2.jpg",
-          },
-          {
-            name: "강남역 4번 출구",
-            artist: "Plastic / Fallin` Dild",
-            url: "https://assets.smallsunnyfox.com/music/2.mp3",
-            cover: "https://assets.smallsunnyfox.com/music/2.jpg",
-          },
-        ],
-        // 自动缩小
-        autoShrink: true,
-        // 悬浮窗模式，吸边
-        shrinkMode: "float",
-        // 悬浮窗位置
-        floatStyle: { bottom: "10px", "z-index": "999999" },
-      },
-    ],
-    [
-      "ribbon",
-      {
-        size: 90, // width of the ribbon, default: 90
-        opacity: 0.2, // opacity of the ribbon, default: 0.3
-        zIndex: -1, // z-index property of the background, default: -1
       },
     ],
     ["cursor-effects"],

@@ -1,6 +1,6 @@
 ---
 home: true
-bgImage: "/banner.jpg"
+bgImage: "/banner.webp"
 bgImageStyle: { maxHeight: "500px", backgroundAttachment: "fixed" }
 faceImage: "/head.png"
 heroImageStyle:
