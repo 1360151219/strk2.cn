@@ -1,7 +1,7 @@
 ---
 title: 搭建一个前端项目原来有这么多讲究---Webpack5（一）
 date: 2022-5-1
-lastUpdated: 2022-5-1
+lastUpdated: 2022-5-4
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -221,6 +221,8 @@ devtool:'source-map'
 
 ### Webpack 生产 / 开发环境的两种配置
 
+> 最终示例地址：https://github.com/1360151219/minimal-webpack5-setup/tree/webpack-distinct-configuration
+
 我们应该将生产、开发环境的两种配置文件分开。
 
 ```json
@@ -309,6 +311,8 @@ module.exports={
 
 ### Webpack 合并配置文件
 
+> 最终示例地址：https://github.com/1360151219/minimal-webpack5-setup/tree/webpack-automaticly-merge-configuration
+
 现在我们的 Webpack 两种配置文件其实有着很多相同的代码配置，为什么我们不将公共部分提取出来使用，只根据环境的不同选择特定的配置呢？
 
 很简单，我们只需要在运行时命令中去动态传一个 env 参数即可。
@@ -384,6 +388,8 @@ module.exports = {
 
 ### Webpack 环境变量的定义
 
+> 最终示例地址：https://github.com/1360151219/minimal-webpack5-setup/tree/webpack-definition-env-variables
+
 有时候你也许需要在源代码中去获取当前处于的环境。那么我们可以通过 Webpack 来声明不同环境下的环境变量。下面是一个例子：
 
 ```js
@@ -422,3 +428,118 @@ module.exports = {
 之后我们就可以在`./src/index.js`以及引用到的 js 文件中去通过`process.env.NODE_ENV`来获取我们定义的环境变量啦。
 
 ### Webpack 环境变量的安全处理 (.ENV)
+
+> 最终示例地址：https://github.com/1360151219/minimal-webpack5-setup/tree/webpack-dotenv-webpack
+
+现在我们的环境变量相当于是明牌的，每一个人都可以直接在 Webpack configuration 中看到，但是如果我们想要去定义一些比较隐私的环境变量，那要怎么做呢？
+
+这里可以用到`dotenv-webpack`，我们在项目根目录去定义两个文件`.env.development`和`.env.production`,然后写入：
+
+```
+// .env.development
+NODE_ENV=development
+```
+
+```
+// .env.production
+NODE_ENV=production
+```
+
+然后在对应的 Webpack configuration 中利用`dotenv-webpack`去读取：
+
+```js
+const DotEnv = require("dotenv-webpack");
+plugins: [
+  new DotEnv({
+    path: path.resolve(__dirname, "..", "./.env.development"),
+  }),
+];
+```
+
+### Webpack 插件
+
+> 最终示例地址：https://github.com/1360151219/minimal-webpack5-setup/tree/webpack-bundleAnalyzer
+
+Webpack 有着一个很庞大的插件生态，在我们前面的 Webpack 使用中其实也引用了一些插件。然而还有别的 Webpack 插件是可以增强我们打包体验的。例如，我们来看一个可以让我们可视化分析 Webpack 打包的插件。
+
+首先我们先引入一个`script`命令：
+
+```
+"build:analyze": "npm run build -- --env addon=bundleanalyze",
+```
+
+在这里，`addon`作为参数被传进了 Webpack configuration 中，接下来我们在`build-utils/webpack.config.js`中去使用它：
+
+```js
+const { merge } = require("webpack-merge");
+
+const commonConfig = require("./webpack.common.js");
+
+const getAddons = (addonsArgs) => {
+  const addons = Array.isArray(addonsArgs) ? addonsArgs : [addonsArgs];
+  return addons
+    .filter(Boolean)
+    .map((name) => require(`./addons/webpack.${name}.js`));
+};
+
+module.exports = ({ env, addon }) => {
+  const envConfig = require(`./webpack.${env}.js`);
+  return merge(commonConfig, envConfig, ...getAddons(addon));
+};
+```
+
+现在除了把 common 和特定环境的配置文件合并起来以外，还把我们将要放进`build-utils/addons`文件夹中的 addons 也合并起来。
+
+让我们来看一下`build-utils/addons/webpack.bundleanalyze.js`：
+
+```js
+const path = require("path");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+
+module.exports = {
+  plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: "static",
+      reportFilename: path.resolve(__dirname, "..", "..", "./dist/report.html"),
+      openAnalyzer: false,
+    }),
+  ],
+};
+```
+
+最后当我们去运行`npm run build:analyze`的时候，可以发现`dist`中多了个`report.html`，它展示了我们项目的一个体积结构。
+
+## 使用 Webpack5 搭建 React 项目
+
+### React with babel
+
+我们需要使用 Babel 去编译`.jsx`文件，这里就需要使用到：
+
+```bash
+npm install --save-dev @babel/preset-react
+```
+
+以及在`.babelrc`文件中去使用：
+
+```json
+{
+  "presets": ["@babel/preset-env", "@babel/preset-react"]
+}
+```
+
+还需要在`webpack.config.js`中配置：
+
+```js
+ module: {
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader'],
+            },
+        ],
+    },
+    resolve:{
+      extension:['*','.js','.jsx']
+    }
+```
