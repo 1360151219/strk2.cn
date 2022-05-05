@@ -6,7 +6,7 @@
 }
 // 右侧文章标题导航栏
 a.sidebar-link {
-  font-size: 16px !important;
+  font-size: 12px !important;
 }
 // 左侧边栏标题字体大小样式
 .sidebar-heading span {
@@ -38,14 +38,15 @@ a.sidebar-link.active {
 blockquote {
   background-color: rgba($accentColor, 0.1) !important;
   margin: 20px !important;
-  padding: 0 !important;
   font-size: 1rem !important; //kkkk
   color: $accentColor !important;
-  font-weight: bold;
+  font-style: italic;
   border-left: 0.25rem solid $borderColor;
+  border-top: 3px solid $borderColor;
+  border-bottom: 1px solid $borderColor;
+  border-radius: 10px 1px 1px 10px;
   margin-left: 0 !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+  padding:1rem;
 }
 
 // tip,warning,danger容器样式
@@ -234,6 +235,9 @@ div[class*="language-"]{
 }
 
 html,body{
-  letter-spacing:2px;
   font-family:Century Gothic !important;
+}
+.content__default code{
+  border-radius: 0.2rem;
+  border: 0.1rem solid rgba(0, 0, 0, 0.1);
 }

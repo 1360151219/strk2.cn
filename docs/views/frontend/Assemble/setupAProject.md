@@ -543,3 +543,37 @@ npm install --save-dev @babel/preset-react
       extension:['*','.js','.jsx']
     }
 ```
+
+### 使用 Hot Module Replacement
+
+使用`react-hot-loader`对你的项目开发效率是一个极大的提升。它可以让你不需要刷新页面的前提下进行热更新。
+
+```bash
+npm install --save-dev react-hot-loader
+```
+
+配置如下：
+
+```js
+const webpack = require('webpack');
+...
+plugins: [new webpack.HotModuleReplacementPlugin()],
+devServer: {
+  static: path.resolve(__dirname, './dist'),
+  hot: true,
+},
+```
+
+```js
+// src/index.js
+import React from "react";
+import ReactDOM from "react-dom";
+
+const title = "React with Webpack and Babel";
+
+ReactDOM.render(<div>{title}</div>, document.getElementById("app"));
+
+module.hot.accept();
+```
+
+这里如果不加上`module.hot.accept()`的话，当代码变化之后浏览器还是会进行刷新.

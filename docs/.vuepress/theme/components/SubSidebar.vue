@@ -3,7 +3,7 @@ import { defineComponent, computed, getCurrentInstance } from 'vue-demi'
 import { isActive } from '@theme/helpers/utils'
 
 export default defineComponent({
-  setup (props, ctx) {
+  setup(props, ctx) {
     const instance = getCurrentInstance().proxy
 
     const headers = computed(() => {
@@ -22,7 +22,7 @@ export default defineComponent({
 
     return { headers, isLinkActive }
   },
-  render (h) {
+  render(h) {
     return h('ul', {
       class: { 'sub-sidebar-wrapper': true },
       style: { width: this.headers.length > 0 ? '12rem' : '0' }
@@ -63,7 +63,7 @@ export default defineComponent({
       a
        color $accentColor
     &.active
-      border-left 1px solid $accentColor
+      border-left 2px solid $accentColor
       a
        color $accentColor
     &.level-1
