@@ -7,6 +7,7 @@ categories:
 author: 盐焗乳鸽还要砂锅
 tags:
   - JavaScript
+  - 编译
 ---
 
 # Babel
