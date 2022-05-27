@@ -1,7 +1,7 @@
 ---
 title: Babel Execrise 配套知识点总结
 date: 2022-5-22
-lastUpdated: 2022-5-22
+lastUpdated: 2022-5-25
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -553,3 +553,298 @@ console.log(map.toString());
 **消费 sourcemap**
 
 利用`SourceMapConsumer.with`的回调，去实现在目标、源代码中去查找位置信息，还能遍历所有 mapping 进行处理等。
+
+## 代码高亮
+
+### @Babel/code-frame
+
+```js
+const { codeFrameColumns } = require("@babel/code-frame");
+
+const res = codeFrameColumns(
+  code,
+  {
+    start: { line: 2, column: 1 },
+    end: { line: 3, column: 5 },
+  },
+  {
+    highlightCode: true,
+    message: "这里出错了",
+  }
+);
+
+console.log(res);
+```
+
+现在主要学习该插件如何做到以下 3 件事情：
+
+#### 如何打印 code frame
+
+我们从例子中可以判断出大致过程，通过源代码、开始和结束的位置，再区间内的每一行加上`>`，每一列加上`^`，最后打印出错误信息。
+
+```js
+let frame = highlightedLines
+  .split(NEWLINE, end)
+  .slice(start, end)
+  .map((line, index) => {
+    const number = start + 1 + index;
+    const paddedNumber = ` ${number}`.slice(-numberMaxWidth);
+    const gutter = ` ${paddedNumber} |`;
+    const hasMarker = markerLines[number];
+    const lastMarkerLine = !markerLines[number + 1];
+
+    if (hasMarker) {
+      let markerLine = "";
+      // hasMarker：[14,4] 起点和marker长度
+      if (Array.isArray(hasMarker)) {
+        // 打印起点前的空格
+        const markerSpacing = line
+          .slice(0, Math.max(hasMarker[0] - 1, 0))
+          .replace(/[^\t]/g, " ");
+        const numberOfMarkers = hasMarker[1] || 1;
+        markerLine = [
+          "\n ",
+          maybeHighlight(defs.gutter, gutter.replace(/\d/g, " ")),
+          " ",
+          markerSpacing,
+          maybeHighlight(defs.marker, "^").repeat(numberOfMarkers),
+        ].join("");
+        // 拼接上错误信息
+        if (lastMarkerLine && opts.message) {
+          markerLine += " " + maybeHighlight(defs.message, opts.message);
+        }
+      }
+      // 将>，gutter，源代码，和markerLine拼接起来
+      return [
+        maybeHighlight(defs.marker, ">"),
+        maybeHighlight(defs.gutter, gutter),
+        line.length > 0 ? ` ${line}` : "",
+        markerLine,
+      ].join("");
+    } else {
+      return ` ${maybeHighlight(defs.gutter, gutter)}${
+        line.length > 0 ? ` ${line}` : ""
+      }`;
+    }
+  })
+  .join("\n");
+```
+
+> 原理省略，自行打断点调试
+
+#### 如何实现语法高亮
+
+`@babel/highlight`包里也有实现逻辑，利用语法分析即可。举个栗子：
+
+```js
+const a = 1;
+const b = 2;
+console.log(a + b);
+
+// token数组如下
+
+[
+  ["whitespace", "\n"],
+  ["keyword", "const"],
+  ["whitespace", " "],
+  ["name", "a"],
+  ["whitespace", " "],
+  ["punctuator", "="],
+  ["whitespace", " "],
+  ["number", "1"],
+  ["punctuator", ";"],
+  ["whitespace", "\n"],
+  ["keyword", "const"],
+  ["whitespace", " "],
+  ["name", "b"],
+  ["whitespace", " "],
+  ["punctuator", "="],
+  ["whitespace", " "],
+  ["number", "2"],
+  ["punctuator", ";"],
+  ["whitespace", "\n"],
+  ["name", "console"],
+  ["punctuator", "."],
+  ["name", "log"],
+  ["bracket", "("],
+  ["name", "a"],
+  ["whitespace", " "],
+  ["punctuator", "+"],
+  ["whitespace", " "],
+  ["name", "b"],
+  ["bracket", ")"],
+  ["punctuator", ";"],
+  ["whitespace", "\n"],
+];
+```
+
+这个 token 是利用`js-tokens`包，通过正则来识别 token，利用函数对不同的分组返回不同类型，完成 token 的识别和分类。
+
+有了分类，再利用`chalk`来显示不同颜色就 OK 了。
+
+#### 在控制台打印颜色
+
+Node 中的 `console.log`的底层是 process.stdout，而 `process.stdout` 的底层又是基于 Stream 实现的，再进一步 `Stream` 的底层指向了.cc 的 c 语言文件。
+
+控制台打印的是 ASCII 码，我们通过 ESC 来完成一些控制功能：(ESC 的 ASCII 码是 27，对应`\033`)
+
+```js
+var mix = "\033[36;1mstrk";
+console.log(mix);
+```
+
+## Babel plugins、presets
+
+### plugin 基本使用
+
+```js
+{
+  plugins: [
+    "pluginA",
+    ["pluginB"],
+    [
+      "pluginC",
+      {
+        /* opts */
+      },
+    ],
+  ];
+}
+```
+
+### plugin 格式
+
+**函数形式**
+
+返回值为一个对象的函数，其中有`visitor`、`pre`、`post`..等属性
+
+```js
+export default function (api, options, dirname) {
+  return {
+    inherits: parentPlugin,
+    manipulateOptions(options, parserOptions) {
+      options.xxx = "";
+    },
+    pre(file) {
+      this.cache = new Map();
+    },
+    visitor: {
+      StringLiteral(path, state) {
+        this.cache.set(path.node.value, 1);
+      },
+    },
+    post(file) {
+      console.log(this.cache);
+    },
+  };
+}
+```
+
+首先这个函数有 3 个参数：
+
+- api：各种 babel 的 api，如`types`、`template`等，不需要我们去引用了。
+- options：外面传进来的参数
+- dirname：目录名称
+
+返回的对象的属性：
+
+- inherits：指定继承某插件，与当前插件的 options 通过`Object.assign`来合并
+- visitor：略
+- pre、post：插件调用前后的 hook
+  manipulateOptions：用于修改 options
+
+**对象形式**
+
+该形式无法处理参数。
+
+```js
+export default plugin = {
+  pre(state) {
+    this.cache = new Map();
+  },
+  visitor: {
+    StringLiteral(path, state) {
+      this.cache.set(path.node.value, 1);
+    },
+  },
+  post(state) {
+    console.log(this.cache);
+  },
+};
+```
+
+### preset
+
+plugin 是单个转换功能的实现，而 preset 可以理解为对 plugin 的一层封装，即批量引入多个 plugin 实现转换功能。
+
+preset 的使用格式与 plugin 一样。区别在于 preset 返回的是配置对象：
+
+```js
+export default function (api, options) {
+  return {
+    plugins: ["pluginA"],
+    presets: [["presetsB", { options: "bbb" }]],
+  };
+}
+```
+
+### ConfigItem
+
+@babel/core 提供了 `createConfigItem` 用于创建配置项
+
+```js
+const pluginA = createConfigItem("pluginA");
+const presetB = createConfigItem("presetsB", { options: "bbb" });
+
+export default obj = {
+  plugins: [pluginA],
+  presets: [presetB],
+};
+```
+
+### 处理顺序
+
+- 先 plugin、再 preset
+- plugin 从前往后处理，preset 反过来
+
+### 名字
+
+一句话总结：最好是 babel-plugin-xx 和 @scope/babel-plugin-xx 这两种，就可以简单写为 xx 和 @scope/xx。如`@babel/preset-env => @babel/env`
+
+详情请读者自行查阅。
+
+## Babel 单元测试
+
+babel 插件就是对 AST 做转换处理，那么我们很容易想到一些测试方式，但常用的就是测试转换后的代码，存成快照进行对比。
+
+`babel-plugin-tester`就是这样做的。它有三种对比方式：直接对比字符串，指定输入输出的字符串进行对比，生成快照对比。
+
+举个例子（插件是将 Identifier 变成 hh）：
+
+```js
+// index.test.js
+
+const pluginTester = require("babel-plugin-tester").default;
+const identifierReversePlugin = require("./plugin.js");
+
+pluginTester({
+  plugin: identifierReversePlugin,
+  tests: {
+    "case1:": "const a=1;", // 输入输出都是同个字符串
+    "case2:": {
+      // 指定输入输出的字符串
+      code: "const a=1;",
+      output: "const hh = 1;",
+    },
+    "case3:xxxxxx": {
+      // 指定输入字符串，输出到快照文件中，对比测试
+      code: `
+        const a = 1;
+      `,
+      snapshot: true,
+    },
+  },
+});
+```
+
+> 注意：请用`jest`的使用方式，否则会报很多错误
