@@ -1,7 +1,7 @@
 ---
 title: Babel Execrise 配套知识点总结
 date: 2022-5-22
-lastUpdated: 2022-5-25
+lastUpdated: 2022-5-30
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -250,6 +250,20 @@ transformSync(code, opts);
 ```
 
 opts 主要是用来配置 presets 和 plugins
+
+### Babel Helpers
+
+#### @babel/helper-module-imports
+
+旨在更好的去引入模块。 用法可见[官方文档](https://www.babeljs.cn/docs/babel-helper-module-imports)
+
+#### @babel/helper-plugin-utils
+
+当一个 babel plugin 在一个缺失正在使用的 APIs 的 Babel 版本环境下运行时，我们希望去提供一个清晰的错误信息。
+
+这个模块就可以很好的帮助我们去指定明确的 Babel version。而且每一个 Babel core plugins and presets 都会使用这个模块。
+
+具体使用看[官方文档](https://babeljs.io/docs/en/babel-helper-plugin-utils)
 
 ## parser 发展与 acorn
 
@@ -848,3 +862,12 @@ pluginTester({
 ```
 
 > 注意：请用`jest`的使用方式，否则会报很多错误
+
+## Babel 和 Linter
+
+根据做过的一些 Babel linter 我们可以知道，babel 的确可以实现判断代码结构错误以及自动修正的功能。但是 Babel 并不能去识别类似 Eslint 那样的代码格式不规范的功能。
+
+
+## 更多
+
+`babel`能做许许多多的事情：自动生成 api 文档、自动 i18n、lint 插件、类型检查等等。。。。案例可以关注开头的 Github 仓库噢
