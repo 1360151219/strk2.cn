@@ -1,7 +1,7 @@
 ---
-title: 再战typescript(复习提升版)
+title: 再战typescript(复习提升版)----一
 date: 2021-8-9
-lastUpdated: 2022-6-4
+lastUpdated: 2022-6-5
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
@@ -512,6 +512,101 @@ class EnglishTeacher extends Teacher {}
 
 `protected` **允许在类内及继承的子类中使用**
 
+## 泛型的使用
+
+### 基础用法
+
+```js
+function identity<T>(arg: T): T {
+  return arg;
+}
+let output = identity < string > "myString"; // type of output will be 'string'
+// 类型推断
+let output = identity("myString"); // type of output will be 'string'
+```
+
+**数组中泛型的使用**
+
+如果传递过来的值要求是数字，如何用泛型进行定义那两种方法:
+
+- 第一种是直接使用[]。 `number[]`
+- 第二种是使用 **Array<泛型>**。形式不一样，其他的都一样。 `Array<number>` `Promise<void>`
+
+**多个泛型的定义**
+
+```js
+function join<T, P>(first: T, second: P) {
+  return `${first}${second}`;
+}
+join < number, string > (1, "2");
+join(1, "2"); // 类型推断
+```
+
+**类中的泛型**
+
+看下面的案例：
+
+```js
+interface Person {
+    name: string
+}
+// 这里不能用implements 因为是接口间继承
+class Persons<T extends Person>{
+    constructor(private persons: T[]) {
+        this.persons = persons;
+    }
+    getPersonName(index: number):string {
+        return this.persons[index].name
+    }
+}
+
+let arr = new Persons([
+    {name:'xiaohong'},
+    {name:'xiaolan'}
+])
+```
+
+### 泛型约束结合类型参数
+
+比如，我们希望写一个获取对象属性值的方法，我们需要确保不会去获取不存在的属性。
+
+```ts
+function getProperty<T, Key extends keyof obj>(obj: T, key: Key) {
+  return obj[key];
+}
+```
+
+### 泛型结合类
+
+```ts
+class BeeKeeper {
+  hasMask: boolean = true;
+}
+
+class ZooKeeper {
+  nametag: string = "Mikle";
+}
+
+class Animal {
+  numLegs: number = 4;
+}
+
+class Bee extends Animal {
+  keeper: BeeKeeper = new BeeKeeper();
+}
+
+class Lion extends Animal {
+  keeper: ZooKeeper = new ZooKeeper();
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+  return new c();
+}
+
+createInstance(Lion).keeper.nametag;
+createInstance(Bee).keeper.hasMask;
+```
+
 ## 类型收窄问题
 
 ```js
@@ -644,56 +739,4 @@ function getArea(shape: Shape) {
       return _exhaustiveCheck;
   }
 }
-```
-
-## 泛型的使用
-
-```js
-function identity<T>(arg: T): T {
-  return arg;
-}
-let output = identity < string > "myString"; // type of output will be 'string'
-// 类型推断
-let output = identity("myString"); // type of output will be 'string'
-```
-
-> 数组中泛型的使用
-
-如果传递过来的值要求是数字，如何用泛型进行定义那两种方法:
-
-- 第一种是直接使用[]。 `number[]`
-- 第二种是使用 **Array<泛型>**。形式不一样，其他的都一样。 `Array<number>` `Promise<void>`
-
-> 多个泛型的定义
-
-```js
-function join<T, P>(first: T, second: P) {
-  return `${first}${second}`;
-}
-join < number, string > (1, "2");
-join(1, "2"); // 类型推断
-```
-
-> 类中的泛型
-
-看下面的案例：
-
-```js
-interface Person {
-    name: string
-}
-// 这里不能用implements 因为是接口间继承
-class Persons<T extends Person>{
-    constructor(private persons: T[]) {
-        this.persons = persons;
-    }
-    getPersonName(index: number):string {
-        return this.persons[index].name
-    }
-}
-
-let arr = new Persons([
-    {name:'xiaohong'},
-    {name:'xiaolan'}
-])
 ```

@@ -865,8 +865,20 @@ pluginTester({
 
 ## Babel 和 Linter
 
-根据做过的一些 Babel linter 我们可以知道，babel 的确可以实现判断代码结构错误以及自动修正的功能。但是 Babel 并不能去识别类似 Eslint 那样的代码格式不规范的功能。
+根据做过的一些 Babel linter 我们可以知道，babel 的确可以实现判断代码结构错误以及自动修正的功能。但是 Babel 并不能去识别类似 Eslint 那样的代码格式不规范的功能。比如：
 
+```
+// 函数体内缺少空格
+function foo() {return true;}
+```
+
+我们来看一下 eslint 是怎么做的。
+
+1. 获取函数体左括号的 token
+2. 拿到左括号后面的第一个 token
+3. 对比两个 token 位置，如果不在同一行或者有空格则就是符合规范的
+
+> babel 没有获取 AST 关联的 token 的 API，这就是 babel parser 和 espree 的区别
 
 ## 更多
 
