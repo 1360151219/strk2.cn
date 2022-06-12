@@ -264,3 +264,265 @@ type ToArrayNonDist<Type> = [Type] extends [any] ? Type[] : never;
 type StrArrOrNumArr = ToArrayNonDist<string | number>;
 // type StrArrOrNumArr = (string | number)[]
 ```
+
+## 映射类型 Mapped Types
+
+映射类型就是使用`PropertyKeys`联合类型的泛型，其中`PropertyKeys`多是通过`keyof`创建，然后循环遍历键名创建一个类型：
+
+```ts
+type OptionsFlags<T> = {
+  [Property in keyof T]: boolean;
+};
+```
+
+上述 `OptionsFlags` 会遍历 `T` 的所有属性，然后设置为 boolean 类型
+
+```ts
+type FeatureFlags = {
+  darkMode: () => void;
+  newUserProfile: () => void;
+};
+
+type FeatureOptions = OptionsFlags<FeatureFlags>;
+// type FeatureOptions = {
+//    darkMode: boolean;
+//    newUserProfile: boolean;
+// }
+```
+
+### 映射修饰符
+
+在使用映射类型的时候，有两个额外的修饰符可能会用到，`readonly`和`?`
+
+我们可以通过前缀`+`或`-`去删除或者添加这些修饰符。默认是`+`
+
+```ts
+type OptionsFlags<T> = {
+  +readonly [Property in keyof T]: ReturnType<
+    T[Property] extends () => unknown ? T[Property] : never
+  >;
+};
+type Concrete<Type> = {
+  [Property in keyof Type]-?: Type[Property];
+};
+type FeatureFlags = {
+  darkMode: () => string;
+  newUserProfile: () => User;
+};
+
+type FeatureOptions = OptionsFlags<FeatureFlags>;
+// type FeatureOptions = {
+//     readonly darkMode: string;
+//     readonly newUserProfile: User;
+// }
+```
+
+### 通过`as`实现键名重映射
+
+举个例子，我们想要基于之前的类型创建出一个新的类型，如从`Person`类型创建出获取其属性的`GetterPerson`类型：
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+}
+
+type GetterPerson<T> = {
+  [Property in keyof T as `get${Capitalize<
+    string & Property
+  >}`]: () => T[Property];
+};
+
+type a = GetterPerson<Person>;
+// type a = {
+//     getName: () => string;
+//     getAge: () => number;
+// }
+```
+
+或者可以利用工具类`Exclude<T,U>=T extends U?never:T`来实现过滤某些类型属性：
+
+```ts
+type RemoveAge<T> = {
+  [Property in keyof T as Exclude<Property, "age">]: T[Property];
+};
+
+type PersonAgeless = RemoveAge<Person>;
+// type PersonAgeless = {
+//     name: string;
+// }
+```
+
+## 模板字面量类型
+
+模板字面量类型以字符串字面量类型为基础，可以通过联合类型拓展成多个字符串
+
+当模板中的变量是一个联合类型时，每一个可能的字符串字面量都会被表示出来：
+
+```ts
+type EmailLocaleIDs = "welcome_email" | "email_heading";
+type FooterLocaleIDs = "footer_title" | "footer_sendoff";
+
+type AllLocaleIDs = `${EmailLocaleIDs | FooterLocaleIDs}_id`;
+// type AllLocaleIDs = "welcome_email_id" | "email_heading_id" | "footer_title_id" | "footer_sendoff_id"
+```
+
+注意，如果模板字面量中有多个变量都是联合类型，其结果会交叉相差，上面的例子就是 2×2
+
+### 模板类型中的字符串联合类型
+
+现在有一个案例，有一个`markWatchedObject`函数，它接收一个对象，并返回一个带`on`方法的对象，然后这个 on 方法传入两个参数`on(event,cb)`
+
+我们希望`event`是这种格式，object 对象属性名+`Changed`，`cb`格式是对应该参数类型，返回值是`void`
+
+```ts
+type AddOn<T> = {
+  on<K extends Extract<keyof T, string>>(
+    eventName: `${K}Changed`,
+    callback: (value: T[K]) => void
+  ): void;
+};
+
+declare function makeWatchedObject<Type>(obj: Type): Type & AddOn<Type>;
+
+const person = makeWatchedObject({
+  firstName: "Saoirse",
+  lastName: "Ronan",
+  age: 26,
+});
+
+person.on("firstNameChanged", (newName) => {
+  // (parameter) newName: string
+  console.log(`new name is ${newName.toUpperCase()}`);
+});
+
+person.on("ageChanged", (newAge) => {
+  // (parameter) newAge: number
+  if (newAge < 0) {
+    console.warn("warning! negative age");
+  }
+});
+```
+
+### TS内置字符串操作类型
+
+```ts
+Uppercase<string>
+Lowercase<string>
+Capitalize<string>
+Uncapitalize<string>
+```
+
+
+## 类
+
+### 类字段 Property
+
+```ts
+class Point{
+  x:number;
+  y:number;
+}
+```
+
+这里类字段的类型注解是可选的，不指定也ok，那就是any
+
+最好是在构造函数中去对类的字段进行初始化，而且是明确的初始化。但你如果执意要通过其他方式去初始化字段，那就可以使用非空断言符：
+
+```ts
+class Point{
+  x!:number;
+}
+```
+
+字段可以通过添加一个`readonly`前缀，即规定其只能在构造函数内赋值
+
+### 构造函数
+
+- 类的构造函数不能有泛型。（泛型在类声明中添加）
+- 类的构造函数不能有返回值类型注解。
+- `super`的调用
+
+### 类的继承
+
+#### `implements`
+
+`implements`用于检查类是否满足一个特定的`interface`。
+
+需要注意的是，`implements`只会检查这个类是否按照指定接口实现，并不会对类的参数或方法的类型有所影响。下面例子中，`s`并不受`interface`的影响，因此为any类型
+
+```ts
+interface Checkable {
+  check(name: string): boolean;
+}
+ 
+class NameChecker implements Checkable {
+  check(s) {
+ 		// Parameter 's' implicitly has an 'any' type.
+    // Notice no error here
+    return s.toLowercse() === "ok";
+    				// any
+}
+
+```
+
+#### `extends`
+
+用于创建一个子类。可以通过`super`来访问父类的方法或字段属性。
+
+**覆写方法**
+
+子类如果要去拓展父类已有的方法，必须要按照其实现来拓展。
+
+```ts
+class Base {
+  greet() {
+    console.log("Hello, world!");
+  }
+}
+ 
+class Derived extends Base {
+  greet(name?: string) {
+    if (name === undefined) {
+      super.greet();
+    } else {
+      console.log(`Hello, ${name.toUpperCase()}`);
+    }
+  }
+}
+ 
+const d = new Derived();
+d.greet();
+d.greet("reader");
+
+```
+
+如果这里不给`name`加上可选符号，会报错` // Type '(name: string) => void' is not assignable to type '() => void'.`
+
+**子类初始化步骤**
+
+我们来看一下下面的这个例子：
+
+```ts
+class Base {
+  name = "base";
+  constructor() {
+    console.log("My name is " + this.name);
+  }
+}
+ 
+class Derived extends Base {
+  name = "derived";
+}
+ 
+// Prints "base", not "derived"
+const d = new Derived();
+```
+
+因此我们可以推测，上述情况是由于子类字段并没有被初始化，子类初始化步骤如下：
+
+- 父类字段初始化
+- 调用父类构造函数
+- 子类字段初始化
+- 调用子类构造函数
+
