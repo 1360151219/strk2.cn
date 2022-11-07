@@ -1,6 +1,7 @@
 // const themeConfig = require('./config/theme')
 const nav = require("./config/nav");
 const sidebar = require("./config/sidebar");
+
 module.exports = {
   title: "茶余趣谈",
   description: "愿世界上每一个人都可以找到自己所爱、所喜欢、所向往、所值得付出的人与物！",
