@@ -1,7 +1,7 @@
 ---
 title: 正则表达式，你别过来~
-date: 2022-4-21
-lastUpdated: 2022-4-21
+date: 2022-04-21
+lastUpdated: 2022-04-21
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

@@ -1,7 +1,7 @@
 ---
 title: 2022 前端春招大汇总
-date: 2022-3-31
-lastUpdated: 2022-3-31
+date: 2022-03-31
+lastUpdated: 2022-03-31
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅

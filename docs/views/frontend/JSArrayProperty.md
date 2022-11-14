@@ -1,7 +1,7 @@
 ---
 title: JavaScript深入之Array高阶函数全揭秘
-date: 2022-2-27
-lastUpdated: 2022-2-27
+date: 2022-02-27
+lastUpdated: 2022-02-27
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

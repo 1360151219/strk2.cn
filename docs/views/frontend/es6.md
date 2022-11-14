@@ -1,7 +1,7 @@
 ---
 title: 有关 ES6 的一些个人记录
-date: 2021-8-9
-lastUpdated: 2022-1-22
+date: 2021-08-09
+lastUpdated: 2022-01-22
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

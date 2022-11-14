@@ -1,7 +1,7 @@
 ---
 title: 《Vuejs深入浅出》
-date: 2021-7-12
-lastUpdated: 2021-7-12
+date: 2021-07-12
+lastUpdated: 2021-07-12
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅

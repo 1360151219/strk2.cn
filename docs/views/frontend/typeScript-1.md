@@ -1,7 +1,7 @@
 ---
 title: 再战typescript(复习提升版)----一
-date: 2021-8-9
-lastUpdated: 2022-6-5
+date: 2021-08-09
+lastUpdated: 2022-06-05
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

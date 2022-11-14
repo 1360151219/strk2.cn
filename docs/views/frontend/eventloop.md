@@ -1,7 +1,7 @@
 ---
 title: Event Loop 事件循环机制
-date: 2021-6
-lastUpdated: 2021-6
+date: 2021-06-01
+lastUpdated: 2021-06-01
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

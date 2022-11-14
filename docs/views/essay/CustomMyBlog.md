@@ -1,7 +1,7 @@
 ---
 title: Vuepress-Reco主题博客魔改
-date: 2022-1-14
-lastUpdated: 2022-1-14
+date: 2022-01-14
+lastUpdated: 2022-01-14
 categories:
   - 随笔日记
 author: 盐焗乳鸽还要砂锅

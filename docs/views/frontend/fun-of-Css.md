@@ -1,7 +1,7 @@
 ---
 title: CSS 原来这么有趣
-date: 2022-6-12
-lastUpdated: 2022-6-12
+date: 2022-06-12
+lastUpdated: 2022-06-12
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

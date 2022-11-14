@@ -1,7 +1,7 @@
 ---
 title: Error 的妙用，来一起看一下吧
-date: 2022-3-25
-lastUpdated: 2022-3-25
+date: 2022-03-25
+lastUpdated: 2022-03-25
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

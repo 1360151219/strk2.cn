@@ -1,7 +1,7 @@
 ---
 title: 再战typescript(内置操作符)----二
-date: 2022-6-5
-lastUpdated: 2022-6-5
+date: 2022-06-05
+lastUpdated: 2022-06-05
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

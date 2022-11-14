@@ -1,7 +1,7 @@
 ---
 title: ServiceWorker 学习
 date: 2021-10-11
-lastUpdated: 2022-2-24
+lastUpdated: 2022-02-24
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅

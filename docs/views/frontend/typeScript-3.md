@@ -1,7 +1,7 @@
 ---
 title: 再战typescript(进阶拓展)----三
-date: 2022-6-10
-lastUpdated: 2022-6-10
+date: 2022-06-10
+lastUpdated: 2022-06-10
 categories:
   - frontend-article
 author: 盐焗乳鸽还要砂锅
